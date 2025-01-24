@@ -1,0 +1,2790 @@
+0:00:07.000,0:00:10.000
+S2 Module 5: Small Fields, Binary Fields with Jim Posen
+
+0:00:10.536,0:00:13.880
+Nico: Welcome to this Module 
+of the ZK Whiteboard Sessions.
+
+0:00:13.880,0:00:15.476
+I am Nico and I'll be today's host.
+
+0:00:15.476,0:00:17.851
+And with me I have Jim from Irreducible.
+
+0:00:17.851,0:00:20.560
+Jim: Thanks, Nico. It's great to be here.
+
+0:00:20.560,0:00:25.800
+Today we're going to talk about small field 
+SNARKs and why this line of work is important.
+
+0:00:25.800,0:00:28.240
+We're going to start with some motivating factors
+
+0:00:28.240,0:00:32.720
+and talk about the performance efficiency 
+that we can get using small field techniques.
+
+0:00:32.720,0:00:37.320
+Then we're going to go through an example 
+of how to construct a STARK-like Plonky2
+
+0:00:38.080,0:00:40.920
+that uses the Goldilocks 64-bit field.
+
+0:00:40.920,0:00:44.280
+And finally, we're going to talk about 
+some recent work that investigates
+
+0:00:44.280,0:00:48.840
+how small we can make our 
+fields using binary towers.
+
+0:00:48.840,0:00:49.500
+How does that sound?
+
+0:00:49.500,0:00:50.840
+Nico: Yeah. Sounds great.
+
+0:00:50.840,0:00:52.760
+Jim: Let's jump in.
+
+0:00:52.760,0:00:54.760
+Nico: Yeah.
+
+0:00:54.760,0:00:56.840
+So you said motivation first.
+
+0:00:56.840,0:00:58.800
+Why would we want to do small field?
+
+0:00:58.800,0:00:59.920
+What do we even mean by small?
+
+0:00:59.920,0:01:01.400
+Jim: Oh, I'm glad you asked!
+
+0:01:01.400,0:01:01.790
+Nico: Yeah.
+
+0:01:01.790,0:01:04.400
+Jim: This really contrasts with the default way
+
+0:01:04.400,0:01:08.920
+that we had of constructing SNARKs prior 
+to, let's say, the Plonky2 project,
+
+0:01:08.920,0:01:11.040
+which really popularized this.
+
+0:01:11.040,0:01:17.400
+And before that, we would typically use a 
+finite field that is a 256-bit prime number.
+
+0:01:17.400,0:01:18.960
+This is for a few reasons,
+
+0:01:18.960,0:01:27.000
+but one of them is this appears in secure elliptic 
+curves as the field that we want to work in.
+
+0:01:27.000,0:01:33.000
+And also we can recall that a lot of SNARKs 
+are based on polynomial identity testing.
+
+0:01:33.000,0:01:36.400
+And when we do a randomized 
+polynomial identity test,
+
+0:01:36.400,0:01:40.280
+the false acceptance probability, 
+which is what we're trying to minimize,
+
+0:01:40.280,0:01:43.440
+is inversely proportional 
+to the size of our field.
+
+0:01:43.440,0:01:47.320
+And so if we use a really 
+large field that's 256 bits,
+
+0:01:47.320,0:01:53.440
+we get a very small and 
+acceptable error probability.
+
+0:01:53.440,0:02:00.040
+Now, the problem with these is the 
+performance of field multiplications  
+
+0:02:00.040,0:02:06.000
+is much larger with 256 bit 
+numbers than with smaller numbers.
+
+0:02:06.000,0:02:10.000
+One reason is, if we look at 
+the computational complexity,
+
+0:02:10.000,0:02:16.440
+the time it takes to do a field multiplication 
+is superlinear in the number of bits,
+
+0:02:16.440,0:02:18.480
+which means if I double my field size,
+
+0:02:18.480,0:02:23.600
+I need to do more than twice the work 
+in order to do this multiplication.
+
+0:02:23.600,0:02:29.120
+And also, computers have native 
+registers for smaller elements,
+
+0:02:29.120,0:02:32.200
+integer elements like 64 and 32-bit numbers.
+
+0:02:32.200,0:02:34.960
+So we want to capture that hardware efficiency.
+
+0:02:34.960,0:02:38.040
+To throw some quick numbers at you,
+
+0:02:38.040,0:02:43.520
+you can do on my computer about 60 million 256-bit  
+
+0:02:43.520,0:02:47.200
+prime field multiplications 
+per second on a single core,
+
+0:02:47.200,0:02:51.960
+whereas it's 1,200 with the 
+64-bit Goldilocks field.
+
+0:02:51.960,0:02:58.000
+So that's 20 times more field multiplications 
+you can do with a 64-bit field.
+
+0:02:58.000,0:03:00.080
+Nico: Right.
+
+0:03:00.080,0:03:01.320
+That sounds worth it.
+
+0:03:01.320,0:03:04.280
+Jim: The other thing that we need to talk about is
+
+0:03:04.280,0:03:08.400
+when we're actually building a 
+SNARK, we have some sort of circuit.
+
+0:03:08.400,0:03:14.160
+And typically we need our circuit to express 
+the computation that we want to prove.
+
+0:03:14.160,0:03:21.080
+And the actual values that appear in 
+our circuit trace or on the wires,
+
+0:03:21.080,0:03:24.960
+are much smaller than the actual 
+size of our field elements, usually.
+
+0:03:24.960,0:03:29.480
+In a lot of computations, 
+we'll have very small values,
+
+0:03:29.480,0:03:38.000
+maybe 16 bits or 8 bits or even 1 bit 
+inside of a field that might be 256 bits.
+
+0:03:38.000,0:03:41.580
+And the rest of the bits in that 
+field element are just zeros.
+
+0:03:41.580,0:03:45.320
+Nico: So I'm using this sort of big storage  
+
+0:03:45.320,0:03:49.220
+slot of 256 bits for just 1 bit 
+that I'm going to do stuff with.
+
+0:03:49.220,0:03:50.200
+Jim: Exactly.
+
+0:03:50.200,0:03:52.800
+So this seems very wasteful, right?
+
+0:03:52.800,0:03:56.400
+Both in terms of the time to 
+do the field multiplications,
+
+0:03:56.400,0:03:59.720
+but also the memory usage we need to pay for.
+
+0:04:00.280,0:04:04.040
+And bad memory usage leads 
+to bad cache utilization,
+
+0:04:04.040,0:04:05.880
+which again leads to poor performance.
+
+0:04:05.880,0:04:10.000
+So these are some of the motivating 
+factors for why we're interested in  
+
+0:04:10.000,0:04:13.200
+building SNARKs and STARKs over small fields.
+
+0:04:13.200,0:04:13.900
+Nico: Okay.
+
+0:04:13.900,0:04:14.710
+Jim: As one --
+
+0:04:14.710,0:04:18.920
+Nico: And so, just to be clear, small means 
+closer to our, like, computer register size.
+
+0:04:18.920,0:04:21.360
+So like 64 bits or 32 bits or smaller.
+
+0:04:21.360,0:04:22.624
+Jim: Exactly.
+
+0:04:22.624,0:04:22.840
+Nico: Cool.
+Jim: Yeah.
+
+0:04:22.840,0:04:29.720
+Let's almost by definition say that it fits 
+within a machine register, which is 32 or 64 bits.
+
+0:04:30.360,0:04:31.400
+One disclaimer!
+
+0:04:31.400,0:04:36.840
+I'm going to talk about the STARK protocol, 
+but I'm going to refer to all STARKs as SNARKs.
+
+0:04:37.480,0:04:41.600
+There's a subtle difference, but I don't 
+think it's worth getting into right now.
+
+0:04:41.600,0:04:43.480
+Nico: Cool.
+
+0:04:43.480,0:04:43.800
+So, yeah.
+
+0:04:43.800,0:04:47.600
+Should we run through a protocol with a 
+small field and see what it looks like?
+
+0:04:47.600,0:04:48.760
+Jim: Yeah, absolutely.
+
+0:04:48.760,0:04:55.800
+Let's refresh on a very simple STARK that we could 
+talk about, which is like a Fibonacci example.
+
+0:04:55.800,0:04:59.800
+So we're going to have, you know, our computation  
+
+0:04:59.800,0:05:02.640
+trace and this is going to 
+be the Fibonacci numbers.
+
+0:05:02.640,0:05:07.400
+And we're actually just going to 
+have, for now, a single polynomial.
+
+0:05:07.400,0:05:08.680
+Nico: Okay. So a single column in our trace?
+
+0:05:08.680,0:05:12.520
+Jim: A single column in our 
+trace, and we'll call this f.
+
+0:05:12.520,0:05:18.760
+And this will have a number 
+of values and the constraint  
+
+0:05:18.760,0:05:29.000
+that we want is that f at [i + 2] - (f --
+
+0:05:29.000,0:05:29.640
+Oops.
+
+0:05:31.520,0:05:42.680
+At [i + 1] + f at [i]) = 0
+for all indices i.
+
+0:05:42.680,0:05:43.280
+Nico: Right.
+
+0:05:43.280,0:05:45.400
+Jim: In our table.
+
+0:05:45.400,0:05:49.680
+There are some boundary constraints that 
+we're going to hand wave aside for now.
+
+0:05:49.680,0:05:55.920
+Nico: So we're saying
+f[i + 2] - (f[i + 1] + f[i]) = 0.
+
+0:05:55.920,0:05:56.355
+Right? So --
+
+0:05:56.355,0:05:56.978
+Jim: That's right.
+
+0:05:56.978,0:05:59.200
+Nico: Okay. Cool.
+Jim: And we want that to hold for every slot.
+
+0:05:59.200,0:05:59.700
+Nico: Right.
+
+0:06:00.920,0:06:02.920
+And then do we wrap around? Are we going to --
+
+0:06:02.920,0:06:03.980
+let's just ignore it for now?
+
+0:06:03.980,0:06:08.160
+Jim: We're going to ignore what happens at 
+the very top and the very bottom for now.
+
+0:06:08.160,0:06:10.560
+There's some way that you 
+could compensate for this.
+
+0:06:10.560,0:06:15.160
+But I believe you've talked about 
+STARKs in a previous session
+
+0:06:15.160,0:06:20.520
+and expressed how we can turn 
+this into a polynomial problem.
+
+0:06:20.520,0:06:24.640
+But roughly, the way we're going to 
+prove this is with three steps, right?
+
+0:06:24.640,0:06:26.615
+Like first, we're going to commit.
+
+0:06:31.000,0:06:34.600
+Two, we're going to do some sort 
+of polynomial division check.
+
+0:06:34.600,0:06:36.400
+I'm going to call this the vanishing argument.
+
+0:06:36.400,0:06:43.588
+What we want to show is that this equation 
+vanishes or is equal to zero over the whole trace.
+
+0:06:43.588,0:06:45.940
+Nico: Yeah. I think we've called 
+it the zerocheck previously.
+
+0:06:45.940,0:06:48.158
+Jim: Okay. Let's call it that then.
+
+0:06:56.600,0:07:00.120
+The third step is the polynomial identity test,
+
+0:07:00.120,0:07:03.480
+which is how we're going to 
+kind of finish the zero check.
+
+0:07:03.480,0:07:07.200
+And then we need to do our FRI evaluation proof.
+
+0:07:07.200,0:07:10.920
+FRI is the Fast Reed-Solomon IOP of proximity.
+
+0:07:10.920,0:07:15.040
+I'm going to maybe refer to it as 
+a polynomial commitment scheme in  
+
+0:07:15.040,0:07:19.080
+this lecture, or in this whiteboard session,
+
+0:07:19.080,0:07:19.980
+Nico: Yeah.
+
+0:07:19.980,0:07:22.589
+Jim: Even though there are some subtleties and --
+
+0:07:22.589,0:07:24.120
+Nico: Cool.
+Jim: It serves various purposes.
+
+0:07:24.120,0:07:26.520
+Nico: I guess it fulfills that role. Right?
+
+0:07:26.520,0:07:27.321
+Jim: Exactly.
+
+0:07:32.240,0:07:34.220
+Nico: Cool.
+
+0:07:34.220,0:07:39.600
+Jim: So perhaps what we can do is let's 
+run through how this protocol looks
+
+0:07:39.600,0:07:45.480
+when we try to use the a 64-bit 
+field for the entire protocol
+
+0:07:45.480,0:07:48.040
+and see what we might need to fix.
+
+0:07:48.040,0:07:49.960
+When I talk about a 64-bit field,
+
+0:07:49.960,0:07:54.336
+I'm specifically going to refer to Goldilocks.
+
+0:08:00.560,0:08:08.468
+And this is a prime number that is 64 
+bits or fits within a 64-bit register.
+
+0:08:12.080,0:08:14.760
+And it has a very special structure
+
+0:08:14.760,0:08:17.880
+that makes it computationally efficient to do within
+
+0:08:17.880,0:08:22.160
+a very small number of cycles on a regular CPU.
+
+0:08:22.160,0:08:24.640
+And it's also compatible with STARK techniques
+
+0:08:24.640,0:08:29.440
+in the sense that it allows for the 
+Fast Fourier Transform that we need.
+
+0:08:30.560,0:08:34.400
+So let's imagine that we have this whole trace.
+
+0:08:34.400,0:08:41.040
+All of our numbers are integers that are sort 
+of embedded within this Goldilocks field.
+
+0:08:41.040,0:08:43.480
+And we want to commit this.
+
+0:08:43.480,0:08:45.640
+This works with no problems.
+
+0:08:45.640,0:08:46.480
+Nico: Okay
+
+0:08:46.480,0:08:49.000
+Jim: So what does committing look like?
+
+0:08:49.000,0:08:53.000
+Well, we're going to apply an 
+error-correcting code, the Reed-Solomon code,
+
+0:08:53.000,0:08:55.514
+and then we're going to build 
+a Merkle tree and we can --
+
+0:08:55.514,0:08:58.370
+Nico: So is this, you know, the 
+interpolation and the blow up?
+
+0:08:58.370,0:08:58.880
+Jim: Exactly.
+
+0:08:58.880,0:08:59.440
+Nico: Okay. Cool.
+
+0:08:59.440,0:09:01.080
+Jim: Yes.
+
+0:09:01.080,0:09:06.760
+And this works perfectly over 
+this Goldilocks prime field.
+
+0:09:06.760,0:09:08.514
+The next step is --
+
+0:09:08.514,0:09:13.320
+Nico: I guess, unless we take our Fibonacci 
+sequence into like way, way, way too big numbers
+
+0:09:13.320,0:09:14.440
+which don't fit in here, right?
+
+0:09:14.440,0:09:16.023
+Jim: That's right. Yes.
+
+0:09:16.023,0:09:16.040
+Nico: Okay. Cool.
+
+0:09:16.040,0:09:19.860
+As long as we're working with like 0, 
+1, and then, et cetera, we're fine.
+
+0:09:19.860,0:09:23.080
+Jim: Yeah. It would take, I guess --
+
+0:09:23.080,0:09:24.160
+Yes. That's right.
+
+0:09:24.160,0:09:29.360
+As long as our Fibonacci number stays 
+within this field, we're pretty happy.
+
+0:09:30.600,0:09:32.920
+The next is the zerocheck.
+
+0:09:32.920,0:09:35.920
+And I'm not going to write 
+this out sort of completely,
+
+0:09:35.920,0:09:40.024
+but we'll remember that, this is 
+basically a polynomial identity test.
+
+0:09:40.024,0:09:40.035
+Nico: Yeah.
+
+0:09:40.035,0:09:44.000
+Jim: Where what we want to do is we have 
+-- you know, this is our constraint,
+
+0:09:44.000,0:09:48.840
+and we want to say something like the 
+composition, which is this constraint,
+
+0:09:48.840,0:09:54.560
+applied to f over a formal variable x,
+
+0:09:54.560,0:09:59.520
+is divisible by the polynomial 
+that is zero everywhere
+
+0:09:59.520,0:10:01.200
+and of appropriate degree.
+
+0:10:01.200,0:10:03.480
+And we're actually going to check 
+this with the multiplication.
+
+0:10:03.480,0:10:08.200
+So we're going to have the 
+prover provide a quotient Q,
+
+0:10:08.200,0:10:12.040
+and this is the zero polynomial.
+
+0:10:12.040,0:10:14.680
+And we want to do this polynomial identity check.
+
+0:10:14.680,0:10:20.980
+And if this is satisfied, then we know 
+that this is zero over the entire trace.
+
+0:10:20.980,0:10:23.360
+Nico: Is this what people 
+call the "vanishing polynomial"?
+
+0:10:23.360,0:10:25.224
+Jim: This is the vanishing polynomial.
+
+0:10:25.224,0:10:27.600
+Nico: Okay.
+Jim: Exactly.
+
+0:10:27.600,0:10:32.240
+Now, what we need to do in the zero 
+check step is compute this quotient Q.
+
+0:10:32.240,0:10:40.320
+The way we do this is, we evaluate the 
+polynomial at an extended, or over some domain,
+
+0:10:40.320,0:10:44.424
+that is where we're not going to 
+get division by zero elements.
+
+0:10:44.424,0:10:44.435
+Nico: Yeah.
+
+0:10:44.435,0:10:48.760
+Jim: We're going to do all of our 
+point divisions in this other domain,
+
+0:10:48.760,0:10:52.400
+and then we're going to interpolate 
+that polynomial to get our quotient Q.
+
+0:10:52.400,0:10:53.280
+Nico: Cool.
+
+0:10:53.280,0:10:55.034
+We being the prover.
+Jim: We being the prover.
+
+0:10:55.034,0:10:56.640
+Nico: The verifier doesn't do any of this. Right?
+
+0:10:56.640,0:10:57.400
+Jim: That's right.
+
+0:10:57.400,0:10:58.195
+Nico: Cool.
+
+0:10:58.195,0:10:58.640
+Jim: Good point.
+
+0:10:58.640,0:11:00.680
+The prover is going to do all this work and  
+
+0:11:00.680,0:11:06.384
+provide commitments to the 
+quotient, to the verifier.
+
+0:11:06.384,0:11:09.880
+Nico: Cool.
+Jim: And what I want to observe is that
+
+0:11:09.880,0:11:12.840
+we are also able to do this entire process
+
+0:11:12.840,0:11:18.200
+of computing the quotient Q for a single 
+constraint over our Goldilocks prime.
+
+0:11:18.200,0:11:19.760
+Nico: Cool.
+
+0:11:19.760,0:11:23.760
+Jim: Now, when we get into the FRI evaluation,
+
+0:11:23.760,0:11:27.785
+this is where we're going to do our 
+randomized polynomial identity test.
+
+0:11:27.785,0:11:29.840
+Nico: Yes.
+Jim: So what we want to do is we want to pick --
+
+0:11:29.840,0:11:36.600
+the verifier chooses, you know, an element Z,
+
+0:11:36.600,0:11:39.400
+which is a random element from our field,
+
+0:11:39.400,0:11:47.600
+and we want to check that this relation 
+holds at this specific point Z.
+
+0:11:47.600,0:11:50.160
+Nico: That's our zerocheck.
+
+0:11:50.160,0:11:51.544
+Jim: This is --
+
+0:11:51.544,0:11:52.200
+Nico: Yeah.
+Jim: Yes.
+
+0:11:52.200,0:11:58.480
+Nico: I think lecture -- maybe the second module.
+
+0:11:58.480,0:11:59.320
+Cool.
+
+0:11:59.320,0:12:03.640
+Jim: Now, the security of this is 
+based on the Schwartz–Zippel lemma.
+
+0:12:03.640,0:12:04.320
+Nico: Yeah.
+
+0:12:04.320,0:12:08.080
+Jim: And without writing that out 
+completely, what we know is that
+
+0:12:08.080,0:12:13.960
+there is a error probability or a essentially 
+it guarantees us a false acceptance probability
+
+0:12:13.960,0:12:16.680
+that's inversely proportional 
+to the size of the field.
+
+0:12:16.680,0:12:18.210
+Nico: Yeah.
+
+0:12:18.210,0:12:20.880
+Jim: This is where we will 
+start to run into a problem
+
+0:12:20.880,0:12:24.960
+because the size of our field is only 2^64
+
+0:12:24.960,0:12:31.280
+and really we want an error probability 
+that's less than say 2^128
+
+0:12:31.280,0:12:32.740
+or something much smaller.
+
+0:12:32.740,0:12:35.120
+Nico: Are those the bits of 
+security that we talk about?
+
+0:12:35.120,0:12:35.720
+Jim: Yes.
+
+0:12:35.720,0:12:36.960
+That is what we --
+
+0:12:36.960,0:12:42.080
+That is sort of by definition what we 
+need to achieve a 128-bit security target.
+
+0:12:42.080,0:12:42.640
+Nico: Okay.
+
+0:12:42.640,0:12:45.200
+And we're not even close right now.
+
+0:12:45.200,0:12:47.824
+Jim: We're not even close. We're --
+
+0:12:47.824,0:12:48.920
+Nico: Okay.
+Jim: That's right.
+
+0:12:48.920,0:12:52.960
+We would need a much bigger 
+field, like a 256-bit prime field
+
+0:12:52.960,0:12:57.400
+that we sort of were trying to replace 
+in the first place in order to get this.
+
+0:12:57.400,0:13:03.640
+This Schwartz–Zippel test to give 
+us an acceptable security level.
+
+0:13:03.640,0:13:07.080
+So we now need to talk about 
+how we're going to fix this
+
+0:13:07.080,0:13:13.000
+with a technique called error amplification.
+
+0:13:13.000,0:13:16.760
+So we're going to talk about how we're going to  
+
+0:13:16.760,0:13:20.840
+use error amplification to 
+use the Goldilocks field,
+
+0:13:20.840,0:13:28.560
+but still get a very small error probability 
+which is achieving a 128-bit security level.
+
+0:13:28.560,0:13:29.120
+Nico: Okay.
+
+0:13:29.920,0:13:33.560
+Jim: There are a few techniques to do this,
+
+0:13:33.560,0:13:36.920
+but I'm going to talk about 
+using extension fields.
+
+0:13:36.920,0:13:38.600
+Nico: Okay. What are those?
+
+0:13:38.600,0:13:45.120
+Jim: Extension fields, you might actually already 
+be aware of from high school algebra, where --
+
+0:13:45.120,0:13:48.960
+Do you remember learning about the 
+complex numbers and the imaginary numbers?
+
+0:13:48.960,0:13:49.760
+Nico: Yep.
+
+0:13:49.760,0:13:50.200
+Jim: Great.
+
+0:13:50.200,0:13:56.680
+So the idea was that we had the real number line,
+
+0:13:56.680,0:14:03.320
+and we can think of in our analogy, the reals 
+kind of being like our Goldilocks number.
+
+0:14:03.320,0:14:05.400
+And what we did was we said,
+
+0:14:05.400,0:14:11.360
+we're going to declare that a complex 
+number has the form a + bi,
+
+0:14:11.360,0:14:14.040
+where i is the imaginary unit.
+
+0:14:14.040,0:14:18.760
+And this basically turns our number 
+system into a two-dimensional plane,
+
+0:14:18.760,0:14:23.620
+where a is along the real axis 
+and b is along the imaginary axis.
+
+0:14:23.620,0:14:24.300
+Nico: Yeah.
+
+0:14:24.300,0:14:28.440
+Jim: And now, any of our numbers 
+falls somewhere in this plane.
+
+0:14:29.200,0:14:36.400
+The other thing is, we knew that 
+we declared that i² = 1.
+
+0:14:36.400,0:14:37.260
+Nico: Yeah.
+
+0:14:37.260,0:14:38.820
+Jim: Sorry, -1.
+
+0:14:38.820,0:14:39.460
+Nico: Yes.
+
+0:14:39.460,0:14:44.320
+Jim: We declared that i² = -1.
+
+0:14:44.320,0:14:48.800
+We can do something analogous 
+with the Goldilocks prime.
+
+0:14:48.800,0:14:49.840
+In fact, what we --
+
+0:14:49.840,0:14:55.920
+What the complex numbers are, are they 
+are an extension field of the real field.
+
+0:14:55.920,0:14:57.640
+Nico: Right. Okay.
+
+0:14:57.640,0:15:00.800
+Jim: And what this means is, an extension,  
+
+0:15:00.800,0:15:04.120
+we're going to talk about a 
+degree 2 extension of Goldilocks,
+
+0:15:04.120,0:15:07.160
+meaning we're going to have 
+a two-dimensional plane
+
+0:15:07.160,0:15:13.040
+and every point in our extension field 
+is a pair of Goldilocks field elements.
+
+0:15:13.040,0:15:14.080
+Nico: Right.
+
+0:15:14.080,0:15:19.200
+Jim: Now, this means that the size 
+of our field can gets squared.
+
+0:15:19.200,0:15:24.840
+If we count up how many coordinates 
+there are in a two-dimensional plane
+
+0:15:24.840,0:15:29.560
+where each value can -- is a 
+Goldilocks prime field element,
+
+0:15:29.560,0:15:35.400
+we have a 128-bit field or a field 
+with close to 2^128 elements.
+
+0:15:35.400,0:15:36.040
+Nico: I see.
+
+0:15:36.040,0:15:39.080
+Or I guess one way to say it is also every --
+
+0:15:39.080,0:15:42.920
+Yeah. How many pairs of 
+Goldilocks elements can we have?
+
+0:15:42.920,0:15:43.740
+Jim: Exactly.
+
+0:15:43.740,0:15:44.680
+Nico: Right. Okay.
+
+0:15:44.680,0:15:51.200
+Jim: And if we count those up, we see that it is 
+enough to give us a secure Schwartz–Zippel test.
+
+0:15:51.200,0:15:52.680
+Nico: Right. Right.
+
+0:15:52.680,0:15:57.800
+Jim: I want to mention a couple of properties 
+about extension field multiplication,
+
+0:15:57.800,0:15:58.920
+because it doesn't come for free.
+
+0:15:58.920,0:15:59.552
+Nico: Okay.
+
+0:15:59.552,0:16:04.440
+Jim: So let's remember how we 
+had to multiply complex numbers.
+
+0:16:04.440,0:16:13.640
+If we took two different complex 
+numbers, (a + bi) * (c + di),
+
+0:16:13.640,0:16:18.142
+and we want to compute this, 
+there are a few cross terms.
+
+0:16:18.142,0:16:18.195
+Nico: We are gonna have to 
+distribute this out. Yeah.
+
+0:16:18.195,0:16:19.640
+Jim: We have to distribute this out.
+
+0:16:19.640,0:16:23.994
+So we get ac + --
+
+0:16:23.994,0:16:28.920
+Nico: Oh, this takes me back!
+
+0:16:31.160,0:16:37.344
+Jim: And at this point, when we multiply, we're 
+going to remember that i² = -1.
+
+0:16:37.344,0:16:37.355
+Nico: Yeah.
+
+0:16:37.355,0:16:41.480
+Jim: But the thing I want to point out is that 
+to do this multiplication of two elements,
+
+0:16:41.480,0:16:46.920
+we actually had to do four different 
+multiplications of our base field elements.
+
+0:16:46.920,0:16:47.840
+Nico: Yes.
+
+0:16:47.840,0:16:56.840
+Jim: So doubling the size of our field and 
+operating on pairs turned into four cross terms.
+
+0:16:56.840,0:17:00.520
+Again, this is an example of how 
+when you increase your field size,
+
+0:17:00.520,0:17:03.620
+it's a super linear growth in 
+the multiplication complexity.
+
+0:17:03.620,0:17:04.740
+Nico: That makes sense.
+
+0:17:04.740,0:17:07.120
+Jim: I want to mention one more property which is
+
+0:17:07.720,0:17:13.360
+if we want to scale a Goldilocks 
+field by a base field element.
+
+0:17:13.360,0:17:14.194
+So in this case --
+
+0:17:14.194,0:17:17.225
+Nico: Sorry. Scale an 
+extension field by base field?
+
+0:17:17.225,0:17:17.760
+Jim: Yes.
+Nico: Okay. Cool.
+
+0:17:17.760,0:17:20.200
+Jim: I want to point out that if we want to scale  
+
+0:17:20.200,0:17:22.600
+an extension field element 
+by a base field element.
+
+0:17:22.600,0:17:25.960
+So instead of multiplying an 
+extension field by an extension field,
+
+0:17:25.960,0:17:28.840
+we multiply a base times an extension field.
+
+0:17:29.680,0:17:31.880
+This requires fewer multiplications.
+
+0:17:31.880,0:17:42.394
+So if we took s * (a + bi), we can 
+simply distribute this to be sa + --
+
+0:17:42.394,0:17:44.880
+Nico: sbi. Okay.
+
+0:17:44.880,0:17:50.160
+Jim: So as much as possible, we would like to 
+operate with multiplications in the base field,
+
+0:17:50.160,0:17:54.424
+and the next best thing is to multiply base 
+field elements by extension field elements.
+
+0:17:54.424,0:17:54.435
+Nico: Yeah.
+
+0:17:54.435,0:17:58.600
+Jim: But when necessary, we have 
+a way of multiplying extension  
+
+0:17:58.600,0:18:00.760
+field elements by extension field elements.
+
+0:18:00.760,0:18:01.440
+Nico: Cool.
+
+0:18:01.440,0:18:04.960
+Jim: I think at this point, we 
+can return to the "how we're  
+
+0:18:04.960,0:18:08.820
+going to run the STARK protocol 
+using the Goldilocks extension."
+
+0:18:08.820,0:18:11.640
+Nico: Sounds good.
+
+0:18:11.640,0:18:12.820
+So back to a STARK.
+
+0:18:12.820,0:18:14.720
+Jim: Let's go back to the STARK.
+
+0:18:14.720,0:18:16.920
+Let's start over.
+
+0:18:16.920,0:18:22.560
+So we have our trace with the column f,
+
+0:18:22.560,0:18:25.760
+and we're going to keep this 
+inside of the Goldilocks field.
+
+0:18:25.760,0:18:27.800
+These are not extension field elements yet.
+
+0:18:27.800,0:18:28.280
+Nico: Okay.
+
+0:18:28.280,0:18:31.140
+Jim: And the first thing we did was commit.
+
+0:18:31.140,0:18:36.360
+Nico: So the reason we can do this is because 
+we're working with just small numbers. Right?
+
+0:18:36.360,0:18:38.155
+Things that are less than 2^64?
+
+0:18:38.155,0:18:39.584
+Jim: Exactly.
+
+0:18:39.584,0:18:40.400
+Nico: Cool.
+Jim: Yeah.
+
+0:18:40.400,0:18:43.440
+We, for this purpose, don't need --
+
+0:18:43.440,0:18:45.280
+We can fit within this field,
+
+0:18:45.280,0:18:48.800
+and also we know that every 
+Goldilocks field element is  
+
+0:18:48.800,0:18:51.560
+itself living within the extension field.
+
+0:18:51.560,0:18:55.600
+If you think about the real number 
+line that lives within the plane.
+
+0:18:55.600,0:18:56.800
+Nico: Yeah.
+
+0:18:56.800,0:19:01.200
+Jim: So the first thing we want 
+to do is commit our column f.
+
+0:19:01.200,0:19:06.000
+And I claim that we can do this 
+the same way we did before.
+
+0:19:06.000,0:19:10.600
+We're going to do our Fast Fourier 
+Transform and our Reed-Solomon encoding,
+
+0:19:10.600,0:19:13.880
+and our Merkle tree building 
+all over the Goldilocks prime.
+
+0:19:13.880,0:19:19.680
+And this is great, because even though the 
+rest of our protocol might have some changes,
+
+0:19:19.680,0:19:22.460
+we still get the efficiency gain here.
+
+0:19:22.460,0:19:25.600
+Nico: Cool! So we still save on --
+
+0:19:25.600,0:19:30.700
+Yeah. Having small numbers in smaller 
+storage locations rather than like 256-bit?
+
+0:19:30.700,0:19:31.664
+Jim: Exactly.
+
+0:19:31.664,0:19:33.680
+Nico: Cool.
+Jim: So another important thing here is that,
+
+0:19:33.680,0:19:35.640
+when we do our Fast Fourier Transform,
+
+0:19:35.640,0:19:39.640
+minimizing the memory usage of this 
+is really important for performance
+
+0:19:39.640,0:19:42.680
+because it means it can fit in a smaller cache.
+
+0:19:42.680,0:19:44.540
+Nico: Right. Cool.
+
+0:19:44.540,0:19:47.440
+Jim: The second step was the zerocheck.
+
+0:19:47.440,0:19:50.600
+Nico: This is where things broke down. Right?
+
+0:19:50.600,0:19:53.420
+Jim: Almost --
+Nico: Or I guess with the sampling.
+
+0:19:53.420,0:19:54.200
+Jim: That's right.
+
+0:19:54.200,0:19:56.320
+So there's actually two phases here.
+
+0:19:56.320,0:19:58.640
+There's the quotient computation,
+
+0:20:09.720,0:20:14.360
+and right, this is where we just computed 
+the coefficients of our Q polynomial.
+
+0:20:14.360,0:20:14.960
+Nico: Yeah.
+
+0:20:14.960,0:20:19.720
+Jim: The coefficients are still 
+within the Goldilocks base field
+
+0:20:19.720,0:20:22.520
+when we have this one constraint,
+
+0:20:22.520,0:20:26.600
+which means that the work to do 
+this, which is quite a bit of work,
+
+0:20:26.600,0:20:32.160
+and quite a bit of polynomial evaluations, 
+we can still do over our base field.
+
+0:20:32.160,0:20:32.850
+Nico: Cool.
+
+0:20:32.850,0:20:41.920
+Jim: The point where this broke 
+is when we did our random testing.
+
+0:20:41.920,0:20:47.720
+Random --
+
+0:20:47.720,0:20:50.400
+And at this point, we're 
+going to do the same thing,
+
+0:20:50.400,0:20:55.640
+but when we take z, it's going to be 
+basically a pair of Goldilocks elements.
+
+0:20:55.640,0:20:57.400
+It's going to be --
+
+0:20:57.400,0:20:59.201
+Nico: An element of the extension?
+
+0:20:59.201,0:21:00.440
+Jim: An element of the extension.
+Nico: Amazing. Okay.
+
+0:21:00.440,0:21:06.120
+Jim: And kind of remarkably, we 
+can plug that in to our equations
+
+0:21:06.120,0:21:10.440
+where each of these coefficients 
+are from the Goldilocks field
+
+0:21:10.440,0:21:13.920
+and still do this polynomial identity test
+
+0:21:13.920,0:21:18.720
+and now get a much lower 
+false acceptance probability.
+
+0:21:18.720,0:21:25.000
+So we've amplified the 
+probability of catching an error.
+
+0:21:25.000,0:21:26.120
+Nico: So why is that?
+
+0:21:26.120,0:21:31.100
+Because we went from 1 over size of 
+Goldilocks to 1 over size of extension?
+
+0:21:31.100,0:21:32.040
+Jim: Yes.
+
+0:21:32.040,0:21:36.920
+Our extension field, remember, 
+is, you know, roughly -
+
+0:21:36.920,0:21:44.480
+I'm going to call this like GL² 
+for the tuples of the extension.
+
+0:21:44.480,0:21:48.920
+And this is roughly of size 2^128.
+
+0:21:48.920,0:21:51.520
+Nico: Okay.
+
+0:21:51.520,0:21:52.900
+Amazing.
+
+0:21:52.900,0:21:58.520
+Jim: Then we're going to move 
+on to our FRI evaluation proof,
+
+0:22:00.600,0:22:06.760
+and run the FRI protocol.
+
+0:22:06.760,0:22:10.120
+And without getting into the details of this here,
+
+0:22:10.120,0:22:12.880
+the FRI protocol will itself involve more sampling  
+
+0:22:12.880,0:22:16.760
+of random elements from the 
+Goldilocks extension field.
+
+0:22:16.760,0:22:22.420
+But by a similar argument, we 
+can show that the error, that --
+
+0:22:22.420,0:22:26.760
+the soundness error that we 
+get during the FRI protocol is
+
+0:22:27.560,0:22:30.280
+inversely proportional roughly to our --
+
+0:22:30.280,0:22:31.680
+the size of our extension field.
+
+0:22:31.680,0:22:36.200
+And so the same soundness amplification 
+technique works in this step as well.
+
+0:22:36.200,0:22:39.300
+Nico: Right. But now FRI is 
+going to work over the extension.
+
+0:22:39.300,0:22:40.360
+Jim: Yes.
+
+0:22:40.360,0:22:43.840
+Nico: Okay. So no savings really here.
+
+0:22:43.840,0:22:44.920
+Jim: That's right.
+
+0:22:44.920,0:22:45.400
+Nico: Cool.
+
+0:22:45.400,0:22:47.680
+Jim: At this point, we're not getting savings,
+
+0:22:47.680,0:22:54.880
+but we have saved a bunch of work 
+here in our commitment phase,
+
+0:22:54.880,0:23:03.160
+we've saved work in -- well, in phase 2a.
+
+0:23:03.160,0:23:08.840
+And phase 2b is quite cheap to do for the prover.
+
+0:23:08.840,0:23:13.240
+And phase 3, we didn't really save any work,
+
+0:23:13.240,0:23:17.400
+but actually we're just really happy 
+that we saved work in the commitment
+
+0:23:17.400,0:23:19.360
+and quotient computation phases.
+
+0:23:19.360,0:23:23.160
+Nico: I mean, I remember recent 
+talks from Eli Ben-Sasson
+
+0:23:23.160,0:23:25.000
+who was saying these were the real bottlenecks.
+
+0:23:25.000,0:23:26.000
+Jim: That's right.
+
+0:23:26.000,0:23:26.780
+Nico: Good news.
+
+0:23:26.780,0:23:29.600
+Jim: Yeah. That's absolutely true.
+
+0:23:29.600,0:23:35.960
+The FRI protocol is linear in the 
+size of the extended polynomial,
+
+0:23:35.960,0:23:38.800
+whereas the commitment phase 
+is actually really expensive
+
+0:23:38.800,0:23:42.240
+because it involves both 
+the Fast Fourier Transform,
+
+0:23:42.240,0:23:46.160
+which is superlinear in 
+the size of the polynomial,
+
+0:23:46.160,0:23:50.280
+and also a lot of hashing 
+to build our Merkle trees.
+
+0:23:50.280,0:23:55.160
+So if we can even just save work in the 
+commitment phase, we're really happy.
+
+0:23:55.160,0:23:59.000
+Nico: So now I have another question, which is,
+
+0:23:59.000,0:24:03.960
+by the same logic, if I took something that's 
+64 bits and to get security, I extended it,
+
+0:24:03.960,0:24:06.460
+could I take something smaller and extend it more?
+
+0:24:06.460,0:24:07.760
+Jim: Yes.
+
+0:24:07.760,0:24:10.520
+And there's a lot of projects doing this today.
+
+0:24:10.520,0:24:15.160
+So there's two smaller prime fields 
+that are used by other projects.
+
+0:24:15.160,0:24:20.874
+The RISC Zero project began using 
+the Baby Bear prime field, which --
+
+0:24:20.874,0:24:23.000
+Nico: Do you mind writing 
+them out if you know them?
+
+0:24:23.000,0:24:28.360
+Jim: Yes. So let me come back over here.
+
+0:24:34.640,0:24:53.120
+So the Baby Bear field is a 31-bit prime number 
+and it has the form 15 * 2^27 + 1.
+
+0:24:55.520,0:24:59.320
+And we didn't talk too much 
+about the Fast Fourier Transform,
+
+0:24:59.320,0:25:04.360
+but it's actually really important that 
+we have prime numbers with this structure
+
+0:25:04.360,0:25:10.914
+that is some number times a large 
+power of 2 plus 1 in order to --
+
+0:25:10.914,0:25:13.349
+Nico: Oh, I guess we can 
+factor the 2^32 here --
+
+0:25:13.349,0:25:18.240
+Jim: Yeah. Let's do this.
+
+0:25:18.240,0:25:22.880
+Nico: Right.
+
+0:25:22.880,0:25:23.520
+Jim: Good point.
+
+0:25:23.520,0:25:27.520
+We can see that our Goldilocks 
+prime have this property
+
+0:25:27.520,0:25:29.440
+that we're going to call smoothness
+
+0:25:29.440,0:25:32.240
+that allows us to use the
+Fast Fourier Transform techniques.
+
+0:25:32.240,0:25:33.020
+Nico: Okay.
+
+0:25:33.020,0:25:36.280
+Jim: There's another prime field --
+Nico: So smoothness, just to be clear,  
+
+0:25:36.280,0:25:38.280
+is the -- this thing, right?
+
+0:25:38.280,0:25:41.000
+This big 2^32 or this big power of --
+
+0:25:41.000,0:25:44.920
+Jim: It is this form where you have a 
+number times a big power of 2 plus 1.
+
+0:25:44.920,0:25:46.660
+Nico: Cool.
+
+0:25:46.660,0:25:53.240
+Jim: There's another prime field 
+that is gotten attention for --
+
+0:25:53.240,0:25:56.520
+There's a new line of work called Circle STARKs.
+
+0:25:56.520,0:26:06.680
+And this is the Mersenne field.
+
+0:26:06.680,0:26:13.320
+And this number is 2^31 - 1.
+
+0:26:13.320,0:26:14.800
+Now what do you notice?
+
+0:26:14.800,0:26:18.260
+Nico: Yeah. I mean, they don't 
+have the nice plus 1 thing.
+
+0:26:18.260,0:26:22.360
+Jim: It does not have the smoothness 
+property as I just defined it.
+
+0:26:22.880,0:26:25.120
+But due to some really creative research,
+
+0:26:25.120,0:26:31.200
+we can actually do something like the
+Fast Fourier Transform for the Mersenne field,
+
+0:26:31.200,0:26:34.800
+even though it doesn't have this particular form.
+
+0:26:34.800,0:26:37.720
+And we're interested in doing this because
+
+0:26:37.720,0:26:43.200
+the computation to compute multiplications 
+in the Mersenne field is actually several  
+
+0:26:43.200,0:26:46.600
+clock cycles cheaper than 
+doing it even for Baby Bear.
+
+0:26:46.600,0:26:47.400
+Nico: Wow. Okay.
+
+0:26:47.400,0:26:51.840
+I guess because it's just a 
+one, a bunch of zeros and --
+
+0:26:51.840,0:26:53.064
+Or maybe --
+
+0:26:53.064,0:26:54.500
+Jim: Yeah.
+Nico: Oh no, not necessarily actually.
+
+0:26:54.500,0:26:56.400
+But yeah, never mind. Ignore that.
+
+0:26:56.400,0:26:57.260
+But it looks simpler.
+
+0:26:57.260,0:27:01.303
+Jim: If we were to write it out in 
+binary, it would be like a lot of ones.
+
+0:27:01.303,0:27:01.315
+Nico: Right.
+
+0:27:01.315,0:27:07.480
+Jim: And there's nice digital logic circuits that 
+could process multiplications of those numbers.
+
+0:27:07.480,0:27:09.760
+Nico: That makes sense.
+
+0:27:09.760,0:27:12.400
+Can we go even smaller?
+
+0:27:12.400,0:27:13.400
+Jim: Great question.
+
+0:27:13.400,0:27:15.000
+Actually, I forgot --
+
+0:27:15.000,0:27:20.543
+Before this, what we can do with the Baby 
+Bear field is we still need a field extension.
+
+0:27:20.543,0:27:20.555
+Nico: Right.
+
+0:27:20.555,0:27:26.080
+Jim: And we cannot do just a degree 
+2 extension, which is a plane,
+
+0:27:26.080,0:27:28.360
+because if we think about how many fields,
+
+0:27:28.360,0:27:31.680
+let's take a degree 2 extension -- Baby Bear.
+
+0:27:31.680,0:27:34.480
+I said this is a 31-bit field.
+
+0:27:34.480,0:27:37.360
+If we think about all pairs of Baby Bear elements,  
+
+0:27:37.360,0:27:42.360
+we still only have less than 
+2^64 total elements.
+
+0:27:42.360,0:27:44.920
+And so in the case of Baby Bear and Mersenne,
+
+0:27:44.920,0:27:48.080
+we would need to use a 
+quartic extension, which is,
+
+0:27:48.920,0:27:57.000
+every element of our extension field is a four as 
+a tuple of four Baby Bear or Mersenne elements.
+
+0:27:57.000,0:28:02.080
+And there is a multiplication method 
+that would be defined for this.
+
+0:28:02.080,0:28:05.480
+But using basically everything that 
+we talked about for Goldilocks,
+
+0:28:05.480,0:28:08.480
+the rest of the STARK protocol would go through.
+
+0:28:08.480,0:28:10.040
+Nico: Right.
+
+0:28:10.040,0:28:11.420
+Amazing.
+
+0:28:11.420,0:28:15.280
+Jim: You then asked, "can we go even smaller?"
+
+0:28:15.280,0:28:16.510
+Nico: Yes.
+
+0:28:16.510,0:28:19.840
+Jim: That's a really interesting question.
+
+0:28:19.840,0:28:21.440
+And there are some challenges.
+
+0:28:21.440,0:28:28.960
+So, you know, we could ask, "could we use a 
+16-bit prime field or an 8-bit prime field?"
+
+0:28:28.960,0:28:33.360
+And we run into really two problems.
+
+0:28:33.360,0:28:34.660
+I'm going to erase this now.
+
+0:28:34.660,0:28:39.760
+Nico: Yeah. Sounds good.
+
+0:28:39.760,0:28:43.280
+I guess, smoothness, since you were 
+saying, we need this big power of 2.
+
+0:28:43.280,0:28:55.400
+Jim: That is certainly one problem. So --
+
+0:28:55.400,0:28:59.840
+And let's remember two particular phases of this.
+
+0:28:59.840,0:29:03.360
+So one was Reed-Solomon encoding.
+
+0:29:05.320,0:29:07.729
+Nico: For the commit part.
+
+0:29:07.729,0:29:11.560
+Jim: For the commit part.
+Nico: Cool.
+
+0:29:11.560,0:29:17.400
+Jim: Which is part of the commitment, as you said.
+
+0:29:17.400,0:29:18.640
+And this is --
+
+0:29:18.640,0:29:21.640
+The way we implement this is 
+with Fast Fourier Transforms.
+
+0:29:21.640,0:29:25.000
+And the second was polynomial division.
+
+0:29:25.000,0:29:26.280
+Nico: Yes.
+
+0:29:26.280,0:29:28.040
+Jim: Which was part of our zerocheck.  
+
+0:29:34.560,0:29:37.200
+Nico: Does that also need Fast Fourier Transforms?
+
+0:29:37.200,0:29:39.640
+Jim: It does.
+
+0:29:39.640,0:29:44.880
+We can reuse the Fast Fourier Transforms 
+that we did during the Reed-Solomon encoding.
+
+0:29:44.880,0:29:50.080
+But the property that both of these 
+have is that we need to take --
+
+0:29:50.080,0:29:56.280
+we need to treat our f column and 
+interpolate a high degree polynomial,
+
+0:29:57.000,0:29:58.120
+depending on --
+
+0:29:58.120,0:30:04.520
+relatively, we need to interpolate a polynomial 
+over the values that we had in our f column.
+
+0:30:04.520,0:30:05.874
+So let's say --
+
+0:30:05.874,0:30:09.120
+Nico: Like high you're saying compared to this,
+
+0:30:09.120,0:30:11.660
+but low compared to the size of 
+the extension field, I'm guessing.
+
+0:30:11.660,0:30:12.160
+Jim: Yes.
+
+0:30:12.160,0:30:12.720
+Nico: Because --
+
+0:30:12.720,0:30:13.800
+Okay. Cool.
+
+0:30:13.800,0:30:16.960
+Jim: So I think for typical SNARKs,
+
+0:30:16.960,0:30:24.560
+we would be talking about columns that are 
+in the range of 2^20 to 2^24.
+
+0:30:25.240,0:30:31.480
+That's a pretty typical size 
+for the height of a STARK trace.
+
+0:30:31.480,0:30:40.080
+What that means is, recall, we're going 
+to associate with every row in this column
+
+0:30:40.080,0:30:43.200
+a different evaluation point from our field.
+
+0:30:43.880,0:30:46.165
+Nico: Yes. The roots of unity.
+
+0:30:46.165,0:30:47.900
+Jim: Yes. The roots of unity.
+Nico: Also past modules.
+
+0:30:47.900,0:30:53.360
+Jim: Now, we run into a problem if 
+we're trying to use a 16-bit field,
+
+0:30:53.360,0:30:57.160
+because a 16-bit field not only doesn't 
+even have that many roots of unity,
+
+0:30:57.160,0:30:58.660
+it doesn't even have that many points.
+
+0:30:58.660,0:30:59.600
+Nico. Right. Yes.
+
+0:30:59.600,0:31:07.337
+Jim: We couldn't possibly have 2^20 
+evaluation points in an 8-bit prime field.
+
+0:31:07.337,0:31:11.400
+Nico: Makes sense.
+Jim: So we could use field extensions.
+
+0:31:11.400,0:31:16.120
+But this is starting to get essentially difficult,
+
+0:31:16.120,0:31:21.080
+and we're not getting the same 
+benefits from basically using  
+
+0:31:21.080,0:31:23.040
+the efficiency of small fields when we use that.
+
+0:31:23.040,0:31:25.800
+Nico: I was going to ask. If we start 
+using extensions from the beginning,  
+
+0:31:25.800,0:31:28.635
+we're no longer having savings like --
+
+0:31:28.635,0:31:29.151
+Jim: Exactly.
+
+0:31:29.151,0:31:30.840
+Nico: In points one and two. Okay.
+
+0:31:30.840,0:31:36.920
+Jim: So I'm going to talk about how 
+to solve these challenges separately.
+
+0:31:37.720,0:31:42.000
+Actually, number 2 is 
+potentially the easiest to solve.
+
+0:31:42.000,0:31:43.720
+And I'm not going to go into too much detail,
+
+0:31:43.720,0:31:47.080
+but recall that this was part 
+of our vanishing argument,
+
+0:31:47.880,0:31:54.960
+or our vanishing or zerocheck argument.
+
+0:31:54.960,0:31:59.880
+And there's another protocol that we 
+could replace polynomial division with
+
+0:31:59.880,0:32:01.720
+called the Sum-Check Protocol.
+
+0:32:01.720,0:32:03.240
+Nico: Right.
+
+0:32:03.240,0:32:06.880
+Jim: I believe you may have talked about 
+this in a past or upcoming session.
+
+0:32:06.880,0:32:09.320
+I can't -- or I'm not going 
+to go into the details.
+
+0:32:09.320,0:32:13.000
+But when we use the Sum-Check 
+Protocol for our zerocheck,
+
+0:32:13.000,0:32:19.320
+we actually don't have this limitation that 
+forces our field size to be very large.
+
+0:32:19.320,0:32:26.000
+We can even run the Sum-Check 
+Protocol with small field polynomials,
+
+0:32:26.000,0:32:27.840
+again using extension challenges.
+
+0:32:28.600,0:32:30.540
+But this all works really nicely.
+
+0:32:30.540,0:32:32.920
+Nico: Okay. So that's solved.
+
+0:32:32.920,0:32:34.320
+What about encoding?
+
+0:32:34.320,0:32:45.480
+Jim: Right. Solved with Sum-Check.
+
+0:32:45.480,0:32:47.840
+What about Reed-Solomon encoding?
+
+0:32:47.840,0:32:51.000
+Well, let's talk about quickly 
+what Reed-Solomon encoding is.
+
+0:32:51.000,0:32:56.200
+Reed-Solomon encoding -- Reed-Solomon is an 
+error-correcting code or an erasure code.
+
+0:32:56.200,0:33:01.040
+And what it effectively means is we're 
+going to treat our f column as a polynomial.
+
+0:33:01.040,0:33:05.080
+We're going to interpolate and 
+evaluate it at many more points.
+
+0:33:05.080,0:33:08.000
+So again, we have this problem that 
+we need lots of evaluation points
+
+0:33:08.000,0:33:10.960
+to even define what it would mean 
+to do a Reed-Solomon encoding.
+
+0:33:10.960,0:33:12.780
+Nico: Like even more than the trace itself?
+
+0:33:12.780,0:33:14.400
+Jim: Even more than the trace itself.
+
+0:33:14.400,0:33:19.400
+We can think about some 
+evaluation points down here
+
+0:33:19.400,0:33:25.040
+where we're going to extend our polynomial to.
+
+0:33:25.040,0:33:30.040
+And so, it has taken some more 
+creativity to get around this.
+
+0:33:30.040,0:33:35.280
+My team developed some techniques based on a 
+different type of field called a "binary tower".
+
+0:33:35.280,0:33:38.080
+And I want to talk about what a binary tower is
+
+0:33:38.080,0:33:40.200
+and how we can both use binary towers
+
+0:33:40.200,0:33:46.120
+and a new small field polynomial to large field  
+
+0:33:46.120,0:33:50.720
+polynomial commitment scheme 
+reduction in some generality.
+
+0:33:50.720,0:33:54.050
+Nico: Amazing.
+
+0:33:54.050,0:33:57.720
+Jim: So have you heard of a binary field before?
+
+0:33:58.640,0:34:00.340
+Nico: I'm not sure. No.
+
+0:34:00.340,0:34:08.800
+Jim: So let's start with the smallest field 
+we could possibly cook up, which is F₂.
+
+0:34:08.800,0:34:12.000
+And this is literally has two elements.
+
+0:34:12.000,0:34:14.800
+It has the elements {0,1}.
+
+0:34:14.800,0:34:17.960
+We're going to use our field extension technique
+
+0:34:17.960,0:34:22.680
+and create a field f₂^2
+or four elements.
+
+0:34:22.680,0:34:25.720
+And we can think of these as 
+being pairs of F₂ elements.
+
+0:34:25.720,0:34:26.640
+Nico: Right.
+
+0:34:26.640,0:34:28.480
+So 0,0 , 0,1 , 1,0 , 1,1.
+
+0:34:28.480,0:34:29.920
+Jim: Yes.
+
+0:34:29.920,0:34:30.720
+Nico: Cool.
+
+0:34:30.720,0:34:33.680
+Jim: We can also think of this as a 2-bit string.
+
+0:34:34.880,0:34:37.983
+And we're going to just keep 
+doing this over and over.
+
+0:34:37.983,0:34:37.995
+Nico: Right.
+
+0:34:37.995,0:34:41.160
+Jim: And what you may have 
+learned in high school is that
+
+0:34:41.160,0:34:42.600
+this doesn't work for the real numbers,
+
+0:34:42.600,0:34:45.160
+but it does work for these binary fields
+
+0:34:45.160,0:34:50.120
+that we can continue to build 
+planes and field extensions.
+
+0:34:50.120,0:34:54.280
+So we could make a field --
+
+0:34:54.280,0:34:56.800
+Sorry. This should be 2^4.
+
+0:34:56.800,0:35:02.040
+Nico: So we're taking two of these 
+elements to make one of these elements.
+
+0:35:02.040,0:35:02.640
+Jim: That's right.
+
+0:35:02.640,0:35:05.945
+Nico: But because this was already 
+two of these, this now becomes four.
+
+0:35:05.945,0:35:05.954
+Jim: Yes.
+
+0:35:05.954,0:35:09.580
+Nico: Okay. I see. I see what's 
+happening. And it keep towering, right?
+
+0:35:09.580,0:35:10.080
+Jim: Yes.
+
+0:35:10.080,0:35:16.040
+So this is -- I like to think of it in terms 
+of the number of bits to represent each field.
+
+0:35:16.040,0:35:17.920
+So this is 4 bits.
+
+0:35:17.920,0:35:21.600
+Nico: Yeah. That's a lot less 
+confusing than what I was saying.
+
+0:35:21.600,0:35:23.440
+Jim: This is 8 bits.
+
+0:35:23.440,0:35:24.730
+Nico: Yeah.
+
+0:35:24.730,0:35:30.480
+Jim: And we're going to just keep doing 
+this and we can go as high as we want.
+
+0:35:30.480,0:35:38.120
+For the purposes of this conversation, we'll 
+continue doing this up to f₂^128,
+
+0:35:38.120,0:35:41.360
+which is a 128-bit field.
+
+0:35:41.360,0:35:46.240
+And that is enough to give us the security 
+that we wanted for our Schwartz-Zippel test
+
+0:35:46.240,0:35:51.340
+and the rest of our polynomial or 
+our protocol soundness guarantees.
+
+0:35:51.340,0:35:52.280
+Nico: Amazing.
+
+0:35:52.280,0:35:58.480
+So you talked a bit about the costs of 
+multiplication in these extension fields
+
+0:35:58.480,0:36:02.400
+when we were looking at Goldilocks saying, 
+like, it gets more expensive as we extend more.
+
+0:36:02.400,0:36:03.540
+Is this also the case here?
+
+0:36:03.540,0:36:09.840
+Jim: This is the case that our multiplication 
+grows superlinearly in the number of bits.
+
+0:36:09.840,0:36:13.920
+However, there's some really 
+remarkable ways of constructing this.
+
+0:36:13.920,0:36:18.960
+In particular, we identified one 
+way of constructing this tower
+
+0:36:18.960,0:36:22.360
+that gives us really good 
+multiplication complexity,
+
+0:36:22.360,0:36:26.420
+matching the asymptotic complexity 
+of regular integer multiplication.
+
+0:36:26.420,0:36:27.400
+Nico: Wow. Okay.
+
+0:36:27.400,0:36:32.960
+Jim: And notably, what this 
+means is when I wrote out the  
+
+0:36:32.960,0:36:35.320
+multiplication algorithm for the complex plane,
+
+0:36:35.320,0:36:38.280
+it looks like it would be a quadratic number of  
+
+0:36:38.280,0:36:42.560
+multiplications you needed to do whenever 
+you multiplied extension field elements.
+
+0:36:42.560,0:36:49.400
+Remember that we multiplied two complex numbers 
+and had to do four subfield multiplications.
+
+0:36:49.400,0:36:55.692
+Actually, we can do multiplications in the 
+binary tower with less than a quadratic --
+
+0:36:55.692,0:36:55.715
+Nico: Okay. Super cool.
+
+0:36:55.715,0:37:01.560
+Jim: number of underlying bit 
+multiplications or bit operations.
+
+0:37:01.560,0:37:04.720
+So, you know, how should you think about these?
+
+0:37:04.720,0:37:07.720
+Well, again, this symbol was inclusion,
+
+0:37:07.720,0:37:14.680
+meaning we kind of have this Russian doll of 
+different fields that live one within another.
+
+0:37:14.680,0:37:19.320
+And whenever in our protocol we're able 
+to use a smaller field, we will do that.
+
+0:37:19.320,0:37:24.160
+And then whenever we require a larger 
+field for either more evaluation points
+
+0:37:24.160,0:37:29.182
+or for more cryptographic soundness, 
+we can move up to a higher tower level.
+
+0:37:29.182,0:37:29.200
+Nico: Makes sense.
+
+0:37:29.200,0:37:36.120
+So after this detour, I guess my question 
+is now, how does this solve that problem?
+
+0:37:36.120,0:37:38.658
+Jim: I want to talk about one more concept --
+
+0:37:38.658,0:37:40.600
+Nico: Okay. Cool.
+Jim: Which is what we call packing.
+
+0:37:40.600,0:37:46.360
+And this is this notion that because 
+these live within it one another,
+
+0:37:46.360,0:37:48.320
+we can take -- you know,  
+
+0:37:48.320,0:37:55.160
+we talked about a F₂^8 element 
+as being pairs of F₂^4 elements.
+
+0:37:55.160,0:37:55.700
+Nico: Yeah.
+
+0:37:55.700,0:38:00.360
+Jim: And so if we have, let's say --
+
+0:38:00.360,0:38:02.122
+Where should I write this?
+
+0:38:02.122,0:38:06.160
+Nico: Should we get rid of these?
+Jim: I'm going to erase this here.
+
+0:38:06.160,0:38:08.600
+In F₂, the 8 element is 8 bits.
+
+0:38:08.600,0:38:11.240
+This is the same size as 1 byte, right?
+
+0:38:13.720,0:38:19.680
+So let's say we have a bunch of bytes.
+
+0:38:19.680,0:38:21.840
+Say we have 16 of them.
+
+0:38:21.840,0:38:24.474
+I don't know if this is going 
+to be 16 slots, but we have --
+
+0:38:24.474,0:38:25.880
+Nico: Let's pretend.
+
+0:38:25.880,0:38:31.280
+Jim: 16 elements that are F₂^8.
+
+0:38:31.280,0:38:34.720
+Each one is a byte, so we have 16 bytes.
+
+0:38:35.480,0:38:41.960
+What I'm saying we can do is, we could 
+view this in many different ways.
+
+0:38:41.960,0:38:52.440
+So we could actually view this as a 
+single element of the 128-bit field,
+
+0:38:52.440,0:38:56.120
+or we can chunk this into 4 bytes at a time
+
+0:38:56.120,0:39:07.360
+and treat this as four 32-bit field elements.
+
+0:39:07.360,0:39:08.920
+And this is what we call packing.
+
+0:39:08.920,0:39:13.560
+It's the idea that we can take small 
+field elements, group them together
+
+0:39:13.560,0:39:16.320
+and treat them as big field elements.
+
+0:39:16.320,0:39:19.720
+And this doesn't say come for free,
+
+0:39:19.720,0:39:22.720
+there are technicalities we need to deal with.
+
+0:39:22.720,0:39:28.920
+But this is in general a technique that's 
+available to us in the setting of extension towers
+
+0:39:28.920,0:39:29.900
+that becomes really useful.
+
+0:39:29.900,0:39:32.860
+Nico: It's like kids in a trench 
+coat trying to get to the cinema.
+
+0:39:32.860,0:39:33.620
+Jim: Exactly!
+
+0:39:33.620,0:39:35.660
+Nico: That's what's happening here. Okay.
+
+0:39:35.660,0:39:40.680
+Jim: So I think now we're ready 
+to talk about how we're going to  
+
+0:39:40.680,0:39:46.560
+use packing to fix our problem 
+with the Reed-Solomon encoding
+
+0:39:46.560,0:39:51.520
+and basically not having enough evaluation 
+points when we're operating over F₂.
+
+0:39:51.520,0:39:53.740
+Nico: Cool.
+
+0:39:53.740,0:39:57.800
+Jim: So the setting here 
+now is we have a column f.
+
+0:39:57.800,0:40:04.200
+It has 2^20 to 2^24 rows in this 
+column, but each element is a single bit.
+
+0:40:04.200,0:40:04.770
+Nico: Okay.
+
+0:40:04.770,0:40:10.320
+Jim: It's an F₂ element.
+
+0:40:10.320,0:40:14.280
+And we wanted some way to commit this polynomial
+
+0:40:14.280,0:40:16.640
+and run something like our STARK protocol,
+
+0:40:16.640,0:40:20.160
+but with the zerocheck replaced 
+with a Sum-Check reduction.
+
+0:40:20.160,0:40:21.240
+Nico: Yeah.
+
+0:40:21.240,0:40:26.520
+Jim: And we also would like to 
+continue using Reed-Solomon codes
+
+0:40:26.520,0:40:28.960
+because they have really good properties
+
+0:40:28.960,0:40:31.000
+and they lend themselves to the FRI protocol.
+
+0:40:31.000,0:40:31.810
+Nico: Yep.
+
+0:40:31.810,0:40:33.920
+Jim: But we have this problem that
+
+0:40:33.920,0:40:40.160
+if we were to evaluate our f 
+column at a bunch of more points,
+
+0:40:40.160,0:40:44.720
+we could do this by padding them 
+up to 32-bit field elements.
+
+0:40:44.720,0:40:51.200
+So we could kind of imagine that 
+these all were 32-bit field elements
+
+0:40:51.200,0:40:53.000
+and we would pad with zeros.
+
+0:40:53.000,0:40:54.480
+Nico: A bunch of zeros. Okay.
+
+0:40:54.480,0:40:57.720
+Jim: But this looks really inefficient 
+be for all the reasons that
+
+0:40:57.720,0:41:00.480
+we didn't want to use a larger 
+field in the first place.
+
+0:41:00.480,0:41:00.760
+Nico: Yes.
+
+0:41:00.760,0:41:04.543
+We're back to like small things going 
+into a bigger field storage slot.
+
+0:41:04.543,0:41:04.780
+Jim: Right.
+Nico: Okay.
+
+0:41:04.780,0:41:15.080
+Jim: So instead what we want to do is find 
+a way to take chunks of bits and pack them.
+
+0:41:15.080,0:41:16.480
+Nico: Trenchcoat!
+
+0:41:16.480,0:41:18.560
+Jim: Yes!
+
+0:41:18.560,0:41:27.600
+So let's imagine that we're going to 
+take chunks of 128 bits at a time.
+
+0:41:27.600,0:41:32.040
+128 bits here, 128 bits here,
+
+0:41:32.040,0:41:38.640
+and treat them as a single element of a 
+very large field of an F₂^128 field.
+
+0:41:38.640,0:41:40.960
+This is big enough for us to run FRI over.
+
+0:41:40.960,0:41:42.430
+Nico: Yeah.
+
+0:41:42.430,0:41:43.634
+Jim: Now --
+
+0:41:43.634,0:41:45.680
+Nico: Does this have the 
+smoothness property model?
+
+0:41:45.680,0:41:48.155
+Yes. I guess, it's already --
+
+0:41:48.155,0:41:50.380
+Jim: Yeah. It has a different type of smoothness.
+
+0:41:50.380,0:41:51.120
+Nico: Okay.
+
+0:41:51.120,0:41:59.920
+Jim: And what that means is that there exists 
+a Fast Fourier Transform type of algorithm
+
+0:42:00.720,0:42:06.680
+that can do efficient Reed-Solomon 
+encoding for these binary fields.
+
+0:42:06.680,0:42:08.200
+It's called the "additive NTT".
+
+0:42:08.200,0:42:12.880
+It's slightly different from the 
+regular NTT or FFT that we're used to,
+
+0:42:12.880,0:42:14.640
+but it does have a notion of smoothness.
+
+0:42:14.640,0:42:16.240
+Nico: What does NTT stand for?
+
+0:42:16.240,0:42:18.624
+Jim: That's the Number Theoretic Transform.
+
+0:42:18.624,0:42:19.960
+Nico: Okay.
+Jim: Which is when you --
+
+0:42:19.960,0:42:25.120
+It's a transformation on finite field vectors.
+
+0:42:25.120,0:42:26.320
+Nico: Okay.
+
+0:42:26.320,0:42:31.720
+Jim: And usually we want to refer to using 
+the Fast Fourier Transform algorithm,
+
+0:42:31.720,0:42:36.622
+which is famously efficient for doing this 
+transformation on finite field elements.
+
+0:42:36.622,0:42:36.640
+Nico: I see. Okay.
+
+0:42:36.640,0:42:39.700
+So NTT is what we want to do 
+and FFT is the algorithm we use.
+
+0:42:39.700,0:42:40.320
+Jim: Yes.
+
+0:42:40.320,0:42:41.100
+Nico: Cool.
+
+0:42:41.100,0:42:44.800
+Jim: So back to here, we said 
+that we have a column of bits.
+
+0:42:44.800,0:42:49.240
+We wanted to pack adjacent 
+bits into big field elements.
+
+0:42:49.240,0:42:53.360
+We wanted to use the FRI protocol 
+running over our big field elements
+
+0:42:53.360,0:43:01.760
+and use this to effectively evaluate the 
+interpolation of our column f somewhere.
+
+0:43:01.760,0:43:08.200
+Now, if we were to just do this, this 
+would not actually equal on its own the --
+
+0:43:08.200,0:43:11.000
+So let's talk about two different polynomials.
+
+0:43:11.000,0:43:20.440
+We have f, we have 2^20, F₂ coefficients.
+
+0:43:27.160,0:43:36.520
+And when we pack, we're going to take 
+chunks of 128 bits or 128 elements.
+
+0:43:36.520,0:43:38.520
+128 is 2^7.
+
+0:43:38.520,0:43:39.660
+Nico: Yeah.
+
+0:43:39.660,0:43:42.440
+Jim: And we're going to turn 
+-- We're going to have a --
+
+0:43:42.440,0:43:47.480
+We can define this as an 
+entirely different polynomial,
+
+0:43:47.480,0:43:52.360
+kind of calculate it in this way, which 
+is basically a memory cast on the bits.
+
+0:43:52.360,0:43:57.040
+And instead, we end up with 2^20-7.
+
+0:43:57.040,0:43:58.520
+Nico: Right.
+
+0:43:58.520,0:44:01.940
+Jim: f, 2^128 coefficients.
+
+0:44:01.940,0:44:02.680
+Nico: Right.
+
+0:44:02.680,0:44:07.080
+Because we divided our column of 2^20
+into chunks of 2^7.
+
+0:44:07.080,0:44:07.620
+Jim: Exactly.
+
+0:44:07.620,0:44:09.700
+Nico: And so the division gives this. Okay.
+
+0:44:09.700,0:44:11.280
+Jim: So these are --
+
+0:44:11.280,0:44:15.120
+What I am saying is that these are 
+actually two separate polynomials.
+
+0:44:15.120,0:44:18.600
+They don't even have the same number of variables.
+
+0:44:18.600,0:44:23.200
+But using a Sum-Check based 
+reduction and a technique
+
+0:44:23.200,0:44:26.320
+that my team developed that 
+we call "ring switching",
+
+0:44:26.320,0:44:41.560
+what this lets us do is, if 
+I want the evaluation of f,
+
+0:44:41.560,0:44:47.720
+I'm going to have the prover and 
+verifier engage in a Sum-Check Protocol
+
+0:44:47.720,0:44:57.040
+that we call a ring switching Sum-Check.
+
+0:44:59.720,0:45:06.560
+And this is a reduction to a claim 
+about f hat at a particular point.
+
+0:45:06.560,0:45:24.720
+What that means is I'm then going to 
+get a claim about f hat at a point.
+
+0:45:24.720,0:45:25.830
+Nico: Right.
+
+0:45:25.830,0:45:29.880
+Jim: And what it means for 
+this to be a reduction is that
+
+0:45:29.880,0:45:37.480
+if this claim is true that f hat evaluates 
+to the claimed value at the claimed point,
+
+0:45:37.480,0:45:43.160
+then I should be fully convinced that f 
+evaluated in the way that I wanted originally.
+
+0:45:43.160,0:45:44.440
+Nico: Right.
+
+0:45:44.440,0:45:51.680
+Jim: And what's really cool here is that we 
+were able to do this sort of packing trick on f.
+
+0:45:51.680,0:45:55.240
+We're able to run our Reed-Solomon code over that,
+
+0:45:55.240,0:46:00.240
+because F₂^128 is smooth 
+and has enough evaluation points.
+
+0:46:00.240,0:46:03.480
+We were able to run the FRI protocol here,
+
+0:46:03.480,0:46:05.840
+but we were able to do a Sum-Check reduction
+
+0:46:05.840,0:46:11.400
+so that we sidestepped all the issues that 
+we had with using not just small fields,
+
+0:46:11.400,0:46:13.143
+but what I call tiny fields.
+
+0:46:13.143,0:46:13.155
+Nico: Right.
+
+0:46:13.155,0:46:16.720
+Jim: Fields that are way less than 
+the size for a machine register.
+
+0:46:17.400,0:46:24.100
+And so that explains how we're able to use 
+binary towers to shrink the size of our field.
+
+0:46:24.100,0:46:26.480
+Nico: So just to make sure I 
+understood this part correctly,  
+
+0:46:26.480,0:46:28.960
+you're actually only going to commit to f hat.
+
+0:46:28.960,0:46:30.240
+Jim: That's right.
+
+0:46:30.240,0:46:37.160
+Nico: And then to get evaluations of f, I'm going 
+to get evaluations of f hat for my commitment.
+
+0:46:37.160,0:46:40.945
+And then there's this little protocol 
+that translates from f hat to f.
+
+0:46:40.945,0:46:41.560
+Jim: Yes.
+Nico: Is that correct?
+
+0:46:41.560,0:46:42.280
+Okay. Cool.
+
+0:46:42.280,0:46:43.880
+Amazing.
+
+0:46:43.880,0:46:46.000
+Is that like an expensive protocol?
+
+0:46:46.000,0:46:47.520
+Is that a cheap protocol?
+
+0:46:47.520,0:46:49.800
+Jim: It's a fairly cheap protocol.
+
+0:46:49.800,0:46:56.840
+It's roughly the same cost of doing the FRI 
+protocol that we needed to run on f hat anyway.
+
+0:46:56.840,0:46:57.746
+Nico: Right.
+
+0:46:57.746,0:46:59.559
+Jim: So we can think of  
+
+0:46:59.560,0:47:06.080
+it as being a small constant multiple, or maybe 
+twice as much work as we were -- we had to do.
+
+0:47:06.080,0:47:14.280
+But we're saving a lot here because instead 
+of running f hat for 2^20 coefficients,
+
+0:47:14.280,0:47:16.103
+we're running it for 2^20-7.
+
+0:47:16.103,0:47:17.360
+Nico: Right.
+Jim: 2^13 coefficients.
+
+0:47:17.360,0:47:21.440
+Nico: So a factor of 2 here, but there's 
+like 7 factors of 2 removed there.
+
+0:47:21.440,0:47:22.040
+Jim: That's right.
+
+0:47:22.040,0:47:22.680
+Nico: Amazing.
+
+0:47:22.680,0:47:26.720
+Is this what people call Binius, 
+this sort of construction here?
+
+0:47:26.720,0:47:27.240
+Jim: Yes.
+
+0:47:27.240,0:47:33.880
+Binius refers to a project that implements all 
+of these techniques that my team is developing.
+
+0:47:33.880,0:47:36.800
+And it has kind of come to refer to these  
+
+0:47:36.800,0:47:41.040
+techniques of using binary towers 
+to construct SNARKs, generally.
+
+0:47:41.040,0:47:42.240
+Nico: Amazing.
+
+0:47:42.240,0:47:47.960
+So correct me if I'm wrong, but today what we saw 
+is we want to use small fields for performance.
+
+0:47:47.960,0:47:51.920
+The problem with that was soundness, that 
+we got this one over size of field thing.
+
+0:47:51.920,0:47:56.160
+So we ended up taking 
+extensions to get more security.
+
+0:47:56.160,0:47:58.320
+That got us down to like 32-bit fields.
+
+0:47:58.320,0:47:59.480
+Pretty cool.
+
+0:47:59.480,0:48:01.840
+And then we were saying if 
+we want even smaller fields,
+
+0:48:01.840,0:48:03.600
+the problem is that we need to do FFTs
+
+0:48:03.600,0:48:07.760
+and we need our traces to be 
+long enough to be meaningful.
+
+0:48:07.760,0:48:12.160
+And so the solution there was -- or one 
+of the solutions, I guess, is packing.
+
+0:48:12.160,0:48:15.040
+Right? This idea of trenchcoat.
+
+0:48:15.040,0:48:18.080
+And to fix packing, you have 
+this sort of protocol here.
+
+0:48:18.080,0:48:19.760
+Jim: Exactly.
+
+0:48:19.760,0:48:20.940
+That summarizes it well.
+
+0:48:20.940,0:48:21.720
+Nico: Amazing!
+
+0:48:21.720,0:48:22.560
+Thank you very much, Jim.
+
+0:48:22.560,0:48:23.480
+Jim: Thank you, Nico.
+
+0:48:23.480,0:48:26.760
+Nico: And thanks for following with us.

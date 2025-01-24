@@ -1,0 +1,3151 @@
+0:00:07.000,0:00:10.000
+S2 Module 3: An Update on Lookups with Ariel Gabizon
+
+0:00:10.815,0:00:14.320
+Nico: Welcome to this module 
+of the ZK Whiteboard Sessions.
+
+0:00:14.320,0:00:16.400
+Today we're going to be 
+covering an update on lookups.
+
+0:00:16.400,0:00:20.960
+So this is a follow up to Module 6
+in Season 1 with Mary Maller.
+
+0:00:20.960,0:00:24.400
+I'm Nico. I'll be today's host. And 
+with me today have Ariel Gabizon.
+
+0:00:24.400,0:00:25.100
+Hello, Ariel!
+
+0:00:25.100,0:00:26.580
+Ariel: Hey! Good to be here.
+
+0:00:26.580,0:00:29.000
+Nico: So, Ariel, what's the 
+plan for today's lesson?
+
+0:00:29.000,0:00:35.280
+Ariel: Well, today I'm going to start by 
+giving you an overview of the lookup landscape.
+
+0:00:35.280,0:00:36.160
+The different --
+
+0:00:36.160,0:00:40.960
+The three main approaches that 
+have been used in lookup protocols.
+
+0:00:40.960,0:00:44.640
+And then we're going to dive deep 
+into one of those approaches,
+
+0:00:44.640,0:00:47.260
+what can be called the "log derivative" approach.
+
+0:00:47.260,0:00:49.100
+Nico: Cool. Shall we get started?
+
+0:00:49.100,0:00:51.320
+Ariel: Yeah. Let's do it!
+
+0:00:51.320,0:00:59.920
+So let's look at the lookup landscape.
+
+0:01:02.880,0:01:12.960
+So we can think of three main approaches 
+that have been used in lookup protocols.
+
+0:01:12.960,0:01:21.400
+The first is what we can 
+call "multiset equality based".
+
+0:01:21.400,0:01:23.480
+Nico: Okay.
+
+0:01:23.480,0:01:38.000
+Ariel: And in this category we have protocols like 
+the Halo 2 lookup protocol, the plookup protocol,
+
+0:01:38.000,0:01:46.240
+and slightly less known is a 
+protocol based on -- excuse me,  
+
+0:01:47.360,0:01:56.280
+memory checking that appeared 
+in the Spartan paper.
+
+0:01:57.080,0:02:06.708
+And more recently, a GKR 
+version appeared in Lasso.
+
+0:02:06.708,0:02:10.480
+Nico: Okay. And so Halo 2 and plookup is in 
+the style of what we saw in Module 6. Right?
+
+0:02:10.480,0:02:13.280
+Ariel: Exactly. Yeah.
+
+0:02:13.280,0:02:21.520
+The second approach is what people 
+usually call the "log derivative" based.
+
+0:02:24.960,0:02:29.720
+And really this is one of those 
+names that are not too descriptive,
+
+0:02:29.720,0:02:34.600
+but have sort of a historical root.
+
+0:02:35.360,0:02:41.480
+That root, in a sense is these protocols 
+are sort of taking the log derivative from
+
+0:02:41.480,0:02:45.200
+what maybe is the original lookup 
+protocol from the ARIA paper,
+
+0:02:45.880,0:02:53.160
+but maybe a more descriptive name is 
+just lookups based on fractional sums.
+
+0:02:53.160,0:02:54.840
+Nico: Okay.
+
+0:02:55.880,0:02:59.840
+Do we need to understand what a log derivative 
+is to understand these or not at all?
+
+0:02:59.840,0:03:01.960
+Ariel: No. That's the nice thing.
+
+0:03:01.960,0:03:09.474
+You can talk about log derivative lookup 
+without knowing what a log derivative is. And --
+
+0:03:09.474,0:03:10.673
+Nico: This is a little more descriptive. Right?
+
+0:03:10.673,0:03:15.480
+Ariel: It's basically sums of fractions, 
+and we're going to see that later.
+
+0:03:15.480,0:03:24.280
+And in this category we have sort 
+of what you can say is the classic,
+
+0:03:24.280,0:03:25.480
+as people are calling it today,
+
+0:03:25.480,0:03:34.320
+logUp protocol that appeared initially in 
+the Bulletproof++ paper of Eagen et al.
+
+0:03:34.320,0:03:39.400
+But sort of, I think what's 
+become the standard reference is
+
+0:03:39.400,0:03:46.502
+this independent work of Haböck on this protocol.
+
+0:03:46.502,0:03:46.513
+Nico: Okay.
+
+0:03:46.513,0:03:54.340
+Ariel: So we had logUp and 
+then we had the cq protocol.
+
+0:03:54.340,0:03:56.020
+Nico: Of which you're an author?
+
+0:03:56.020,0:03:56.960
+Ariel: Yeah.
+
+0:03:56.960,0:04:04.020
+Which improved logUp, or you could say adapted 
+logUp to the setting of very large tables.
+
+0:04:04.020,0:04:04.860
+Nico: Okay.
+
+0:04:04.860,0:04:20.160
+Ariel: And we've had some 
+variants, cq+, cq++ and m-seek.
+
+0:04:20.160,0:04:24.893
+Nico: Some classic cryptography 
+naming happening here.
+
+0:04:24.893,0:04:25.760
+Ariel: Yeah.
+Nico: A lot of plus and plus pluses.
+
+0:04:27.720,0:04:28.140
+Cool.
+
+0:04:28.140,0:04:29.080
+Ariel: Yeah.
+
+0:04:29.080,0:04:33.280
+And also --
+
+0:04:33.280,0:04:45.440
+And also here people have worked on using the GKR 
+to speed up certain aspects of the logUp protocol.
+
+0:04:46.400,0:04:48.420
+So this is the second approach.
+
+0:04:48.420,0:04:48.920
+Nico: Sure.
+
+0:04:48.920,0:04:56.780
+Ariel: The third approach, we can 
+call it maybe "matrix-vector" based.
+
+0:04:56.780,0:04:58.640
+Nico: Okay.
+
+0:04:58.640,0:05:03.960
+Ariel: "Matrix-vector multiplication" based.
+
+0:05:04.680,0:05:06.800
+And I think the first --
+
+0:05:06.800,0:05:12.480
+The first lookup work in this 
+context was the Baloo work.
+
+0:05:15.920,0:05:23.902
+To a degree, Lasso also -- certain components 
+of Lasso also fall under this approach.
+
+0:05:23.902,0:05:23.913
+Nico: Okay.
+
+0:05:23.913,0:05:34.520
+Ariel: And in the folding context, 
+we have FLI, a recent paper.
+
+0:05:34.520,0:05:40.560
+Oh, and I sort of forgot to say that 
+also adapting the log derivative approach
+
+0:05:40.560,0:05:47.440
+to the folding context happens 
+in the ProtoStar paper.
+
+0:05:47.440,0:05:51.240
+Nico: Which I think is 
+mentioned in the folding module.
+
+0:05:51.240,0:05:53.240
+So that's a nice link here.
+
+0:05:53.240,0:05:57.680
+Ariel: Cool. So we have --
+
+0:05:57.680,0:05:59.840
+We have these basic -- these three approaches.
+
+0:05:59.840,0:06:01.360
+This is not comprehensive.
+
+0:06:02.800,0:06:09.960
+Some papers are not mentioned here and maybe 
+don't fall cleanly into these categories.
+
+0:06:11.320,0:06:17.800
+But in any case, today we're going to 
+focus on the log derivative approach
+
+0:06:17.800,0:06:24.480
+and dive deeply into sort of its 
+different variants, different versions.
+
+0:06:24.480,0:06:26.860
+Nico: Sounds good. Should we get into it?
+
+0:06:26.860,0:06:29.680
+Ariel: Yeah! Let's get into it.
+
+0:06:29.680,0:06:35.920
+So let me erase this.
+
+0:06:35.920,0:06:38.800
+Okay. So let's dive into 
+the log derivative approach.
+
+0:06:38.800,0:06:44.890
+Nico: Cool.
+
+0:06:44.890,0:06:58.000
+Ariel: The approach is based on the 
+following basic lemma that says as follows.
+
+0:06:58.000,0:07:04.640
+So suppose -- let's fix vectors 
+f and t of size n over our field.
+
+0:07:04.640,0:07:06.760
+So again, we're thinking of this as the table is.
+
+0:07:06.760,0:07:09.600
+This is the witness that we want 
+to show is contained in the table.
+
+0:07:09.600,0:07:10.350
+Nico: Cool.
+
+0:07:10.350,0:07:18.880
+Ariel: And let's assume the characteristic 
+of the field is larger than n.
+
+0:07:18.880,0:07:22.100
+Nico: What's the characteristic of the field?
+
+0:07:22.100,0:07:26.360
+Ariel: So the characteristic of 
+the field is the number of times --
+
+0:07:26.360,0:07:30.520
+the minimal number of times you 
+add one to itself to reach zero.
+
+0:07:30.520,0:07:33.020
+Nico: Is it -- is that the 
+number of elements in our field?
+
+0:07:33.020,0:07:36.702
+Ariel: Well, in a prime -- 
+field of prime size it will be.
+
+0:07:36.702,0:07:36.713
+Nico: Okay.
+
+0:07:36.713,0:07:43.000
+Ariel: But in a field of for example, size power 
+of 2, these fields have become popular lately.
+
+0:07:43.000,0:07:46.660
+The characteristic will be 2, even though 
+the fields can be of size 2^128.
+
+0:07:46.660,0:07:48.600
+Nico: I see. Okay.
+
+0:07:48.600,0:07:54.600
+Ariel: So the lemma says that it 
+gives us sort of a lookup criteria.
+
+0:07:54.600,0:08:05.880
+It says that f is contained in t if and 
+only if there exists a vector m of size n
+
+0:08:05.880,0:08:18.680
+such that we have the following 
+equality of rational functions.
+
+0:08:18.680,0:08:21.080
+So the equality looks like this.
+
+0:08:21.080,0:08:27.840
+On the left-hand side we have a sum over 1 to n.
+
+0:08:27.840,0:08:29.440
+Nico: Okay.
+
+0:08:29.440,0:08:38.040
+Ariel: Of mᵢ over x plus tᵢ.
+
+0:08:38.040,0:08:45.200
+So sort of a fractional sum over 
+the table weighted by the mᵢ's.
+
+0:08:45.200,0:08:45.950
+Nico: Okay.
+
+0:08:45.950,0:08:50.440
+Ariel: And on the right-hand side we have  
+
+0:08:50.440,0:08:55.720
+a fractional sum over the 
+values of f -- of the witness.
+
+0:08:55.720,0:08:59.280
+You can think of it.
+
+0:08:59.280,0:09:02.200
+Nico: Okay. And so what 
+does this equality tell us?
+
+0:09:02.200,0:09:05.580
+How does it link to our lookup problem?
+
+0:09:05.580,0:09:07.000
+Ariel: Right.
+
+0:09:07.000,0:09:12.640
+Well, so we're claiming here 
+that the existence of an m
+
+0:09:12.640,0:09:17.500
+such that this holds is an 
+equivalent condition for lookup.
+
+0:09:17.500,0:09:18.180
+Nico: Okay.
+
+0:09:18.180,0:09:25.640
+Ariel: And to gain some intuition, 
+let's at least sketch the proof.
+
+0:09:25.640,0:09:34.400
+So the easier direction is that 
+this is a necessary condition.
+
+0:09:34.400,0:09:38.880
+So suppose f is contained in t.
+
+0:09:38.880,0:09:40.560
+Let's do this little exercise.
+
+0:09:40.560,0:09:41.250
+Nico: Sure.
+
+0:09:41.250,0:09:47.760
+Ariel: How should we set the mᵢ's 
+so that this equality will hold?
+
+0:09:47.760,0:09:52.633
+Nico: Let's see. So it's a multiplier 
+on this thing. Right? So --
+
+0:09:52.633,0:09:52.740
+Ariel: Right.
+
+0:09:52.740,0:09:57.680
+Nico: Are we saying mᵢ is the 
+number of times fi appears,
+
+0:09:57.680,0:10:00.200
+or the number of times tᵢ appears in f?
+
+0:10:00.200,0:10:01.480
+Ariel: Exactly! Exactly.
+
+0:10:01.480,0:10:18.820
+We simply need to set mᵢ to be the 
+number of j such that fj is equal to tᵢ.
+
+0:10:18.820,0:10:21.800
+Nico: Okay.
+
+0:10:21.800,0:10:23.360
+So it's the number of repetitions.
+
+0:10:23.360,0:10:25.234
+Ariel: Exactly. Right? So --
+
+0:10:25.234,0:10:27.220
+Nico: Element of f appearing in t. Cool.
+
+0:10:27.220,0:10:27.680
+Ariel: Right.
+
+0:10:27.680,0:10:34.720
+So if for every index, for every 
+-- this fi is an element of t
+
+0:10:34.720,0:10:38.960
+and we just set these mᵢ's to 
+be the number of repetitions.
+
+0:10:38.960,0:10:44.200
+Right? Then obviously we will have this equality.
+
+0:10:45.160,0:10:46.200
+Okay.
+
+0:10:46.200,0:10:50.160
+Now the more interesting 
+direction is the other one.
+
+0:10:50.160,0:10:53.080
+And let's just sketch it.
+
+0:10:53.080,0:10:56.760
+Nico: Sure.
+
+0:10:56.760,0:10:59.240
+Ariel: So let me do it here maybe.
+
+0:11:00.120,0:11:02.660
+Nico: Sure. Let me move to the other side.
+
+0:11:02.660,0:11:05.280
+Ariel: All right.
+
+0:11:06.360,0:11:12.840
+Okay. So now let's assume that 
+f is not contained in the table.
+
+0:11:12.840,0:11:20.314
+So there exists on the right-hand side --
+
+0:11:20.314,0:11:22.360
+Nico: Something that appears zero times in here.
+
+0:11:22.360,0:11:22.760
+Ariel: Exactly.
+
+0:11:22.760,0:11:24.320
+There exists some --
+
+0:11:24.320,0:11:33.740
+Here, there's going to be some summand 
+1 over x plus a, where a is not in t.
+
+0:11:33.740,0:11:34.960
+Nico: Okay.
+
+0:11:34.960,0:11:39.080
+Ariel: So now the question is 
+-- So we have here this summand.
+
+0:11:39.080,0:11:45.800
+Can we somehow choose mᵢ's 
+that will create this summand?
+
+0:11:45.800,0:11:46.480
+Nico: Right.
+
+0:11:46.480,0:11:49.040
+So to pretend that it exists in here. Okay.
+
+0:11:49.040,0:11:49.960
+Ariel: Yeah.
+
+0:11:49.960,0:11:59.280
+And basically the idea is 
+that because the set of --
+
+0:11:59.280,0:12:07.800
+If we look at the set of functions of all such 
+functions 1 over x plus b over all b in the field,
+
+0:12:09.680,0:12:16.800
+so you can check that these 
+functions are linearly independent.
+
+0:12:16.800,0:12:22.660
+Nico: So no linear combination of these 
+will ever create the one that doesn't exist.
+
+0:12:22.660,0:12:23.080
+Ariel: Yes.
+
+0:12:23.080,0:12:29.280
+So if this a here is not 
+in t, no linear combination  
+
+0:12:29.280,0:12:33.880
+on the left-hand side can give us this element.
+
+0:12:33.880,0:12:35.160
+So cannot --
+
+0:12:35.160,0:12:46.820
+So we cannot create 1 over x 
+plus a on the left-hand side.
+
+0:12:46.820,0:12:51.440
+Nico: Okay. And so is that why we're 
+using these rational functions,  
+
+0:12:51.440,0:12:52.660
+because they have this property?
+
+0:12:52.660,0:12:53.800
+Ariel: Exactly.
+
+0:12:53.800,0:12:58.680
+The linear independence of these 
+functions is one of the main things
+
+0:12:58.680,0:13:03.000
+that makes them so convenient and useful.
+
+0:13:03.000,0:13:08.520
+So you may be wondering where 
+does this characteristic come in?
+
+0:13:08.520,0:13:19.520
+So suppose we had in f such an element a,
+but the characteristic was 2.
+
+0:13:19.520,0:13:20.600
+Nico: Okay.
+
+0:13:20.600,0:13:24.200
+Ariel: So, how could we cheat?
+
+0:13:24.200,0:13:29.120
+Well, suppose now we try to use a vector
+
+0:13:29.960,0:13:34.280
+f where this element a that is 
+not in the table appears twice.
+
+0:13:35.280,0:13:38.240
+Then what's going to happen 
+here on this right-hand side?
+
+0:13:38.240,0:13:39.920
+Nico: Are they going to cancel out?
+
+0:13:39.920,0:13:40.680
+Ariel: Exactly.
+
+0:13:40.680,0:13:42.150
+Nico: Okay.
+
+0:13:42.150,0:13:46.800
+Ariel: So although we have an 
+element that's not in the table,
+
+0:13:47.480,0:13:49.640
+because the characteristic is very small,
+
+0:13:51.080,0:13:56.640
+the contributions of that element on this side are 
+going to cancel out and the prover could cheat.
+
+0:13:56.640,0:13:57.300
+Nico: I see.
+
+0:13:57.300,0:14:00.520
+Ariel: Okay. So now that we have the basic lemma,  
+
+0:14:00.520,0:14:11.760
+let's use it to get a lookup 
+protocol, the logUp protocol.
+
+0:14:11.760,0:14:16.720
+So here's the idea for the logUp protocol.
+
+0:14:16.720,0:14:22.560
+We're going to start by having the 
+prover commit to this vector m.
+
+0:14:22.560,0:14:26.850
+Nico: Okay.
+
+0:14:26.850,0:14:28.640
+Ariel: Which is --
+
+0:14:28.640,0:14:32.542
+Right. Which is the vector of 
+multiplicities, we can call it.
+
+0:14:32.542,0:14:37.840
+Nico: Yeah.
+Ariel: How many times each element appears.
+
+0:14:38.760,0:14:47.520
+And then the verifier is going 
+to send a random challenge Beta.
+
+0:14:47.520,0:14:51.300
+Nico: Okay.
+
+0:14:51.300,0:15:02.240
+Ariel: And now the idea is, if the lookup is 
+not satisfied, if f is not contained in t,
+
+0:15:02.240,0:15:09.100
+that rational identity, with very high probability 
+it should not hold on the challenge Beta.
+
+0:15:09.100,0:15:13.160
+Nico: Right. This is our Schwartz–Zippel 
+testing that we usually have.
+
+0:15:13.160,0:15:13.800
+Ariel: Exactly.
+
+0:15:13.800,0:15:16.160
+Nico: Cool.
+
+0:15:16.160,0:15:28.960
+Ariel: So now basically P is going to convince V 
+
+0:15:31.440,0:15:40.960
+that the rational identity we 
+had in the lemma holds at Beta.
+
+0:15:40.960,0:15:42.760
+Nico: Okay.
+
+0:15:42.760,0:15:47.760
+Ariel: And by the way, how this step is done,  
+
+0:15:47.760,0:15:51.300
+this is what separates the different 
+variants of the log derivative approach.
+
+0:15:51.300,0:15:51.920
+Nico: Okay.
+
+0:15:51.920,0:15:55.500
+Ariel: It's different in 
+LogUp, in cq and in LogUp GKR.
+
+0:15:55.500,0:15:57.740
+Nico: But otherwise they 
+all follow this blueprint?
+
+0:15:57.740,0:15:58.400
+Ariel: Yes.
+
+0:15:58.400,0:15:58.920
+Nico: Cool
+Ariel: Yes.
+
+0:16:00.400,0:16:05.880
+Ariel: All right. So let's start 
+with the -- with the logUp approach.
+
+0:16:05.880,0:16:09.640
+So the idea is that --
+
+0:16:09.640,0:16:13.760
+So this is all log or sort of.
+
+0:16:13.760,0:16:16.360
+We can call it just logUp, or "regular" logUp.
+
+0:16:16.360,0:16:17.380
+Nico: Okay.
+
+0:16:17.380,0:16:22.760
+Ariel: So how does step 3 work 
+in the "regular" logUp protocol?
+
+0:16:24.280,0:16:32.440
+So the idea is that -- so all this 
+now is sort of how to do step 3.
+
+0:16:32.440,0:16:33.130
+Nico: Cool.
+
+0:16:33.130,0:16:42.880
+Ariel: So P will send a 
+commitment to a polynomial A.
+
+0:16:42.880,0:16:44.110
+Nico: Okay.
+
+0:16:44.110,0:16:48.920
+Ariel: And what is this polynomial A?
+
+0:16:48.920,0:16:53.000
+So here, like I said earlier, I'm going to sort of  
+
+0:16:53.000,0:16:56.840
+interchange talking between 
+polynomials and variables.
+
+0:16:56.840,0:16:58.840
+So as a vector
+
+0:17:01.040,0:17:16.780
+Aᵢ, the i value of i is going to be, mᵢ 
+over tᵢ plus Beta minus 1 over fᵢ plus Beta.
+
+0:17:16.780,0:17:20.620
+Nico: Okay. Why are we building it this way?
+
+0:17:20.620,0:17:25.114
+Ariel: Well, if you recall the 
+rational identity we had --
+
+0:17:25.114,0:17:25.820
+Nico: Yeah.
+
+0:17:25.820,0:17:29.160
+Ariel: There we had a left-hand 
+side and a right-hand side.
+
+0:17:29.160,0:17:32.880
+If we move the right-hand 
+side to the left-hand side.
+
+0:17:32.880,0:17:42.480
+Right. This is the i-th term of that identity 
+where the variable x is instantiated as Beta.
+
+0:17:42.480,0:17:44.200
+Nico: Okay.
+
+0:17:44.200,0:17:56.840
+Ariel: So according to the basic lemma, it 
+suffices now for P to show the following.
+
+0:17:57.480,0:18:06.060
+The first is that A's values are correct.
+
+0:18:06.060,0:18:09.900
+Nico: Correct with respect to m, t and f.
+
+0:18:09.900,0:18:16.700
+Ariel: Exactly. I mean, so in the 
+protocol, P sends a commitment to sum A.
+
+0:18:16.700,0:18:18.740
+Nico: Verifier doesn't know what it is.
+
+0:18:18.740,0:18:19.514
+Ariel: The verifier --
+
+0:18:19.514,0:18:22.400
+Nico: Okay.
+Ariel: It's supposed to have these values.
+
+0:18:22.400,0:18:27.480
+The first thing is P needs to 
+show that these are really --
+
+0:18:27.480,0:18:28.760
+This is really the A --
+
+0:18:28.760,0:18:29.430
+Nico: Okay.
+
+0:18:29.430,0:18:31.560
+Ariel: -- he sent.
+
+0:18:32.240,0:18:44.180
+And the second thing, that 
+the sum of the Aᵢ's is 0.
+
+0:18:44.180,0:18:50.220
+Nico: And this is because of the identity where 
+we had some on the left, some on the right?
+
+0:18:50.220,0:18:51.520
+Ariel: Exactly.
+
+0:18:51.520,0:18:54.954
+So, given one --
+
+0:18:54.954,0:18:55.660
+Nico: Yeah.
+
+0:18:55.660,0:19:01.720
+Ariel: If two holds, that exactly means that  
+
+0:19:01.720,0:19:06.660
+the rational identity we saw in 
+the basic lemma holds at Beta.
+
+0:19:06.660,0:19:07.620
+Nico: Right.
+
+0:19:07.620,0:19:12.960
+Ariel: And again, since Beta was 
+chosen after P committed to m,  
+
+0:19:14.280,0:19:22.800
+if the lookup condition does not hold, then with 
+very high probability, it won't hold at Beta.
+
+0:19:22.800,0:19:23.594
+So --
+
+0:19:23.594,0:19:23.800
+Nico: Okay.
+
+0:19:23.800,0:19:29.580
+Ariel: These two are sufficient to 
+prove f is contained in the table.
+
+0:19:29.580,0:19:31.000
+Nico: With very high probability.
+
+0:19:31.000,0:19:33.320
+Ariel: With very high probability over Beta.
+
+0:19:33.320,0:19:35.480
+Nico: Yes. Cool.
+
+0:19:35.480,0:19:42.080
+Ariel: All right. So how do we do 1 and 2?
+
+0:19:43.720,0:19:48.580
+So I'm going to mostly skip over 1.
+
+0:19:48.580,0:19:49.520
+Nico: Okay.
+
+0:19:49.520,0:19:55.660
+Ariel: And although we're going delve into 
+it a little when we talk about cq later.
+
+0:19:55.660,0:19:56.360
+Nico: Sounds good.
+
+0:19:56.360,0:20:01.600
+Ariel: But basically for now I'm going to, I 
+guess, brush it off and say that this is --
+
+0:20:01.600,0:20:04.800
+This part is sort of standard.
+
+0:20:04.800,0:20:05.680
+Nico: Okay.
+
+0:20:05.680,0:20:09.120
+Ariel: It can be done with a quotient,  
+
+0:20:09.120,0:20:15.960
+like we do many things in SNARKs, 
+or it can be done via Sum-Check.
+
+0:20:15.960,0:20:17.640
+Nico: Okay.
+
+0:20:17.640,0:20:23.200
+Ariel: But let's focus on 2, because to do 2,  
+
+0:20:23.200,0:20:28.640
+we're going to use another interesting 
+lemma that appears a lot in SNARKs.
+
+0:20:30.920,0:20:34.080
+What's called the Aurora -- what 
+I like to call the Aurora lemma,  
+
+0:20:34.080,0:20:37.140
+since originally I saw it in the Aurora paper.
+
+0:20:37.140,0:20:37.680
+Nico: Okay.
+
+0:20:37.680,0:20:40.000
+Ariel: So let's see what the Aurora lemma is.
+
+0:20:40.000,0:20:42.360
+Nico: Yeah.
+
+0:20:42.360,0:20:53.240
+Ariel: So the Aurora lemma tells us the following.
+
+0:20:53.240,0:21:08.280
+So, like we set up before, suppose H is a 
+multiplicative subgroup of order n, of size n.
+
+0:21:08.280,0:21:12.080
+Nico: Okay. So yeah, the roots of unity.
+
+0:21:12.080,0:21:16.800
+Ariel: Exactly. Yeah. And F --
+
+0:21:16.800,0:21:26.480
+Or let's say, let's call it A, A is a 
+polynomial of degree smaller than n.
+
+0:21:28.720,0:21:52.120
+Then if we look at the sum of A's values over 
+H, this is simply equal to 1 over n times A(0).
+
+0:21:52.120,0:21:56.320
+Wait, what's the n on the other 
+side? The 1 over n is here.
+
+0:21:56.320,0:21:58.520
+Nico: Sorry.
+
+0:22:03.680,0:22:05.680
+Okay. This looks very mysterious.
+
+0:22:05.680,0:22:10.382
+Ariel: Yeah. So this looks very magical.
+
+0:22:10.382,0:22:13.960
+Nico: Yeah.
+Ariel: We can get --
+
+0:22:13.960,0:22:16.160
+Assuming A is of degree smaller than n,  
+
+0:22:16.160,0:22:23.680
+we can get the sum of its values on 
+the subgroup simply by looking at A(0).
+
+0:22:26.320,0:22:31.280
+So let's see why this holds.
+
+0:22:31.280,0:22:36.340
+So we're going to look at 
+what's called a Lagrange base.
+
+0:22:36.340,0:22:37.040
+Nico: Yep.
+
+0:22:37.040,0:22:51.880
+Ariel: So let L₁ to Lₙ be the Lagrange base of H.
+
+0:22:51.880,0:22:56.100
+Nico: Which I think we cover in 
+Module 6 on lookups as well. So.
+
+0:22:56.100,0:22:57.440
+Ariel: Yeah. So, right --
+
+0:22:57.440,0:23:03.840
+So this is simply sort of these delta 
+functions, as they're sometimes called.
+
+0:23:03.840,0:23:08.960
+L₁(X) is simply the polynomial 
+of degrees smaller than n that  
+
+0:23:08.960,0:23:13.280
+is 1 on the i-th point of H, g to the i.
+
+0:23:13.280,0:23:14.000
+Nico: Yeah.
+
+0:23:14.000,0:23:17.320
+Ariel: And 0 elsewhere on H.
+
+0:23:17.320,0:23:18.960
+Nico: Okay.
+
+0:23:18.960,0:23:26.800
+Ariel: So now given A, and A 
+is of degree smaller than n,  
+
+0:23:27.480,0:23:35.960
+so I can write it -- the Lagrange basis, they are 
+basis for polynomials of degrees smaller than n.
+
+0:23:35.960,0:23:37.200
+So I can write A(0) --
+
+0:23:37.200,0:23:38.960
+Nico: Yeah.
+
+0:23:38.960,0:23:43.040
+Ariel: As sum, and also what's --
+
+0:23:43.040,0:23:47.800
+When I write A in Lagrange base, 
+what is the i-th coefficient?
+
+0:23:47.800,0:23:52.800
+Nico: Do we know? We know the evaluations. 
+How do we get the coefficients?
+
+0:23:52.800,0:23:55.440
+Ariel: Well, that's what's 
+nice about Lagrange base,  
+
+0:23:55.440,0:23:58.640
+that the i-th coefficient is just going to be --
+
+0:23:58.640,0:24:05.160
+Yeah. The i-th -- the value 
+of A at the i-th point of --
+
+0:24:05.160,0:24:06.120
+Nico: Okay.
+
+0:24:06.120,0:24:07.200
+Ariel: Of H.
+
+0:24:10.720,0:24:14.480
+So this is simply Aᵢ.
+
+0:24:14.480,0:24:17.600
+Nico: Right. Okay.
+
+0:24:17.600,0:24:21.320
+Ariel: Times Lᵢ of 0.
+
+0:24:21.320,0:24:22.080
+Nico: Right.
+
+0:24:22.080,0:24:26.160
+So you meant coefficient in this Lᵢ form.
+
+0:24:26.160,0:24:31.593
+I thought coefficient in the regular, 
+like a times x and b times x squared.
+
+0:24:31.593,0:24:34.360
+Ariel: Right. So when we --
+
+0:24:34.360,0:24:37.400
+Maybe I should have said this when 
+we talked about conventions earlier.
+
+0:24:37.400,0:24:46.120
+When we go between a vector to a polynomial, 
+then the values of the vector become the  
+
+0:24:46.120,0:24:51.387
+coefficients of the polynomial when 
+we work with the Lagrange base of H.
+
+0:24:51.387,0:24:51.720
+Nico: I see. Cool.
+
+0:24:51.720,0:24:57.098
+Ariel: So in particular, A(0)
+is just going to be --
+
+0:24:57.098,0:24:57.840
+Nico: This sum.
+Ariel: This sum.
+
+0:24:57.840,0:24:59.300
+Nico: Yeah.
+
+0:24:59.300,0:25:04.320
+Ariel: And now we have this cool 
+sub-lemma which I'll leave as an  
+
+0:25:04.320,0:25:14.080
+exercise, which tells us that 
+the Lagranges all agree at 0.
+
+0:25:14.080,0:25:22.680
+So for every i, Lᵢ(0) is simply 1/n.
+
+0:25:22.680,0:25:24.380
+Nico: Okay.
+
+0:25:24.380,0:25:28.320
+Ariel: So let's put this exercise in parentheses.
+
+0:25:28.320,0:25:29.600
+Nico: Yeah.
+
+0:25:29.600,0:25:35.040
+Ariel: And now, given this nice 
+fact, what does this sum become?
+
+0:25:35.040,0:25:37.810
+It simply becomes 1/n.
+
+0:25:37.810,0:25:38.220
+Nico: Yeah.
+
+0:25:38.220,0:25:39.834
+Ariel: Which we can take out --
+
+0:25:39.834,0:25:40.440
+Nico: Yeah.
+
+0:25:40.440,0:25:44.440
+Ariel: Times the sum of Aᵢ.
+
+0:25:44.440,0:25:50.600
+Nico: Right. And so we've 
+recovered what we wanted to prove.
+
+0:25:50.600,0:25:51.040
+Cool.
+
+0:25:51.040,0:25:52.000
+Ariel: Yeah.
+
+0:25:52.000,0:25:53.280
+So given this -
+
+0:25:53.280,0:25:57.800
+Right. What did we want to 
+show for the logUp protocol?
+
+0:25:57.800,0:26:04.600
+We wanted to show that the sum of 
+A's values on the subgroup is 0.
+
+0:26:06.040,0:26:11.800
+And now this Aurora lemma gives us 
+a very convenient way to do this.
+
+0:26:11.800,0:26:24.360
+So P will simply KZG open A(0) to zero.
+
+0:26:24.360,0:26:25.640
+Nico: Hopefully.
+
+0:26:25.640,0:26:26.640
+Ariel: Hopefully.
+
+0:26:26.640,0:26:27.280
+Nico: Right.
+
+0:26:27.280,0:26:36.520
+Ariel: And if he succeeds, according to the Aurora 
+lemma, then we have the sum on the subgroup is 0.
+
+0:26:36.520,0:26:38.180
+Nico: Cool.
+
+0:26:38.180,0:26:45.660
+Ariel: And that implies with high probability 
+that the lookup holds. f is contained in t.
+
+0:26:45.660,0:26:51.880
+Nico: Amazing. So is that logUp complete?
+
+0:26:51.880,0:26:56.640
+Ariel: That is the regular 
+or basic logUp protocol.
+
+0:26:56.640,0:27:01.440
+And now we're going to look at 
+some variance optimizations.
+
+0:27:02.120,0:27:10.280
+So one variant we'll look at next, 
+what's called cq, is asking, well,  
+
+0:27:10.280,0:27:17.980
+so far we've assumed the witness 
+and table are of the same size.
+
+0:27:17.980,0:27:21.582
+Nico: Yeah. This n that we've 
+been carrying around everywhere.
+
+0:27:21.582,0:27:22.160
+Ariel: Yeah.
+Nico: Cool.
+
+0:27:22.160,0:27:33.594
+Ariel: Right. But what if t, the 
+size of t, say instead of little n --
+
+0:27:33.594,0:27:33.780
+Nico: Yeah.
+
+0:27:33.780,0:27:38.760
+Ariel: It's of some size big N
+that is much larger than n.
+
+0:27:38.760,0:27:39.540
+Nico: Okay.
+
+0:27:39.540,0:27:42.840
+Ariel: And then the fascinating question is,  
+
+0:27:42.840,0:27:54.240
+can we, after some pre-processing still run the 
+logUp protocol in time that depends on little n?
+
+0:27:54.240,0:28:12.140
+So can we still have prover 
+runtime depend only on little n?
+
+0:28:12.140,0:28:13.800
+Nico: Cool.
+
+0:28:13.800,0:28:15.473
+Nico: Cool. With a double question mark.
+
+0:28:15.473,0:28:16.440
+Ariel: Yeah!
+
+0:28:16.440,0:28:18.040
+Nico: Cool.
+
+0:28:18.040,0:28:21.600
+Ariel: And that's what we're going to see next.
+
+0:28:21.600,0:28:22.620
+Nico: Sounds good.
+
+0:28:22.620,0:28:31.040
+Ariel: So now in the context of this question, 
+let's start talking about the cq protocol.
+
+0:28:31.040,0:28:35.680
+That's going to be the next 
+main part of this lecture.
+
+0:28:35.680,0:28:37.480
+Nico: Sounds good. Shall we wipe what's here?
+
+0:28:37.480,0:28:38.320
+Ariel: Let's wipe.
+
+0:28:38.320,0:28:41.200
+Nico: Cool.
+
+0:28:41.200,0:28:42.880
+Ariel: Okay.
+
+0:28:42.880,0:28:51.320
+So really, before describing cq itself, 
+the main theme that we're going to use  
+
+0:28:51.320,0:28:59.380
+in cq has to do with committing to sparse 
+polynomials when we're using the KZG scheme.
+
+0:28:59.380,0:29:01.420
+Nico: Okay. What do we mean by sparse?
+
+0:29:01.420,0:29:03.160
+Ariel: All right. So let's --
+
+0:29:03.160,0:29:05.740
+Yeah. That's exactly what we're going to define.
+
+0:29:05.740,0:29:06.340
+Nico: Cool.
+
+0:29:06.340,0:29:09.000
+Ariel: Let me actually remind everybody of a very  
+
+0:29:09.000,0:29:14.680
+convenient property of the KZG 
+scheme, which is the additivity.
+
+0:29:14.680,0:29:28.040
+So I simply mean by this that 
+given commitments to f and g,  
+
+0:29:29.800,0:29:38.000
+we have the property that if I want the 
+commitment of the polynomial f+g, this is --
+
+0:29:38.000,0:29:38.360
+I can --
+
+0:29:38.360,0:29:41.200
+I can simply get this by summing the commitments.
+
+0:29:41.200,0:29:46.690
+Nico: Cool.
+
+0:29:46.690,0:29:51.720
+Ariel: So how does this tie 
+into sparse polynomials?
+
+0:29:51.720,0:29:53.000
+So first of all, what do I --
+
+0:29:53.000,0:29:54.302
+What do I mean by that?
+
+0:29:54.302,0:30:05.400
+Nico: Yeah.
+Ariel: So suppose I have some set of polynomials.
+
+0:30:05.400,0:30:11.120
+So let's call them P₁ up to P,
+let me use big N here.
+
+0:30:12.960,0:30:18.320
+And let's just assume that these like -- 
+these polynomials are linearly independent,  
+
+0:30:18.320,0:30:22.960
+though it's not crucial for what I'm going 
+to say next, but they always will be.
+
+0:30:22.960,0:30:26.380
+Nico: Okay.
+
+0:30:26.380,0:30:45.834
+Ariel: So now we say a polynomial P is little 
+n-sparse in the basis of the Pᵢ's in the --
+
+0:30:45.834,0:30:48.300
+Nico: Okay.
+
+0:30:48.300,0:31:07.360
+Ariel: If I can write P as sum 
+-- as a combination of the Pᵢ's  
+
+0:31:07.360,0:31:20.200
+where Cᵢ is non-zero for at most little n i's.
+
+0:31:20.200,0:31:25.120
+Nico: Okay. So most of the time 
+this Cᵢ is going to be zero.
+
+0:31:25.120,0:31:25.620
+Ariel: Yes.
+
+0:31:25.620,0:31:29.753
+Nico: And then there's only n occurrences 
+where it's not and that's where it's sparse.
+
+0:31:29.753,0:31:30.400
+Ariel: Exactly.
+
+0:31:30.400,0:31:33.480
+Nico: Cool.
+
+0:31:33.480,0:31:38.120
+Ariel: So now what's going to be very useful for  
+
+0:31:38.120,0:31:52.000
+us is suppose we pre-compute 
+the commitments to the Pᵢ's.
+
+0:31:52.000,0:31:52.554
+So we --
+
+0:31:52.554,0:31:53.600
+Nico: So the big ones.
+
+0:31:53.600,0:31:53.900
+Okay. Yeah.
+
+0:31:53.900,0:32:05.440
+Ariel: Yes. We pre-compute 
+the commitments to these Pᵢ's.
+
+0:32:05.440,0:32:06.600
+So we can --
+
+0:32:06.600,0:32:09.240
+And now we want to compute the commitment to P.
+
+0:32:10.000,0:32:16.800
+So we think of Pᵢ's as something we know -- this 
+basis is something that we know of in advance.
+
+0:32:17.360,0:32:22.460
+But P is something we only get sort of 
+when the protocol has already started.
+
+0:32:22.460,0:32:25.880
+Nico: I mean, we can guess from 
+the big Ns and small ns that  
+
+0:32:25.880,0:32:31.313
+you're using -- that probably this is 
+going to be our table stuff and --
+
+0:32:31.313,0:32:32.920
+Ariel: Yeah, yeah. Exactly.
+
+0:32:32.920,0:32:36.840
+So we can now compute the commitment to P.
+
+0:32:39.440,0:32:40.560
+So right.
+
+0:32:40.560,0:32:54.800
+If we write P as sum CᵢPᵢ, and 
+now we use the linearity of KZG.
+
+0:32:54.800,0:33:05.040
+So this is the same as sum of Cᵢ commitment of Pᵢ.
+
+0:33:05.040,0:33:08.480
+And only little n of these are non-zero.
+
+0:33:08.480,0:33:09.800
+Nico: Yep.
+
+0:33:09.800,0:33:15.760
+Ariel: So the point is that 
+when P is little n-sparse,  
+
+0:33:15.760,0:33:24.680
+this requires only little
+n-scalar multiplications.
+
+0:33:24.680,0:33:27.760
+Nico: Right.
+
+0:33:29.920,0:33:33.840
+Because most of the time the Cᵢ is 
+0, we don't have to do anything.
+
+0:33:33.840,0:33:36.760
+And when it is not 0, that's 
+when scalar multiplication.
+
+0:33:36.760,0:33:39.982
+Ariel: Exactly. Yeah.
+
+0:33:39.982,0:33:39.993
+Nico: Okay.
+
+0:33:39.993,0:33:52.640
+Ariel: So the cq protocol, you can think of it as 
+sort of going over the logUp protocol and noting  
+
+0:33:52.640,0:34:01.020
+-- observing that all the polynomials that come 
+up are sparse in some basis we know of in advance.
+
+0:34:01.020,0:34:01.720
+Nico: Okay.
+
+0:34:01.720,0:34:06.920
+Ariel: So now let's sort of go over 
+some of the polynomials that come up  
+
+0:34:06.920,0:34:15.200
+in the logUp protocol and see how 
+they have this sparsity property.
+
+0:34:15.200,0:34:17.630
+Nico: Okay.
+
+0:34:17.630,0:34:23.880
+Ariel: So just one little bit of again, notation.
+
+0:34:23.880,0:34:29.160
+So in the cq context, when we think of 
+the table is larger than the witness,  
+
+0:34:29.160,0:34:33.200
+we usually also think of 
+having an additional subgroup.
+
+0:34:33.200,0:34:42.600
+So let's think of having also a 
+subgroup V of this size big N.
+
+0:34:42.600,0:34:43.380
+Nico: Right.
+
+0:34:43.380,0:34:57.680
+Ariel: And now let's maybe switch notation a 
+bit and use L to denote Lagrange basis of V.
+
+0:34:57.680,0:34:59.100
+Nico: So in the big set.
+
+0:34:59.100,0:35:00.360
+Ariel: Yeah. The big set.
+
+0:35:00.360,0:35:00.900
+Nico: Cool.
+
+0:35:00.900,0:35:07.040
+Ariel: So the first polynomial that 
+comes up in logUp is this polynomial  
+
+0:35:07.040,0:35:10.300
+m describing the multiplicities of the element.
+
+0:35:10.300,0:35:10.900
+Nico: Yeah.
+
+0:35:10.900,0:35:15.040
+Ariel: So in the cq context, 
+when the table is very big,  
+
+0:35:15.040,0:35:21.880
+we're going to encode m over the big subgroup V.
+
+0:35:21.880,0:35:25.440
+So m is going to be --
+
+0:35:25.440,0:35:28.840
+Now this polynomial sum mᵢ --
+
+0:35:28.840,0:35:33.920
+Nico: Right. And we do this over the big group  
+
+0:35:33.920,0:35:38.280
+because in our identity we had the 
+sum of the m's divided by the t's.
+
+0:35:38.280,0:35:40.760
+So for every t there is an m.
+
+0:35:40.760,0:35:43.840
+And so this is why we need to be on the big group?
+
+0:35:43.840,0:35:45.274
+Ariel: Well, yeah, we need for --
+
+0:35:45.274,0:35:46.120
+Nico: Okay.
+
+0:35:46.120,0:35:49.040
+Ariel: First of all, yeah, 
+just to write down our table.
+
+0:35:49.040,0:35:51.180
+Nico: Right. We need this big group.
+
+0:35:51.180,0:35:52.220
+Ariel: We need this big group.
+
+0:35:52.220,0:35:52.880
+Nico: Cool.
+
+0:35:52.880,0:35:54.240
+Ariel: Yeah.
+
+0:35:55.320,0:36:01.520
+So the first thing to notice is 
+that m is going to be little n.
+
+0:36:01.520,0:36:06.760
+So again, if we're still thinking of our witness  
+
+0:36:06.760,0:36:20.080
+f as being a vector of size n or 
+equivalently a polynomial over --
+
+0:36:20.080,0:36:33.480
+So now let's call the
+Lagrange base of H by the Bᵢ's.
+
+0:36:33.480,0:36:37.400
+So H we're still thinking of it 
+as a subgroup of order little n.
+
+0:36:37.400,0:36:38.400
+Nico: Okay?
+
+0:36:38.400,0:36:41.800
+Ariel: Right. So --
+
+0:36:41.800,0:36:48.960
+Okay. And maybe to make it clear, so now 
+we're thinking of t as a vector of size big N
+
+0:36:48.960,0:36:57.606
+or equivalently a polynomial where the 
+values are encoded over this bigger subgroup V.
+
+0:36:57.606,0:36:58.800
+Nico: Yeah. Cool.
+
+0:36:58.800,0:37:05.720
+Ariel: Yeah. And again, mᵢ's are 
+the multiplicities of the elements.
+
+0:37:06.520,0:37:11.600
+So what do you think? Is this 
+polynomial sparse in this basis?
+
+0:37:11.600,0:37:16.320
+Nico: I mean, if we have a honest prover,  
+
+0:37:16.320,0:37:20.260
+only elements that are in here 
+will have m that is not zero.
+
+0:37:20.260,0:37:21.540
+Ariel: Right. Exactly.
+
+0:37:21.540,0:37:26.261
+Nico: Things that are not an f will 
+have 0, they appear zero times.
+
+0:37:26.261,0:37:26.660
+Ariel: Right.
+Nico: Yeah.
+
+0:37:26.660,0:37:27.800
+Ariel: So, exactly.
+
+0:37:27.800,0:37:38.360
+So m in this basis, since these describe 
+the multiplicities of the elements,  
+
+0:37:38.360,0:37:42.640
+m in the basis of the Lᵢ's 
+will be little n-sparse.
+
+0:37:42.640,0:37:46.200
+So again to be --
+
+0:37:46.200,0:37:57.440
+The point is, like we said before, when 
+pre-computing the commitments to the Lᵢ's,  
+
+0:38:01.400,0:38:13.160
+we can compute cm(m) in little n-scalar mults.
+
+0:38:20.960,0:38:22.440
+So --
+
+0:38:22.440,0:38:27.600
+Okay. So we see that the first polynomial 
+that comes up in the logUp protocol, we  
+
+0:38:27.600,0:38:31.560
+can compute it even when the table is very large.
+
+0:38:31.560,0:38:35.200
+We can compute it after pre-processing with a  
+
+0:38:35.200,0:38:39.000
+number of scalar multiplications 
+depending on the witness size.
+
+0:38:39.000,0:38:40.470
+Nico: Cool.
+
+0:38:40.470,0:38:49.800
+Ariel: And now the second main 
+polynomial that comes up in logUp is --
+
+0:38:49.800,0:38:51.240
+So let's recall. Right?
+
+0:38:51.240,0:38:59.920
+And when we described the logUp protocol, 
+we said let's define this polynomial A  
+
+0:38:59.920,0:39:08.480
+whose values in the logUp protocol 
+its values were something like this.
+
+0:39:08.480,0:39:13.060
+Nico: Yeah.
+
+0:39:13.060,0:39:21.160
+Ariel: So in cq we sort of deal with 
+this part and this part separately.
+
+0:39:21.160,0:39:25.360
+And for the purpose of this talk, 
+let's focus on the table part.
+
+0:39:25.360,0:39:27.360
+That's going to be sort of the interesting part.
+
+0:39:27.360,0:39:27.780
+Nico: Sure.
+
+0:39:27.780,0:39:30.200
+Ariel: So let's assume --
+
+0:39:30.200,0:39:32.560
+Let's assume that this part just doesn't exist.
+
+0:39:32.560,0:39:33.800
+Nico: Okay.
+
+0:39:33.800,0:39:41.600
+Ariel: And now one of the things 
+we needed to do in logUp was --
+
+0:39:41.600,0:39:53.600
+Right. We need to show that 
+these are really A's values.
+
+0:39:57.960,0:40:00.640
+And before, during describing logUp we said well,  
+
+0:40:00.640,0:40:04.720
+this is like a standard thing 
+with quotients or Sum-Check.
+
+0:40:04.720,0:40:10.840
+But now let's look a little how 
+this thing is done with quotient.
+
+0:40:10.840,0:40:14.920
+Like how do we usually prove 
+such a thing with quotients?
+
+0:40:14.920,0:40:27.320
+So what we can say is that A's vals 
+are correct if and only if there exists  
+
+0:40:28.320,0:40:39.160
+a quotient polynomial Q such that --
+
+0:40:39.160,0:40:57.000
+So if I look at A times T plus Beta, then sort of 
+mod -- mod the subgroup, it is going to equal mᵢ.
+
+0:40:57.000,0:41:09.560
+So, so is he going to be equal 
+to ZV times Q of x plus m of x.
+
+0:41:09.560,0:41:12.000
+Nico: Okay.
+
+0:41:12.000,0:41:14.400
+Ariel: So, right.
+
+0:41:14.400,0:41:16.480
+So this is --
+
+0:41:16.480,0:41:27.240
+We know that if such a Q exists, it means that 
+for every -- whenever we plug in something from V,  
+
+0:41:28.000,0:41:30.800
+this is the polynomial that vanishes on V.
+
+0:41:30.800,0:41:31.550
+Nico: Yeah.
+
+0:41:31.550,0:41:39.700
+Ariel: We're going to have that 
+A times T plus Beta equals m.
+
+0:41:39.700,0:41:42.418
+Nico: Okay. Because this goes to 
+zero when we plug in something --
+
+0:41:42.418,0:41:42.680
+Ariel. Yes. Yes.
+Nico: Okay.
+
+0:41:42.680,0:41:53.840
+Ariel: Or equivalently, A is equal to m divided 
+by T plus Beta, which is what we want to show.
+
+0:41:53.840,0:41:55.490
+Nico: Yeah.
+
+0:41:55.490,0:42:06.960
+Ariel: So our goal is to compute the 
+commitment to Q like we did with m.
+
+0:42:06.960,0:42:15.160
+Our goal is to compute the commitment 
+with Q in little n-scalar multiplications.
+
+0:42:15.160,0:42:20.240
+Nico: Right. So again, it's this thing 
+of removing the dependence on big N.
+
+0:42:20.240,0:42:22.914
+Ariel: Yes. So, right, so the degree --
+
+0:42:22.914,0:42:28.860
+Nico: Yeah,.
+Ariel: The degree of Q is definitely around big N.
+
+0:42:28.860,0:42:29.860
+Nico: Okay. Right.
+
+0:42:29.860,0:42:32.440
+Ariel: If you just look at the degrees here,  
+
+0:42:32.440,0:42:36.800
+this is of degree big N or this 
+degree big N, bigger than this one.
+
+0:42:36.800,0:42:37.880
+So yeah.
+
+0:42:37.880,0:42:39.880
+So the degrees here are all big N.
+
+0:42:39.880,0:42:49.080
+But another point is, wait! Is it going to be 
+enough to compute just the commitment to Q?
+
+0:42:51.360,0:42:52.040
+Because really --
+
+0:42:52.040,0:42:55.360
+Because usually what goes on in SNARKs is we --
+
+0:42:55.360,0:42:57.447
+Nico: We are going to check 
+this at a random point?
+
+0:42:57.447,0:43:00.262
+Ariel: We're going to check 
+this at a random point.
+
+0:43:00.262,0:43:00.273
+Nico: Okay.
+
+0:43:00.273,0:43:04.320
+Ariel: So to check it at a random 
+point, like usually happens in SNARKs,  
+
+0:43:04.320,0:43:06.680
+the commitment to Q wouldn't be enough for us.
+
+0:43:06.680,0:43:11.600
+We would need Q itself. Otherwise we wouldn't 
+be able to open it at a random point.
+
+0:43:11.600,0:43:11.880
+Nico: Right.
+
+0:43:11.880,0:43:14.700
+Because we need to evaluate it and 
+prove that we evaluated it correctly.
+
+0:43:14.700,0:43:15.520
+Ariel: Yeah.
+
+0:43:15.520,0:43:16.440
+Nico: Cool.
+
+0:43:16.440,0:43:26.560
+Ariel: But a nice feature of KZG is that to check  
+
+0:43:26.560,0:43:33.640
+an equation like this can be 
+done directly from commitments.
+
+0:43:33.640,0:43:34.960
+Nico: Okay.
+
+0:43:34.960,0:43:47.000
+Ariel: So this is another nice feature of 
+KZG that kind of follows from pairings,  
+
+0:43:47.000,0:43:50.360
+from the fact that KZG is pairing-based.
+
+0:43:50.360,0:43:53.400
+And KZG can check --
+
+0:43:53.400,0:44:08.520
+We can check a degree 2 identity 
+directly from commitments.
+
+0:44:08.520,0:44:14.040
+Nico: Okay.
+
+0:44:14.040,0:44:17.840
+And here when you say degree 2, you're not 
+referring to the degree of the polynomials, right?
+
+0:44:17.840,0:44:18.560
+You're referring --
+
+0:44:18.560,0:44:19.280
+Ariel: I'm not.
+
+0:44:19.280,0:44:24.120
+I'm just saying say we think of the polynomials 
+as something we put in a variable. Right?
+
+0:44:24.120,0:44:24.560
+Nico: Okay.
+
+0:44:24.560,0:44:26.120
+Ariel: So, right, so this is like --
+
+0:44:26.120,0:44:26.800
+This is a degree 2 --
+
+0:44:26.800,0:44:29.815
+Nico: Because we're multiplying two variables --
+
+0:44:29.815,0:44:31.200
+Ariel: Yeah. Right.
+Nico: Okay. Cool.
+
+0:44:31.200,0:44:35.080
+Ariel: And this is also degree at most 2.
+
+0:44:35.080,0:44:36.473
+Nico: Yeah.
+
+0:44:36.473,0:44:39.680
+Ariel: So this is sort of a black box 
+that I'm not going to get to here.
+
+0:44:39.680,0:44:45.720
+But this is again, it follows 
+from using pairings, and -- yeah.
+
+0:44:45.720,0:44:52.200
+So basically KZG and we have a degree 
+2 identity between polynomials.
+
+0:44:52.200,0:44:55.730
+We can check it directly from commitments
+
+0:44:55.730,0:44:57.160
+Nico: Without openings?
+Ariel: Without openings.
+
+0:44:57.160,0:44:57.793
+Nico: Okay.
+
+0:44:57.793,0:44:59.220
+Ariel: Yeah. It's a very cool feature.
+
+0:44:59.220,0:45:01.160
+Nico: Okay. So we're still 
+left with this problem, right?
+
+0:45:01.160,0:45:02.720
+How do we compute the commitment?
+
+0:45:02.720,0:45:14.200
+Ariel: And now what we need to do, we need to 
+find some basis that we'll know of in advance,  
+
+0:45:14.200,0:45:17.213
+such that Q will be little n-sparse --
+
+0:45:17.213,0:45:17.920
+Nico: In that basis.
+Ariel: In that basis.
+
+0:45:17.920,0:45:19.300
+Nico: Okay.
+
+0:45:19.300,0:45:35.000
+Ariel: All right. So now let's see how 
+we can write Q as a sparse combination.
+
+0:45:35.000,0:45:38.920
+So for simplicity, let's sort of 
+forget for a second about some  
+
+0:45:38.920,0:45:44.637
+of the details in logUp and just think of the --
+
+0:45:44.637,0:45:47.880
+of sort of the situation where we have A.
+
+0:45:47.880,0:45:48.500
+Nico: Yep.
+
+0:45:48.500,0:45:55.240
+Ariel: And A is little n-sparse in some basis.
+
+0:45:55.240,0:46:01.040
+Say in the basis of these Lagrange's {Lᵢ}.
+
+0:46:01.040,0:46:02.600
+Nico: Sure.
+
+0:46:02.600,0:46:13.600
+Ariel: And we want to write 
+A -- we have some fixed --
+
+0:46:13.600,0:46:16.560
+We have some fixed T. Right?
+
+0:46:16.560,0:46:31.400
+So T is the table polynomial set, and we 
+want to write A * T as Q * Z + R.
+
+0:46:31.400,0:46:36.320
+So sort of division with remainder, 
+division by Z with remainder.
+
+0:46:36.320,0:46:37.520
+Nico: Yeah.
+
+0:46:37.520,0:46:47.520
+Ariel: And we want to compute the 
+commitments to Q, to the quotient  
+
+0:46:47.520,0:46:56.840
+and the remainder in little n-scalar mults.
+
+0:46:58.240,0:47:02.880
+And sort of -- the reason we can 
+do this essentially is because  
+
+0:47:02.880,0:47:07.800
+since division is linear, the 
+sparsity is sort of inherited.
+
+0:47:07.800,0:47:08.760
+Nico: Okay.
+
+0:47:08.760,0:47:14.800
+Ariel: So to see what I mean by this, 
+let's just write this out in the basis Lᵢ.
+
+0:47:14.800,0:47:19.080
+So we know that A is sum AᵢLᵢ(X).
+
+0:47:20.680,0:47:26.280
+Again, we know that only little n
+of these are non zeros.
+
+0:47:27.920,0:47:34.600
+Now let's pre-compute for each 
+Lᵢ the division with remainder.
+
+0:47:34.600,0:47:44.760
+So any Lᵢ we can write Lᵢ(X)*T(X).
+And now divide with remainder.
+
+0:47:44.760,0:47:53.114
+So this is going to be some Qᵢ(X) times Z --
+
+0:47:53.114,0:47:54.033
+Nico: And some R.
+
+0:47:54.033,0:47:56.080
+Ariel: Plus some Rᵢ of X.
+
+0:47:56.080,0:47:56.840
+Nico: Okay.
+
+0:47:56.840,0:47:58.800
+Ariel: All right. And division with remainder,  
+
+0:47:58.800,0:48:05.920
+we mean here -- the point is that right 
+degree of Rᵢ is always smaller than --
+
+0:48:05.920,0:48:08.240
+That's what we mean by division, by remainder.
+
+0:48:08.240,0:48:14.360
+We're always computing Qᵢ and Rᵢ such that 
+the degree of this is smaller than this.
+
+0:48:14.360,0:48:18.193
+Nico: We take out as many Z's as we 
+can and then we're left with some R.
+
+0:48:18.193,0:48:20.280
+Ariel: We cannot write -- we can always --
+
+0:48:20.280,0:48:26.760
+We can always write this in this form 
+where the degree of the remainder  
+
+0:48:27.360,0:48:29.680
+is smaller than the degree of Z.
+
+0:48:29.680,0:48:31.220
+Nico: Cool.
+Ariel: Otherwise it wouldn't be a remainder.
+
+0:48:31.220,0:48:32.080
+Nico: Yeah, yeah.
+
+0:48:32.080,0:48:41.680
+Ariel: And now the idea is just for 
+every i, we're going to pre-compute  
+
+0:48:41.680,0:48:48.580
+the commitment to Qᵢ and the commitment to Rᵢ.
+
+0:48:48.580,0:48:50.160
+Nico: Okay.
+
+0:48:50.160,0:48:59.360
+Ariel: And now basically we're just going to use 
+the linearity of division with remainder. Right?
+
+0:48:59.360,0:49:06.480
+So we're just going to write this thing 
+-- we're going to plug in this thing.
+
+0:49:06.480,0:49:17.560
+So this is sum AᵢLᵢ(X) * T(X). Right?
+
+0:49:17.560,0:49:31.800
+Which is some Aᵢ(LᵢT(X)).
+
+0:49:31.800,0:49:38.000
+And now here we're going to plug in this 
+decomposition to quotient and remainder.
+
+0:49:38.000,0:49:49.000
+So we can write this as
+sum Aᵢ(Qᵢ(X)*Z(X)+Rᵢ(X)).
+
+0:49:52.640,0:49:56.240
+And now let's sort of take out the Z.
+
+0:49:56.840,0:50:07.960
+So this is the same as sum AᵢQᵢ(X) * Z(X).
+
+0:50:07.960,0:50:09.760
+Nico: Yeah.
+
+0:50:09.760,0:50:14.120
+Ariel: Plus some AᵢRᵢ(X).
+
+0:50:14.120,0:50:18.240
+Nico: Okay. So here you're 
+distributing the Aᵢ's over this?
+
+0:50:18.240,0:50:18.700
+Ariel: Yes.
+
+0:50:18.700,0:50:22.320
+Nico: And then keeping the Z out 
+because it doesn't depend on any i?
+
+0:50:22.320,0:50:27.520
+Ariel: Yes. Exactly. Right. And now we see that --
+
+0:50:27.520,0:50:30.280
+Nico: This looks suspiciously 
+like a division with remainder.
+
+0:50:30.280,0:50:31.800
+Ariel: Yeah. This is --
+
+0:50:31.800,0:50:33.080
+This is our Q.
+
+0:50:33.080,0:50:34.160
+Nico: Yeah.
+
+0:50:34.160,0:50:43.260
+Ariel: This is our R. And now are these 
+Q and R, are they sparse in some basis?
+
+0:50:43.260,0:50:50.400
+Nico: Well, if A is sparse, then we are sparse 
+in this Qᵢ basis and sparse in the Rᵢ basis.
+
+0:50:50.400,0:50:55.280
+Ariel: Exactly. We knew 
+most of the Aᵢ's were zero.
+
+0:50:55.280,0:51:05.120
+So it means that this Q and R, like A was 
+sparse in the original Lagrange basis.
+
+0:51:05.120,0:51:13.320
+This Q is going to be sparse in this Qᵢ basis 
+and the R is going to be sparse in this Rᵢ basis.
+
+0:51:13.320,0:51:18.280
+So if we pre-compute, this is why 
+cq is short for cache quotients.
+
+0:51:18.280,0:51:26.800
+These Qᵢ's, they're -- the commitments to these 
+Qᵢ's is what we call the cached quotients.
+
+0:51:26.800,0:51:33.740
+And we pre-compute them so that we can 
+then quickly evaluate the commitment to Q.
+
+0:51:33.740,0:51:34.880
+Nico: Amazing.
+
+0:51:34.880,0:51:40.440
+Ariel: All right. So that's 
+the basic idea of how cq works.
+
+0:51:42.720,0:51:47.240
+The drawback are all these 
+things we need to pre-compute.
+
+0:51:47.240,0:51:48.020
+Nico: Right.
+
+0:51:48.020,0:51:50.400
+Ariel: So, for example, we need to pre-compute  
+
+0:51:50.400,0:51:56.520
+the commitments to these big N, 
+capital N number of these Qᵢ's.
+
+0:51:56.520,0:51:58.120
+Nico: Yeah.
+
+0:51:58.120,0:52:01.320
+Ariel: So, for example, a setting --
+
+0:52:01.320,0:52:06.954
+The way I think of the numbers, we can 
+think, say of big N as 2^40 --
+
+0:52:06.954,0:52:10.160
+Nico: Okay.
+Ariel: And little n as 2^20.
+
+0:52:11.520,0:52:19.080
+And then we didn't go into how best to pre-compute 
+all these commitments, but the point is that  
+
+0:52:19.080,0:52:27.360
+they can be computed in time in a number of 
+operations, which is O capital N log capital N.
+
+0:52:27.360,0:52:27.560
+Right?
+
+0:52:27.560,0:52:33.714
+So, for example, for this N, this 
+is like 40 times 2^40 --
+
+0:52:33.714,0:52:33.880
+Nico: Yeah.
+
+0:52:33.880,0:52:38.400
+Ariel: Right? Which is about, 
+I don't know, 2^45.
+
+0:52:41.320,0:52:47.120
+And this is the amount of like, you need 
+this amount of scalar multiplications.
+
+0:52:47.120,0:52:48.600
+So this is --
+
+0:52:48.600,0:52:52.480
+When I try to estimate, this is a 
+computation that could take months.
+
+0:52:52.480,0:52:54.360
+Nico: Right.
+
+0:52:54.360,0:52:58.260
+And I guess a lot of storage as well, because 
+there's a lot of elements we need to keep.
+
+0:52:58.260,0:53:00.760
+Ariel: And the storage, I 
+think, is in the petabytes.
+
+0:53:00.760,0:53:01.713
+Nico: Okay. Wow.
+
+0:53:01.713,0:53:03.360
+Ariel: You need to store --
+
+0:53:03.360,0:53:08.400
+For the full cq, you need to store, I 
+think, seven times this number of elements.
+
+0:53:08.400,0:53:09.180
+Nico: Okay.
+
+0:53:09.180,0:53:11.320
+Ariel: And what do you get from that?
+
+0:53:11.320,0:53:16.280
+You get from that that you can use a 40 bit table  
+
+0:53:16.280,0:53:19.740
+where regular logUp you could 
+probably use a 20 bit table.
+
+0:53:19.740,0:53:20.640
+Nico: I see.
+
+0:53:20.640,0:53:26.000
+Ariel: So how much better is a 
+40 bit table than a 20 bit table?
+
+0:53:27.280,0:53:31.300
+It's about a million times bigger. 
+Is it a million times better?
+
+0:53:31.300,0:53:32.160
+Nico: Right.
+
+0:53:32.160,0:53:36.680
+Ariel: Well, it depends on what the tables are.
+
+0:53:36.680,0:53:39.800
+And this is very much related to the whole notion  
+
+0:53:39.800,0:53:45.240
+of table decomposability that was 
+highlighted in the Lasso paper.
+
+0:53:45.240,0:53:49.594
+So, for example, suppose --
+
+0:53:49.594,0:53:50.600
+Nico: Let's make some space.
+
+0:53:50.600,0:53:56.440
+Ariel: Yeah, let's make a little space.
+
+0:53:59.240,0:54:03.800
+I need maybe the whole board for this.
+
+0:54:03.800,0:54:05.120
+Yeah.
+
+0:54:05.120,0:54:13.680
+So, for example, suppose that the table 
+is just the table of 40-bit strings.
+
+0:54:13.680,0:54:21.820
+So as field values, the table is just 
+the value 0,1 up to 2^40 - 1.
+
+0:54:21.820,0:54:22.880
+Nico: Okay.
+
+0:54:22.880,0:54:29.240
+Ariel: So this is an example of what 
+we can call a decomposable table.
+
+0:54:29.240,0:54:30.080
+Why?
+
+0:54:30.080,0:54:35.560
+Because if we set T prime to 
+be the table of 20 bit strings,  
+
+0:54:35.560,0:54:39.560
+so say the value 0 to 2^20 - 1.
+
+0:54:40.360,0:54:42.680
+Right? So what does that mean?
+
+0:54:42.680,0:54:48.480
+It means that some a is in T if and only if we can  
+
+0:54:48.480,0:55:00.440
+write a as sum a₁ + 2^20 a₂,
+where a₁ and a₂ are in T prime.
+
+0:55:00.440,0:55:01.360
+Nico: Right.
+
+0:55:01.360,0:55:03.720
+So actually, just to summarize this is --
+
+0:55:03.720,0:55:06.222
+We use these tables for range check, for example?
+
+0:55:06.222,0:55:08.080
+Ariel: Yeah.
+Nico: Check that something is in 2^40.
+
+0:55:08.080,0:55:08.620
+Ariel: Yeah.
+
+0:55:08.620,0:55:13.200
+Nico: And rather than looking up in this gigantic 
+table, we can look up in this one two things.
+
+0:55:13.200,0:55:13.902
+Ariel: Right.
+
+0:55:13.902,0:55:13.913
+Nico: Okay.
+
+0:55:13.913,0:55:19.160
+Ariel: So we see that, for example, for 
+this table, we can simulate a lookup in  
+
+0:55:19.160,0:55:24.480
+it via two lookups to this table, T prime, 
+which might be -- which we don't need cq for.
+
+0:55:24.480,0:55:32.380
+We can work with regular logUp and sort of a 
+linear constraint, a linear combination gate.
+
+0:55:32.380,0:55:37.760
+Nico: So actually, even going back to Module 6, 
+where we had bit decomposition as our example,  
+
+0:55:37.760,0:55:41.520
+it's kind of a hybrid of doing it 
+constraints only or lookup only.
+
+0:55:41.520,0:55:43.000
+Here we're doing somewhere in between.
+
+0:55:43.000,0:55:43.800
+Ariel: Yeah.
+
+0:55:43.800,0:55:49.880
+So in these tables that people are calling 
+decomposable, it's sort of like saying, well,  
+
+0:55:49.880,0:55:58.400
+it's not 100% that a lookup in the big table 
+is simulated by lookups in the smaller tables,  
+
+0:55:58.400,0:56:05.080
+but it's like a few lookups in the smaller 
+tables plus a minimal amount of constraints.
+
+0:56:05.080,0:56:07.040
+Say just a linear combination gate.
+
+0:56:07.040,0:56:08.340
+Nico: Yeah. Cool.
+
+0:56:08.340,0:56:12.560
+Ariel: So the more structure your table has,  
+
+0:56:12.560,0:56:19.040
+the more you might not be motivated to 
+go through the painful sort of cq setup.
+
+0:56:19.040,0:56:19.920
+Nico: Right.
+
+0:56:19.920,0:56:26.040
+Ariel: So good use cases for cq are 
+when the table is just crazy values.
+
+0:56:26.040,0:56:31.380
+Just you have a set of 2^40. I don't 
+know, strings that look totally random.
+
+0:56:31.380,0:56:31.840
+Nico: Right.
+
+0:56:31.840,0:56:32.640
+No structure to them.
+
+0:56:32.640,0:56:34.060
+Ariel: Yeah. So those are the --
+
+0:56:34.060,0:56:38.400
+So those are the cases where 
+cq could potentially shine.
+
+0:56:38.400,0:56:45.580
+Okay. So now to end this lecture, I want to talk 
+a little about how GKR fits in this picture.
+
+0:56:45.580,0:56:47.960
+Nico: We hear Sum-Check GKR very often.
+
+0:56:47.960,0:56:49.040
+Ariel: Yeah.
+
+0:56:49.040,0:57:01.320
+So one sort of slightly painful point in logUp 
+or cq is the need to commit to big values.
+
+0:57:01.320,0:57:07.240
+So let's look a little at what sort 
+of values we had come up in logUp.
+
+0:57:07.240,0:57:14.100
+So we had the multiplicities mᵢ. 
+These are usually small numbers.
+
+0:57:14.100,0:57:14.760
+Nico: Yeah.
+
+0:57:14.760,0:57:15.950
+Ariel: If the witness --
+
+0:57:15.950,0:57:18.200
+Nico: it appears once, twice, three, 
+four times, and the witness, sure.
+
+0:57:18.200,0:57:21.320
+Ariel: Yeah. Their sum is going to be at most n.
+
+0:57:21.320,0:57:22.360
+Nico: Okay.
+
+0:57:22.360,0:57:29.400
+Ariel: And say we could say that -- 
+okay. Maybe also the values tᵢ are small.
+
+0:57:29.400,0:57:30.800
+I mean, that depends on the table.
+
+0:57:30.800,0:57:37.834
+But say for a table like this, they're 
+going to be small values. But what --
+
+0:57:37.834,0:57:40.320
+Nico: Small? We're saying 
+small compared to the field.
+
+0:57:40.320,0:57:41.640
+Ariel: Small.
+
+0:57:41.640,0:57:43.640
+Yeah. We're saying small --
+
+0:57:43.640,0:57:48.834
+Well, small compared to the field 
+and I guess sort of small --
+
+0:57:48.834,0:57:49.320
+Nico: In general?
+
+0:57:49.320,0:57:52.640
+Ariel: In general. Yeah.
+
+0:57:52.640,0:57:53.593
+Nico: Okay.
+
+0:57:53.593,0:57:56.840
+Ariel: But where --
+
+0:57:56.840,0:58:02.440
+Yeah. Because their sizes will sort of 
+affect how long it takes to commit to them.
+
+0:58:02.440,0:58:03.720
+Nico: Okay.
+
+0:58:03.720,0:58:11.360
+Ariel: Okay. But here is where sort of 
+there's something a little painful we have.
+
+0:58:11.360,0:58:13.500
+Right. We had these values.
+
+0:58:13.500,0:58:15.480
+Nico: Yeah.
+
+0:58:15.480,0:58:17.040
+Ariel: Yeah. Right.
+
+0:58:17.040,0:58:20.760
+This or maybe this plus 1 over fᵢ plus Beta.
+
+0:58:20.760,0:58:23.200
+But let's just look at this, for example.
+
+0:58:23.200,0:58:23.870
+Nico: Sure.
+
+0:58:23.870,0:58:25.720
+Ariel: It doesn't matter exactly.
+
+0:58:25.720,0:58:31.320
+The point is we had this big challenge 
+Beta. And so even if it wasn't big,  
+
+0:58:31.320,0:58:33.360
+we're looking at the inverse of it. So.
+
+0:58:33.360,0:58:34.500
+Nico: Yeah.
+
+0:58:34.500,0:58:37.080
+Ariel: This is like if it's 
+a field of a certain size,  
+
+0:58:37.080,0:58:44.500
+256 bits, say this is a full 256-bit 
+value, even if the mᵢ and tᵢ is small.
+
+0:58:44.500,0:58:45.280
+Nico: Right.
+
+0:58:45.280,0:58:55.760
+Ariel: So we would like ideally to avoid 
+committing, having to commit to these values.
+
+0:58:56.360,0:59:00.320
+Now why did we need to commit to them?
+
+0:59:00.320,0:59:06.920
+Our goal was to show things 
+like sum Aᵢ is equal to 0.
+
+0:59:06.920,0:59:07.880
+Nico: Yeah.
+
+0:59:07.880,0:59:11.360
+And that was also correcting these values.
+
+0:59:11.360,0:59:13.040
+Okay.
+
+0:59:13.040,0:59:18.880
+Ariel: Right. Right. But -- 
+well, I mean, assuming --
+
+0:59:18.880,0:59:19.520
+Right, yeah --
+
+0:59:19.520,0:59:19.840
+Sorry.
+
+0:59:20.560,0:59:30.360
+What we want is to show -- we want to show for --
+
+0:59:30.360,0:59:38.840
+Okay. Or even going back to the full thing, right? 
+We wanted to show that this sum is 0. Right?
+
+0:59:38.840,0:59:41.051
+That's what we really wanted to show.
+
+0:59:41.051,0:59:41.073
+Nico: Yes. True, true.
+
+0:59:41.073,0:59:46.040
+Ariel: And the way we did it was 
+we committed to these values and  
+
+0:59:46.040,0:59:51.300
+then showed that we really committed to 
+these values and that their sum is 0.
+
+0:59:51.300,0:59:51.840
+Nico: Yeah.
+
+0:59:51.840,0:59:56.800
+Ariel: But maybe there is some sort of 
+direct way just from the commitments that  
+
+0:59:56.800,1:00:04.520
+we already have to m, t and f. Maybe there 
+is a more direct way without needing any  
+
+1:00:04.520,1:00:10.760
+extra commitments like the commitment 
+to this A to show that that sum is 0.
+
+1:00:11.440,1:00:19.520
+And that is exactly what the 
+GKR protocol allows us to do.
+
+1:00:19.520,1:00:25.480
+Okay. So let's make some space so we 
+can say a few words about how GKR works.
+
+1:00:25.480,1:00:29.080
+Nico: Sounds good.
+
+1:00:29.080,1:00:30.680
+Ariel: So the idea in GKR--
+
+1:00:30.680,1:00:33.240
+Right, in SNARKs, we talk about circuits a lot.
+
+1:00:33.240,1:00:35.520
+So again, let's say we have 
+-- we have some circuit,  
+
+1:00:35.520,1:00:38.600
+we have like an input, and we have a plus gate.
+
+1:00:38.600,1:00:42.760
+We have a mult gate, maybe. Right?
+
+1:00:45.360,1:00:46.520
+I don't know.
+
+1:00:46.520,1:00:51.360
+And usually in circuits, what we do is we 
+want to prove something about a circuit,  
+
+1:00:51.360,1:00:58.280
+but we have the input values, but we also have 
+the intermediate values, the values of the gates.
+
+1:00:58.280,1:01:02.640
+And usually when we want to prove something 
+about a circuit, we're going to commit  
+
+1:01:02.640,1:01:08.160
+not only to the inputs, we're going to 
+commit to all the intermediate values.
+
+1:01:08.160,1:01:15.520
+And sort of what GKR says is that when 
+our circuit is very, very structured,  
+
+1:01:18.000,1:01:24.940
+we can prove something about a circuit output 
+while only committing to the input layer.
+
+1:01:24.940,1:01:28.400
+Nico: Okay. What do we mean by 
+very structured in this case?
+
+1:01:28.400,1:01:32.240
+Ariel: Well, so what is our case?
+
+1:01:32.240,1:01:32.360
+Right?
+
+1:01:32.360,1:01:39.640
+So our case is sort of like we 
+have inputs, let's call them --
+
+1:01:39.640,1:01:44.440
+Again, let's just for simplicity, 
+just look at the table part.
+
+1:01:44.440,1:01:47.560
+So we have, say -- looking at 
+a slightly simplified equation  
+
+1:01:47.560,1:01:51.360
+than what we actually have in logUp, 
+we have, say, for example, inputs,  
+
+1:01:51.360,1:02:01.640
+these multiplicities, m₁ to mₙ 
+and the table values t₁ to tₙ.
+
+1:02:01.640,1:02:05.520
+And we also had the challenge Beta. We had 
+the -- But let's say we just have these.
+
+1:02:05.520,1:02:09.280
+And let's say we want to compute --
+
+1:02:09.280,1:02:16.400
+We want the output to be this 
+fractional sum mᵢ over tᵢ.
+
+1:02:16.400,1:02:17.560
+Nico: Okay.
+
+1:02:17.560,1:02:19.894
+So here we're simplifying, 
+we're getting rid of the Beta.
+
+1:02:19.894,1:02:22.394
+Ariel: Yea. We're saying, say Beta 
+is 0, we're forgetting the f, but --
+
+1:02:22.394,1:02:23.860
+Nico: It would work in the same way.
+
+1:02:23.860,1:02:25.000
+Ariel: It would work --
+
+1:02:25.000,1:02:26.560
+It would work in the same way.
+
+1:02:26.560,1:02:27.320
+Nico: Okay.
+
+1:02:27.320,1:02:37.040
+Ariel: So now we want a circuit where these 
+are the inputs and this is the output.
+
+1:02:38.320,1:02:44.480
+And sort of the point is in this LogUp GKR paper,  
+
+1:02:45.120,1:02:49.640
+it's also explained, by the way, very 
+nicely in this paper called TaSSLE.
+
+1:02:49.640,1:02:55.560
+We can sort of compute this in a 
+circuit where what does simple mean?
+
+1:02:55.560,1:03:01.120
+So for GKR, sort of the ideal thing, 
+the simplest thing is when we have  
+
+1:03:01.120,1:03:07.960
+a layered circuit and all gates 
+are just the same, the same gate.
+
+1:03:07.960,1:03:08.530
+Nico: Okay.
+
+1:03:08.530,1:03:09.960
+Ariel: The same gate.
+
+1:03:09.960,1:03:14.520
+Nico: So layered mean we'd 
+have a gate with like 2 to 1
+
+1:03:14.520,1:03:17.640
+and then another layers of those 
+gates, 2 to 1 and then keep going?
+
+1:03:17.640,1:03:23.080
+Ariel: Yeah. So, for example, the 
+simplest thing would be a binary tree.
+
+1:03:23.080,1:03:26.240
+So we have, say, inputs --
+
+1:03:26.240,1:03:30.180
+So let's think of our input 
+sort of focusing on this case.
+
+1:03:30.180,1:03:30.600
+Nico: Yeah.
+
+1:03:30.600,1:03:33.800
+Ariel: Let's think of our inputs as being --
+
+1:03:33.800,1:03:35.380
+Let's interleave the m's and the t's.
+
+1:03:35.380,1:03:35.780
+Nico: Sure.
+
+1:03:35.780,1:03:47.674
+Ariel: So we have say m₁, t₁, m₂, t₂, blah blah 
+blah blah blah, m ₙ-1, t ₙ-1, mₙ tₙ.
+
+1:03:47.674,1:03:47.920
+Nico: Cool.
+
+1:03:47.920,1:03:54.520
+Ariel: And now let's look at a circuit that 
+is sort of like you implied, is a binary tree.
+
+1:03:57.600,1:04:03.680
+Well. What's the word? Quadruple tree.
+
+1:04:03.680,1:04:04.400
+Nico: Sure.
+
+1:04:04.400,1:04:05.880
+Ariel: Four-legged tree.
+
+1:04:12.040,1:04:20.840
+So we want such a circuit where the 
+output in the end will be this sum mᵢ, tᵢ.
+
+1:04:21.840,1:04:33.000
+So what we want is sort of a 
+circuit that takes m₁, t₁, m₂, t₂.
+
+1:04:33.000,1:04:34.740
+Nico: Yeah.
+
+1:04:34.740,1:04:45.680
+Ariel: And outputs m₁ over t₁ plus m₂ over t₂.
+
+1:04:46.520,1:04:47.120
+But let's --
+
+1:04:47.120,1:04:53.760
+It's going to be convenient to think --
+we want to get rid of these fractions.
+
+1:04:53.760,1:05:04.880
+So it'll be convenient to just think of 
+representing a fraction a/b as the pair (a,b).
+
+1:05:04.880,1:05:11.480
+Nico: Okay. And we keep the division for later, 
+or just for notation you were saying this?
+
+1:05:11.480,1:05:14.880
+Ariel: Well, so sort of inside the circuit --
+
+1:05:14.880,1:05:16.600
+Yeah, we could -- you say we leave it for later.
+
+1:05:16.600,1:05:18.840
+Inside the circuit we're 
+going to just all the time  
+
+1:05:18.840,1:05:21.600
+operate by representing fractions in this way.
+
+1:05:21.600,1:05:24.260
+And then in the end you're going to get some pair.
+
+1:05:24.260,1:05:25.273
+Nico: I see.
+
+1:05:25.273,1:05:28.019
+Ariel: And you can then if you want --
+
+1:05:28.019,1:05:29.680
+Nico: Got you.
+Ariel: Divide in the pair.
+
+1:05:31.280,1:05:36.600
+So, right, in this notation, this m₁, right?
+
+1:05:36.600,1:05:39.720
+Let's do a common denominator. Right?
+
+1:05:39.720,1:05:46.300
+This is going to be -- let's try to do some math.
+
+1:05:46.300,1:05:47.680
+Nico: m₁, t₂.
+Ariel: Yeah. I think it's m₁, t₂.
+
+1:05:47.680,1:05:49.000
+Nico: m₂, t₁.
+
+1:05:49.000,1:05:51.274
+Ariel: Thanks. m₂, t₁ --
+
+1:05:51.274,1:05:53.120
+Nico: Over the product of the t's.
+
+1:05:53.120,1:05:57.560
+Ariel: And yes, I think it's t₁, t₂.
+
+1:05:57.560,1:05:59.720
+Nico: Yeah.
+
+1:05:59.720,1:06:03.040
+Ariel: So these gates, what are they going to be?
+
+1:06:03.040,1:06:10.080
+They're going to be gates sort of 
+mapping four elements into two elements.
+
+1:06:10.080,1:06:11.800
+Nico: Cool.
+
+1:06:11.800,1:06:13.960
+Ariel: From here to here.
+
+1:06:13.960,1:06:22.160
+And so GKR, it uses Sum-Check 
+in this recursive way.
+
+1:06:22.160,1:06:26.640
+But the point is when we have a circuit which is  
+
+1:06:26.640,1:06:30.960
+like just a binary tree and the 
+gates are all the same. Right?
+
+1:06:30.960,1:06:38.360
+The gates are now these gates that take four 
+inputs like this and map them to two outputs.
+
+1:06:38.360,1:06:43.400
+And GKR works very well with such circuits.
+
+1:06:43.400,1:06:47.920
+And again its attractive feature 
+is that you commit to the inputs,  
+
+1:06:47.920,1:06:56.880
+you don't need to commit to the values 
+coming up in these intermediate layers.
+
+1:07:00.320,1:07:04.880
+And yeah, maybe it is right. Maybe --
+
+1:07:04.880,1:07:12.320
+Right. Actually if you want just to see, we're 
+not like making it too easy on ourself, right?
+
+1:07:12.320,1:07:15.234
+If we just want to add this big Beta --
+
+1:07:15.234,1:07:16.680
+Nico: Sure.
+Ariel: Right? That's not --
+
+1:07:16.680,1:07:19.160
+That's not going to be --
+
+1:07:19.160,1:07:22.744
+Well, maybe let's not mess up 
+the board by doing it explicitly.
+
+1:07:22.744,1:07:25.720
+Nico: Yeah. But I think we can imagine 
+how the Beta will appear here, here,  
+
+1:07:25.720,1:07:29.280
+and then appear here, here, 
+and then in here and in here.
+
+1:07:29.280,1:07:34.120
+Ariel: Yeah, yeah, yeah. But let's 
+just not confuse. Let's remove it here.
+
+1:07:34.120,1:07:35.200
+Nico: Sounds good.
+
+1:07:35.200,1:07:37.640
+Ariel: Okay. So that is --
+
+1:07:37.640,1:07:46.600
+Yeah. That is how GKR can help us avoid committing 
+to big values while using the logUp protocol.
+
+1:07:46.600,1:07:50.200
+Nico: Can we combine the idea of cqs to -- of cq  
+
+1:07:50.200,1:07:55.440
+to work with like this big N table and 
+the idea of using GKR or not really?
+
+1:07:55.440,1:07:56.720
+Ariel: I mean, that's --
+
+1:07:56.720,1:08:03.640
+Actually, that's a good question. I think I'm --
+
+1:08:03.640,1:08:11.540
+I need to think about it, but I think for sort of 
+the parts having to do with the witness, you can.
+
+1:08:11.540,1:08:12.300
+Nico: Okay.
+
+1:08:12.300,1:08:17.680
+Ariel: Yes. For the part sort of having to 
+do with a table with these cached quotients,  
+
+1:08:17.680,1:08:19.560
+I think it doesn't really mix,
+
+1:08:19.560,1:08:25.000
+but yeah, the sort of the part we put aside, 
+the part of like the 1 over fᵢ plus Beta,  
+
+1:08:25.560,1:08:28.960
+yeah, that you could do with 
+GKR also while using cq.
+
+1:08:28.960,1:08:30.980
+Nico: So does that conclude the session?
+
+1:08:30.980,1:08:32.080
+Ariel: That's it.
+
+1:08:32.080,1:08:33.720
+Nico: Amazing. Thanks.
+
+1:08:33.720,1:08:39.160
+Actually, let me try to summarize what 
+we saw just to bring things out together.
+
+1:08:39.160,1:08:46.680
+We first had a look at a map, kind of all the 
+lookup works that came out, and then we had a  
+
+1:08:46.680,1:08:51.280
+deep dive into sort of logarithmic derivatives, 
+which you described as fractional sums.
+
+1:08:51.280,1:08:53.480
+And I think that's a lot more descriptive.
+
+1:08:53.480,1:08:54.080
+Ariel: Yeah.
+
+1:08:54.080,1:08:58.720
+Nico: And then within that space, 
+the original logUp protocol, then  
+
+1:08:58.720,1:09:04.340
+pre-computation ideas with cq and big tables, 
+and now how to avoid commitments with GKR.
+
+1:09:04.340,1:09:05.220
+Ariel: Exactly.
+
+1:09:05.220,1:09:06.240
+Nico: Amazing.
+
+1:09:06.240,1:09:22.080
+Ariel, thank you so much! And to 
+the viewers, thanks for watching!

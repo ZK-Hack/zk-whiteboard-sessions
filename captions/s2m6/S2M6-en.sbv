@@ -1,0 +1,3491 @@
+0:00:08.000,0:00:10.000
+S2 Module 6: An Update on Folding with Albert Garreta
+
+0:00:10.736,0:00:13.880
+Nico: Welcome to this module 
+of the ZK Whiteboard Sessions.
+
+0:00:13.880,0:00:15.320
+I am Nico, I'll be today's host
+
+0:00:15.320,0:00:16.880
+and with me is Albert.
+
+0:00:16.880,0:00:18.200
+Albert: It's a pleasure to be here.
+
+0:00:18.200,0:00:21.360
+So, today we will be speaking 
+about folding schemes.
+
+0:00:21.360,0:00:24.400
+I'll review the definition of folding schemes
+
+0:00:24.400,0:00:28.480
+because as I understand, there's a 
+module where these are discussed already.
+
+0:00:28.480,0:00:30.040
+Nico: Absolutely. Module 14.
+
+0:00:30.040,0:00:32.080
+If you haven't seen it, go check it out!
+
+0:00:32.080,0:00:35.120
+Albert: So, yeah, we will review what they are
+
+0:00:35.800,0:00:38.320
+and then, I'll give an overview 
+of what has happened since the  
+
+0:00:38.320,0:00:41.160
+Nova scheme was introduced in 2022.
+
+0:00:41.160,0:00:44.800
+And after that we will focus on one 
+of these schemes, namely Hypernova.
+
+0:00:44.800,0:00:46.080
+Nico: Sounds good.
+
+0:00:46.080,0:00:49.440
+Albert: All right. Let's get into it.
+
+0:00:49.440,0:00:58.400
+All right, so folding schemes.
+
+0:00:58.400,0:01:04.280
+So we deal with relations as usual.
+
+0:01:04.280,0:01:09.520
+And for us a relation will be a set of triples,
+
+0:01:09.520,0:01:14.360
+and there's pp, X and W.
+
+0:01:14.960,0:01:20.080
+And these are public parameters,
+
+0:01:20.080,0:01:23.840
+this is called an instance,
+
+0:01:23.840,0:01:26.120
+and this is the witness.
+
+0:01:26.120,0:01:31.880
+Nico: Okay. So can we think of these as 
+the public inputs and the private inputs?
+
+0:01:31.880,0:01:33.040
+Albert: Yes, exactly.
+
+0:01:33.040,0:01:34.120
+These are --
+
+0:01:34.120,0:01:35.720
+Sometimes they are called as public inputs
+
+0:01:35.720,0:01:37.760
+and sometimes they are called as instances.
+
+0:01:37.760,0:01:38.420
+Nico: Okay.
+
+0:01:38.420,0:01:41.120
+Albert: And you always have 
+the public parameters there.
+
+0:01:41.120,0:01:44.120
+It's kind of annoying technique 
+when you want to be formal,
+
+0:01:44.120,0:01:45.800
+you have to write them everywhere,
+
+0:01:45.800,0:01:50.280
+but no one thinks of them in practice.
+
+0:01:50.280,0:01:50.800
+Okay.
+
+0:01:50.800,0:01:56.560
+So what's a folding scheme?
+
+0:01:56.560,0:01:59.840
+So a folding scheme for two relations,
+
+0:02:04.560,0:02:08.640
+R and Racc,
+
+0:02:09.160,0:02:11.940
+and this "acc" is an 
+abbreviation for accumulation.
+
+0:02:11.940,0:02:13.280
+Nico: Okay.
+
+0:02:13.280,0:02:16.000
+Albert: But we could also say R₁ or R₂.
+
+0:02:17.000,0:02:29.840
+It's an interactive protocol 
+between prover and verifier,
+
+0:02:31.440,0:02:38.116
+where the prover has two instance 
+witness pairs for rela --
+
+0:02:38.116,0:02:40.600
+has an instance witness 
+pair for the relation R and  
+
+0:02:40.600,0:02:43.720
+an instance witness pair for the relation Racc.
+
+0:02:43.720,0:02:52.450
+Nico: Okay.
+
+0:02:52.450,0:02:58.600
+Albert: So I'm going to assume 
+that the public parameters are  
+
+0:02:58.600,0:03:03.160
+the same for the two relations for simplicity.
+
+0:03:03.160,0:03:14.040
+Okay. And the verifier knows the 
+parameters and the input, the instance.
+
+0:03:15.720,0:03:19.920
+Okay. And then the prover and 
+the verifier exchange messages.
+
+0:03:19.920,0:03:25.800
+So it's an interactive protocol,
+
+0:03:25.800,0:03:35.560
+and eventually they output 
+a new instance witness pair.
+
+0:03:35.560,0:03:37.840
+So X₃, W₃.
+
+0:03:39.400,0:03:43.000
+This is known to the prover that this is --
+
+0:03:43.000,0:03:46.080
+The verifier outputs only the parameters and this.
+
+0:03:46.080,0:03:46.720
+Nico: Okay.
+
+0:03:46.720,0:03:51.760
+Albert: So --
+
+0:03:51.760,0:03:59.720
+And the prover also outputs 
+W₃, but it keeps it private.
+
+0:04:04.240,0:04:08.200
+Okay. So this is the syntax of a folding scheme.
+
+0:04:08.200,0:04:12.560
+And now we want to state some properties 
+so that when they are satisfied,  
+
+0:04:12.560,0:04:19.740
+the folding scheme can be used for some 
+purposes that will become apparent now.
+
+0:04:19.740,0:04:24.232
+Nico: So tell me to move over.
+Amazing.
+
+0:04:24.232,0:04:29.720
+Albert: Okay. So requirements here.
+
+0:04:30.800,0:04:33.440
+One, we want this to be complete,
+
+0:04:33.440,0:04:38.200
+and this means -- we say it is complete 
+if whenever the prover is honest,  
+
+0:04:38.200,0:04:42.500
+whatever he is outputting 
+here, this belongs to Racc.
+
+0:04:42.500,0:04:48.300
+Nico: Maybe I should ask, what do you mean 
+when we say a triple belongs in a relation?
+
+0:04:48.300,0:04:49.840
+Albert: Yeah.
+
+0:04:49.840,0:04:57.880
+So the prover might claim 
+that X₁ is a valid instance.
+
+0:04:57.880,0:04:59.720
+A valid instance means --
+
+0:04:59.720,0:05:04.960
+So if someone comes and says X is a 
+valid instance for the relation R,
+
+0:05:04.960,0:05:10.700
+it means that they are claiming that there exists 
+a witness, such that this tuple belongs to R.
+
+0:05:10.700,0:05:11.720
+Nico: Okay.
+
+0:05:11.720,0:05:15.954
+Albert: So you can think of, for 
+example, R could be an equation --
+
+0:05:15.954,0:05:16.140
+Nico: Yeah.
+
+0:05:16.140,0:05:20.920
+Albert: And the instance could be some 
+parameters, the coefficients of the equation.
+
+0:05:20.920,0:05:23.240
+And when --
+
+0:05:23.240,0:05:27.040
+In this example, saying that the instance is valid  
+
+0:05:27.040,0:05:29.720
+means that there exists a 
+solution for the equation.
+
+0:05:29.720,0:05:31.240
+And the solution will be the witness.
+
+0:05:31.240,0:05:32.140
+Nico: I see.
+
+0:05:32.140,0:05:39.480
+Albert: So here is like the prover 
+has an equation, an instance
+
+0:05:39.480,0:05:42.200
+and it has a solution to 
+the equation, the witness.
+
+0:05:42.200,0:05:46.667
+And in here a similar thing, but 
+for a different type of equation.
+
+0:05:46.667,0:05:47.700
+Nico: I see. Okay.
+
+0:05:47.700,0:05:51.400
+Albert: And okay. So requirements.
+
+0:05:51.400,0:05:56.160
+If P is honest, if the prover is 
+honest, then this is in this relation.
+
+0:05:56.160,0:05:59.640
+Nico: Okay.
+
+0:06:08.520,0:06:12.040
+Albert: In the accumulated relation.
+
+0:06:12.040,0:06:17.880
+And then the second property, this 
+is called "perfect completeness".
+
+0:06:17.880,0:06:24.880
+Nico: Which is I guess similar to 
+our completeness in our SNARKs.
+
+0:06:24.880,0:06:26.640
+Albert: Yes.
+
+0:06:27.600,0:06:29.280
+Yeah.
+
+0:06:29.280,0:06:41.320
+Then the second property is "knowledge soundness".
+
+0:06:41.320,0:06:45.120
+And we will not get into the formal 
+definition of knowledge soundness.
+
+0:06:45.120,0:06:48.480
+I'll just provide the intuition of what it means.
+
+0:06:48.480,0:06:54.040
+And it means that, if for any 
+prover, malicious or honest, 
+
+0:06:54.040,0:06:59.520
+if the output belongs to the accumulated relation,
+
+0:07:04.480,0:07:06.760
+well, more correctly,  
+
+0:07:06.760,0:07:14.440
+it's: except with negligible probability 
+over the randomness of the interaction,
+
+0:07:15.320,0:07:25.360
+if the output belongs to the accumulated relation, 
+then the initial two instances were correct.
+
+0:07:25.360,0:07:27.792
+Nico: Correct means they were --
+
+0:07:27.792,0:07:28.505
+Albert: In the relations.
+
+0:07:28.505,0:07:29.280
+Nico: In their respective relations.
+
+0:07:29.280,0:07:29.960
+Albert: Yes.
+
+0:07:29.960,0:07:32.840
+Nico: Okay.
+
+0:07:32.840,0:07:36.600
+Albert: So this is not really the 
+definition of knowledge soundness.
+
+0:07:36.600,0:07:37.920
+It's much more complicated.
+
+0:07:37.920,0:07:38.680
+You have to --
+
+0:07:38.680,0:07:42.520
+You quantify over a prover and then 
+-- so you say that for any prover.
+
+0:07:42.520,0:07:46.280
+and yeah, for any prover there 
+exists a polynomial time algorithm,  
+
+0:07:46.280,0:07:53.680
+an extractor that can rewind the prover
+and interact with the verifier through rewinding.
+
+0:07:53.680,0:08:00.474
+And from this, it is able to obtain a witness 
+W₁, and a witness W₂ so that this holds --
+
+0:08:00.474,0:08:00.920
+Nico: Okay.
+
+0:08:00.920,0:08:02.440
+Albert: With certain probability.
+
+0:08:02.440,0:08:05.420
+Nico: So very similar to knowledge 
+soundness in the SNARK case.
+
+0:08:05.420,0:08:06.800
+Albert: Yeah. It is pretty much the same.
+
+0:08:06.800,0:08:11.120
+If you know the definition of 
+knowledge soundness of the formal one,
+
+0:08:11.120,0:08:12.960
+this one is pretty much the same one.
+
+0:08:12.960,0:08:15.400
+Nico: Okay. And why are these useful?
+
+0:08:15.400,0:08:16.480
+What do we do with this?
+
+0:08:16.480,0:08:23.240
+Albert: So first of all, let's 
+forget about known applications.
+
+0:08:23.240,0:08:25.840
+Let's just look at this, at folding.
+
+0:08:25.840,0:08:28.200
+So here we have --
+
+0:08:28.200,0:08:32.320
+Imagine that the prover wants to prove 
+that X₁ is valid and X₂ is valid,
+
+0:08:32.320,0:08:36.160
+meaning that it knows that there's 
+a witness or that this belongs to R.
+
+0:08:36.160,0:08:40.040
+There's a witness and this 
+belongs to R accumulated.
+
+0:08:40.040,0:08:45.720
+So this technique allows to reduce this 
+task, the task of proving this and this,
+
+0:08:45.720,0:08:48.840
+to the task of proving just this, 
+because of the knowledge soundness.
+
+0:08:48.840,0:08:49.240
+Right?
+
+0:08:49.240,0:08:50.800
+Nico: Right.
+
+0:08:50.800,0:08:58.020
+Albert: So if this step is relatively cheap, 
+you are kind of saving work to be done.
+
+0:08:58.020,0:08:58.780
+Nico: That makes sense.
+
+0:08:58.780,0:09:04.640
+Albert: You had two tasks and now you have 
+just one task by paying a small price,
+
+0:09:04.640,0:09:08.400
+assuming that this is to be done.
+
+0:09:08.400,0:09:09.680
+So that's apparent --
+
+0:09:09.680,0:09:14.920
+I think this makes it quite 
+apparent that folding has potential.
+
+0:09:14.920,0:09:16.440
+Nico: Absolutely.
+
+0:09:16.440,0:09:18.360
+And what do we use it for?
+
+0:09:18.360,0:09:22.440
+Albert: Yeah.
+
+0:09:22.440,0:09:32.160
+So a typical application of folding is for 
+IVC or "Incremental Verifiable Computation".
+
+0:09:32.160,0:09:39.440
+Nico: And I think this is 
+actually covered in Module 14.
+
+0:09:39.440,0:09:44.300
+Albert: Yes. Or "Proof Carrying Data".
+
+0:09:44.300,0:09:48.440
+Nico: What is Proof Carrying Data?
+
+0:09:48.440,0:09:50.080
+Albert: It's --
+
+0:09:50.080,0:09:59.000
+So Incrementally Verifiable Computation is a 
+technique where you have several prove tasks 
+
+0:09:59.000,0:10:05.360
+and instead of proving this task, you 
+keep folding and folding and folding.
+
+0:10:05.360,0:10:08.200
+And every time you have an accumulated instance,
+
+0:10:08.200,0:10:13.360
+so every time you have say, X₃,W₃, 
+and you get a new proof task incoming,
+
+0:10:13.360,0:10:16.280
+you fold it with the accumulated 
+one, and so on, and so on.
+
+0:10:16.280,0:10:18.240
+And at each step, you prove --
+
+0:10:18.240,0:10:21.800
+you have the prover create a proof 
+that the folding was done correctly.
+
+0:10:21.800,0:10:28.400
+And in this way, when you are done with 
+doing this Incremental Verifiable Folding,
+
+0:10:28.400,0:10:33.600
+at the end, you can just prove the accumulated 
+instance, the folded instance, this one,
+
+0:10:33.600,0:10:37.440
+because the prover has been proving 
+that the folding was done correctly.
+
+0:10:37.440,0:10:42.680
+By verifying this last step, the verifier can be 
+sure that all the previous steps were correct.
+
+0:10:42.680,0:10:43.160
+All the --
+
+0:10:43.160,0:10:44.720
+All the previous steps were correct,
+
+0:10:44.720,0:10:49.440
+and the instances that appeared in the 
+folding in the previous steps, were correct.
+
+0:10:49.440,0:10:51.120
+Nico: Because we have a cascade, I guess.
+
+0:10:51.120,0:10:53.240
+Like if this is right, then these two were right.
+
+0:10:53.240,0:10:53.640
+Albert: Yes.
+
+0:10:53.640,0:10:55.552
+And if this itself was one of these --
+
+0:10:55.552,0:10:56.424
+Albert: Exactly. Yeah.
+
+0:10:56.424,0:10:57.020
+Nico: We can -- Okay.
+
+0:10:57.020,0:10:59.520
+Albert: And if you --
+
+0:10:59.520,0:11:06.960
+You can picture IVC somehow as a 
+line where this is the accumulated.
+
+0:11:06.960,0:11:12.520
+Nico: I remember Justin Drake 
+drawing something similar.
+
+0:11:12.520,0:11:15.640
+Albert: The accumulated line.
+
+0:11:17.280,0:11:25.080
+And at each step there's a 
+non-accumulated instance coming in.
+
+0:11:25.080,0:11:26.480
+So this is from R.
+
+0:11:30.640,0:11:33.800
+Yeah.
+
+0:11:33.800,0:11:37.960
+You take R and R accumulated, 
+you get R accumulated.
+
+0:11:37.960,0:11:42.600
+Then you take R, R accumulated, 
+you get R accumulated, and so on.
+
+0:11:42.600,0:11:46.560
+And PCD is a generalization of this idea 
+where instead of just having a line,  
+
+0:11:46.560,0:11:49.300
+you have an arbitrary, basically graph.
+
+0:11:49.300,0:11:49.940
+Nico: Okay.
+
+0:11:49.940,0:11:51.474
+Albert: So you might have --
+
+0:11:51.474,0:11:53.030
+Nico: Many things.
+
+0:11:53.030,0:11:53.062
+Albert: Yeah. Some kind of tree.
+
+0:11:53.062,0:11:53.760
+Nico: Coming into each other.
+
+0:11:53.760,0:11:56.080
+Okay.
+
+0:11:56.080,0:12:00.240
+Albert: In here you have --
+
+0:12:03.040,0:12:05.400
+And then in the leaves you might have R.
+
+0:12:05.400,0:12:09.360
+Nico: I see.
+
+0:12:09.360,0:12:12.600
+Albert: Okay. Yeah.
+
+0:12:12.600,0:12:19.423
+But for the details, people 
+should check the module 14.
+
+0:12:19.423,0:12:20.440
+Nico: Module 14. Yeah.
+
+0:12:20.440,0:12:23.040
+So Nova from Module 14 is a folding scheme.
+
+0:12:23.040,0:12:23.460
+Albert: Yes.
+
+0:12:23.460,0:12:24.940
+Nico: Or uses a folding scheme?
+
+0:12:24.940,0:12:26.800
+Albert: It is a folding scheme.
+
+0:12:26.800,0:12:29.160
+Nico: Okay. What has changed since?
+
+0:12:29.160,0:12:35.040
+Albert: Yeah. Let's discuss this.
+
+0:12:35.040,0:12:35.200
+Okay.
+
+0:12:35.200,0:12:39.840
+So now let's see what happened 
+since 2022, when Nova was published.
+
+0:12:39.840,0:12:42.600
+So Nova was a very influential paper.
+
+0:12:42.600,0:12:46.160
+A lot of work has come after it.
+
+0:12:46.160,0:12:47.520
+So let's see.
+
+0:12:48.040,0:12:52.340
+There's different lines of work, and each 
+line of work addresses different aspects.
+
+0:12:52.340,0:12:53.080
+Nico: Okay.
+
+0:12:53.080,0:12:59.120
+Albert: So yeah, we have Nova from 2022.
+
+0:12:59.760,0:13:04.560
+And Nova has some limitations, 
+or it has very nice properties,
+
+0:13:04.560,0:13:08.240
+but there are also things that 
+can be seen as limitations.
+
+0:13:08.240,0:13:10.240
+Nico: I mean, we always want more anyway.
+
+0:13:10.240,0:13:11.200
+Albert: Yeah.
+
+0:13:11.200,0:13:17.520
+So one thing is that, if you try to 
+do Nova in a higher degree setting,
+
+0:13:17.520,0:13:20.400
+so Nova works for R1CSs that are degree 2.
+
+0:13:20.400,0:13:26.080
+If you want to use a similar idea for degree 
+10, then you have a quadratic blowout.
+
+0:13:26.080,0:13:28.740
+You have lots of cross 
+terms, like 100 cross terms.
+
+0:13:28.740,0:13:29.200
+Nico: Okay.
+
+0:13:29.200,0:13:32.080
+Albert: And that is problematic.
+
+0:13:32.080,0:13:38.360
+So a way of addressing this issue 
+came with the paper, Hypernova.
+
+0:13:39.280,0:13:44.960
+Hypernova has other nice properties that I'm 
+not sure the purpose was to address -- 
+
+0:13:44.960,0:13:47.821
+to get those properties,
+but it does have them.
+
+0:13:47.821,0:13:47.832
+Nico: Okay.
+
+0:13:47.832,0:13:54.080
+Albert: So yeah, Hypernova, there's no 
+error terms, which is very nice because,
+
+0:13:54.080,0:13:56.480
+for example, in Nova, another --
+
+0:13:56.480,0:14:02.440
+another problem in Nova possibly 
+comes when you have to commit to  
+
+0:14:02.440,0:14:09.000
+the error term, because the error term 
+has entries of arbitrary size which --
+
+0:14:09.000,0:14:11.514
+And this can be very expensive if you are using --
+
+0:14:11.514,0:14:14.040
+Nico: So just the process of 
+committing is expensive. Okay.
+
+0:14:14.040,0:14:18.840
+Albert: Yes. Committing to a vector of size --
+whose entries have arbitrary size with  
+
+0:14:18.840,0:14:20.540
+Pedersen commitments is very expensive.
+
+0:14:20.540,0:14:21.160
+Nico: Okay.
+
+0:14:21.160,0:14:22.960
+Albert: And that is an issue.
+
+0:14:22.960,0:14:26.360
+So there is a line of work that addresses this.
+
+0:14:26.360,0:14:30.360
+So Hypernova addresses this actually, 
+because there's no error terms,
+
+0:14:30.360,0:14:37.680
+but addressing this issue, 
+there's also Mova and Protogalaxy.
+
+0:14:37.680,0:14:39.000
+So Mova --
+
+0:14:39.000,0:14:41.040
+Maybe I should write Protogalaxy first.
+
+0:14:41.040,0:14:43.480
+Protogalaxy is from 2023.
+
+0:14:43.480,0:14:45.880
+It does several things.
+
+0:14:45.880,0:14:48.160
+I'll talk about Protogalaxy in a minute.
+
+0:14:48.160,0:14:52.040
+Let me just start with Mova, 
+because it's simpler conceptually
+
+0:14:52.040,0:14:54.240
+and what it brings to the table is simpler.
+
+0:14:54.240,0:14:59.920
+So Mova is just a variation that we 
+published recently where we show that  
+
+0:14:59.920,0:15:05.680
+it is not necessary to commit to the error 
+term in Nova. The commitment is superfluous.
+
+0:15:05.680,0:15:07.520
+That's what we show in Mova.
+
+0:15:07.520,0:15:11.520
+And this addresses a big 
+computational bottlenecking in Nova.
+
+0:15:11.520,0:15:13.800
+But as I said, Protogalaxy already does this.
+
+0:15:13.800,0:15:18.480
+Nova is kind of a particular case of 
+a variation of Protogalaxy anyway.
+
+0:15:18.480,0:15:19.620
+Nico: Okay.
+
+0:15:19.620,0:15:20.440
+Albert: Okay.
+
+0:15:20.440,0:15:25.400
+Then there's other schemes 
+for higher degree constraints.
+
+0:15:25.400,0:15:26.690
+Nico: Okay.
+
+0:15:26.690,0:15:29.480
+Albert: Or for different 
+types of arithmetizations.
+
+0:15:29.480,0:15:33.420
+For example, there's Sangria 
+by someone named Nico.
+
+0:15:33.420,0:15:35.960
+Nico: Yeah. I'm familiar with this guy.
+
+0:15:35.960,0:15:38.400
+Albert: Which deals with Plonkish constraints.
+
+0:15:39.160,0:15:42.340
+Plonkish constraints are -- in 
+practice, they are degree 2 or 3.
+
+0:15:42.340,0:15:49.760
+Albert: So it could also deal with 
+Plonkish constraints of arbitrary degree.
+
+0:15:49.760,0:15:52.880
+But one might have the same 
+issues as Nova in that case.
+
+0:15:52.880,0:15:53.630
+Nico: Absolutely.
+
+0:15:53.630,0:16:02.200
+Albert: And then there's Protostar 
+and Protogalaxy, which are wide --
+
+0:16:02.200,0:16:08.000
+You could say in simplistic terms that Protostar 
+and Protogalaxy are wide generalizations of Nova
+
+0:16:08.000,0:16:15.320
+for not only relations of very 
+high degree, but also protocols.
+
+0:16:15.320,0:16:18.480
+And there's another thing to 
+consider when you do folding,
+
+0:16:18.480,0:16:22.080
+which is whether you can fold different circuits,
+
+0:16:22.080,0:16:26.160
+which in the terminology of R1CSs 
+corresponds to having different matrices.
+
+0:16:27.840,0:16:30.960
+All these schemes do not support, 
+do not have this capacity.
+
+0:16:30.960,0:16:33.840
+So you are always bound to fold R1CSs
+
+0:16:33.840,0:16:38.200
+or whatever relation you have with 
+the same structure, so to speak.
+
+0:16:38.200,0:16:45.480
+There's KiloNova, which is an extension 
+of Hypernova that addresses this issue
+
+0:16:45.480,0:16:50.560
+and allows to fold where 
+the matrices are different.
+
+0:16:50.560,0:16:58.280
+And then all these schemes use elliptic curve 
+commitments, which present several issues.
+
+0:16:58.280,0:17:01.560
+There's several things that are undesirable.
+
+0:17:01.560,0:17:05.580
+Nico: So I guess you said 
+the cost was the problem?
+
+0:17:05.580,0:17:08.320
+Albert: The cost can be a problem sometimes.
+
+0:17:08.320,0:17:12.160
+There's also the problem 
+that if you want to do IVC,
+
+0:17:12.160,0:17:15.360
+when you have the prover proof that 
+the folding was done correctly,
+
+0:17:15.360,0:17:18.880
+then you have an issue because you 
+have to prove that some elliptic  
+
+0:17:18.880,0:17:20.800
+curve operations were performed correctly.
+
+0:17:20.800,0:17:21.340
+Nico: Yes.
+
+0:17:21.340,0:17:24.040
+Albert: And then you are either 
+doing wrong field arithmetic
+
+0:17:24.040,0:17:27.480
+or you have to use cycles of 
+curves, which is a headache,
+
+0:17:27.480,0:17:28.840
+and it's also expensive. Yes.
+
+0:17:28.840,0:17:32.500
+Nico: I think Justin Drake 
+addresses it in the Nova module.
+
+0:17:32.500,0:17:33.560
+Albert: Yeah.
+
+0:17:33.560,0:17:38.940
+And another issue is that it bounds 
+you to the context of KCG-based SNARKs.
+
+0:17:38.940,0:17:38.952
+Nico: Right.
+
+0:17:38.952,0:17:40.800
+Albert: If you want to use --
+
+0:17:40.800,0:17:46.880
+To work over a small prime 
+field, you are kind of out of --
+
+0:17:46.880,0:17:48.160
+The possibility is not really there,
+
+0:17:48.160,0:17:53.040
+because here you are using elliptic curve 
+commitments and you need a big field.
+
+0:17:53.040,0:17:53.960
+Nico: Okay.
+
+0:17:53.960,0:17:58.840
+Albert: So addressing these problems, 
+there's two new works from this year.
+
+0:17:59.480,0:18:05.720
+One is "Accumulation without homomorphism",
+
+0:18:05.720,0:18:10.400
+which describes a folding scheme where the 
+commitments are Merkle tree commitments.
+
+0:18:10.400,0:18:12.680
+Nico: So they use hash functions only?
+
+0:18:12.680,0:18:13.480
+Albert: Yes.
+
+0:18:13.480,0:18:13.780
+Nico: Okay.
+
+0:18:13.780,0:18:17.760
+Albert: You can probably replace the hash 
+functions by some other vector commitment,
+
+0:18:17.760,0:18:25.760
+but I think the idea is to use hash functions.
+
+0:18:25.760,0:18:29.000
+And in this case, there's really 
+no homomorphism being used,
+
+0:18:29.000,0:18:34.120
+which is completely different to 
+what's been the common trend before.
+
+0:18:34.120,0:18:41.880
+And then there's LatticeFold, which is 
+an analog of Hypernova for lattices.
+
+0:18:41.880,0:18:42.920
+Nico: Okay.
+
+0:18:42.920,0:18:46.400
+Albert: And it kind of uses 
+homomorphic commitment schemes.
+
+0:18:46.400,0:18:50.820
+It uses the Ajtai commitment scheme, 
+which is homomorphic in some sense.
+
+0:18:50.820,0:18:51.749
+Nico: Okay.
+
+0:18:51.749,0:18:52.960
+Albert: It has some limitations.
+
+0:18:52.960,0:18:55.960
+There's some homomorphicity in 
+there, but there's some caveats.
+
+0:18:55.960,0:18:58.360
+Nico: Okay. So to --
+
+0:18:58.360,0:19:01.240
+I'm trying to get a representation of your map,
+
+0:19:01.240,0:19:06.200
+the ideas were: go beyond 
+R1CS, deal with cross terms,  
+
+0:19:06.200,0:19:09.880
+you said, and get rid of elliptic curves, maybe,
+
+0:19:09.880,0:19:11.480
+or the cost of committing.
+
+0:19:11.480,0:19:12.440
+Albert: Yes.
+
+0:19:12.440,0:19:14.040
+Nico: Very nice.
+
+0:19:14.040,0:19:16.680
+Should we dive into one of 
+these topics in particular?
+
+0:19:16.680,0:19:19.474
+Albert: Yeah. I wanted to discuss Hypernova --
+
+0:19:19.474,0:19:19.660
+Nico: Cool.
+
+0:19:19.660,0:19:21.120
+Albert: Because of several reasons.
+
+0:19:21.120,0:19:26.800
+It's an influential paper, it 
+has influential works beyond it
+
+0:19:26.800,0:19:30.880
+and even outside of the context of folding,
+
+0:19:30.880,0:19:34.840
+Hypernova deals with some ideas that 
+are, I think, in my opinion, very nice
+
+0:19:34.840,0:19:38.320
+and used in papers outside 
+of the context of folding.
+
+0:19:38.320,0:19:43.720
+So I think it is a very nice protocol 
+to look at when you get into this area.
+
+0:19:43.720,0:19:48.880
+Of course, after Nova.
+
+0:19:48.880,0:19:58.640
+So in Hypernova, R is the committed R1CS relation.
+
+0:19:59.920,0:20:03.480
+Nico: How is that different to regular R1CS?
+
+0:20:03.480,0:20:10.920
+Albert: So in folding, you usually take your 
+relation, the relation you really want to fold,
+
+0:20:10.920,0:20:14.040
+and you transform it into a 
+committed version of the relation.
+
+0:20:14.040,0:20:19.960
+And this just means that you add a commitment 
+to the witness in the public instance pair
+
+0:20:19.960,0:20:20.470
+Nico: Okay.
+
+0:20:20.470,0:20:23.440
+Albert: In the public instance part of the tuple.
+
+0:20:23.440,0:20:40.360
+And the accumulated relation is the 
+committed linearized R1CS relation.
+
+0:20:40.360,0:20:42.880
+Yeah. Committed linearized R1CS.
+
+0:20:42.880,0:20:45.200
+And let's see what all this means.
+
+0:20:45.200,0:20:49.000
+Before I move on, here I used R1CS,
+
+0:20:49.000,0:20:54.480
+but in the Hypernova paper, 
+the Hypernova deals with CCSs,
+
+0:20:54.480,0:20:59.920
+which, as I mentioned previously, CCS 
+is a high degree generalization of R1CS.
+
+0:20:59.920,0:21:05.880
+Nico: So can we imagine it being R1CS 
+with just more than three matrices?
+
+0:21:05.880,0:21:09.620
+Instead of being A, B, C, we can 
+have A, B, C, D, E, F and plenty more.
+
+0:21:09.620,0:21:12.520
+Albert: Yes. So there's more terms, more summands,
+
+0:21:12.520,0:21:17.200
+and each summand has possibly more 
+than a multiplication of two matrices.
+
+0:21:17.200,0:21:17.620
+Nico: Okay.
+
+0:21:17.620,0:21:19.920
+Albert: So it could look like this.
+
+0:21:19.920,0:21:22.800
+A₁Z, A₂Z.
+
+0:21:22.800,0:21:24.520
+Nico: Right.
+
+0:21:24.520,0:21:26.520
+Albert: Oops.
+
+0:21:26.520,0:21:34.760
+A₃Z plus B₁Z B₂Z plus --
+
+0:21:34.760,0:21:40.320
+And then here you might have 
+four Hadamard products and so on.
+
+0:21:40.320,0:21:44.280
+Nico: Okay.
+
+0:21:44.280,0:21:47.280
+And so R1CS is like the simple version of this.
+
+0:21:47.280,0:21:48.390
+Albert: Yes.
+
+0:21:48.390,0:21:53.280
+Nico: And so now what is 
+the this linearized version?
+
+0:21:53.280,0:21:57.228
+Albert: Yeah. Let's first write what R is exactly.
+
+0:21:57.228,0:21:57.740
+Nico: Okay. Yes.
+
+0:21:57.740,0:22:05.040
+Albert: So as we saw, we said, then relations 
+are triples of public parameters, instances 
+
+0:22:05.040,0:22:06.640
+and witnesses.
+
+0:22:06.640,0:22:10.280
+And in this case, the public 
+parameters are a field,  
+
+0:22:10.280,0:22:16.480
+three matrices and then some size parameters.
+
+0:22:16.480,0:22:21.780
+So A, B, C are matrices of size n times n.
+
+0:22:21.780,0:22:24.920
+Nico: Are they always square? n times n?
+
+0:22:24.920,0:22:26.472
+Or is it --
+
+0:22:26.472,0:22:27.580
+Albert: Yeah. They are usually square.
+
+0:22:27.580,0:22:28.520
+Nico: Okay, cool.
+
+0:22:30.720,0:22:37.040
+Albert: X is a vector x.
+
+0:22:39.800,0:22:42.960
+So just a vector x in this case.
+
+0:22:42.960,0:22:47.280
+And X is a vector of size l.
+
+0:22:47.280,0:22:49.120
+Nico: Okay.
+
+0:22:49.120,0:22:56.240
+And the witness is just a vector.
+
+0:22:56.240,0:22:57.500
+Nico: Okay.
+
+0:22:57.500,0:23:03.040
+Albert: Of size F, l minus 1.
+
+0:23:03.040,0:23:03.960
+Oops.
+
+0:23:03.960,0:23:06.540
+n minus 1 minus l.
+
+0:23:06.540,0:23:08.160
+Nico: Okay.
+
+0:23:08.160,0:23:18.840
+Albert: And the following key relation is 
+satisfied by the instance and the witness,
+
+0:23:18.840,0:23:23.120
+which is that A times the vector z,  
+
+0:23:23.120,0:23:29.960
+Hadamard product, B times the vector 
+z is equal to C times the vector z, 
+
+0:23:29.960,0:23:38.680
+where z is this vector in here, 
+1 and this vector in here.
+
+0:23:38.680,0:23:40.000
+Nico: Okay.
+
+0:23:40.920,0:23:45.840
+I guess, why do we call this committed 
+R1CS as opposed to just R1CS?
+
+0:23:45.840,0:23:48.440
+Albert: Right. This is just the R1CS relation.
+
+0:23:48.440,0:23:49.160
+Thanks.
+
+0:23:49.160,0:23:50.160
+Nico: Okay.
+
+0:23:50.160,0:23:57.480
+Albert: And the committed 
+R1CS relation is exactly this.
+
+0:23:57.480,0:24:00.240
+But we add a commitment to the 
+witness in the public instance.
+
+0:24:00.240,0:24:05.800
+So let's add it.
+
+0:24:05.800,0:24:11.040
+So we have the relation, and now if it's 
+committed, let's write here "committed".
+
+0:24:11.040,0:24:14.400
+Nico: Okay.
+
+0:24:14.400,0:24:28.760
+Albert: Then it's exactly the same, 
+but in here we have commitment.
+
+0:24:28.760,0:24:32.560
+Okay? And --
+
+0:24:32.560,0:24:40.120
+So this commitment is the commitment to the 
+vector w for some fixed commitment scheme,
+
+0:24:40.120,0:24:43.360
+which in Hypernova is usually Pedersen or KZG.
+
+0:24:43.360,0:24:45.970
+Nico: Okay.
+
+0:24:45.970,0:24:50.960
+Albert: And you do this all 
+the time in folding schemes.
+
+0:24:50.960,0:24:53.280
+You have a relation you are interested in
+
+0:24:53.280,0:24:56.120
+and you transform it into the 
+committed version of the relation,
+
+0:24:56.120,0:24:59.040
+where you simply add a commitment to the witness.
+
+0:24:59.040,0:25:00.400
+Nico: Okay.
+
+0:25:00.400,0:25:03.840
+Because that is useful for the folding scheme, or?
+
+0:25:03.840,0:25:08.880
+Albert: Yeah. The folding scheme really requires 
+you to commit to the witness for security reasons.
+
+0:25:08.880,0:25:11.120
+Nico: Okay.
+
+0:25:11.120,0:25:12.320
+Albert: Okay.
+
+0:25:12.320,0:25:18.660
+So this is outside of the finishing.
+
+0:25:18.660,0:25:21.840
+Nico: Yes, yes, yes.
+
+0:25:21.840,0:25:25.200
+Albert: Okay.
+
+0:25:25.200,0:25:34.800
+So now let's see what the linearized R1CS.
+
+0:25:34.800,0:25:46.080
+So again we have triples and 
+the parameters are the same.
+
+0:25:52.120,0:25:57.680
+And the instance now looks as follows.
+
+0:25:57.680,0:26:00.000
+So we again have a vector x.
+
+0:26:00.000,0:26:01.360
+Nico: Okay.
+
+0:26:01.360,0:26:07.800
+Albert: And then we have another 
+vector r, which I will write --
+
+0:26:07.800,0:26:10.640
+This is an evaluation point for a polynomial
+
+0:26:10.640,0:26:15.480
+and writing it with the arrow, even 
+though x and w are also vectors.
+
+0:26:15.480,0:26:17.190
+Nico: Okay.
+
+0:26:17.190,0:26:25.560
+Albert: And then we have two 
+field elements VA, VB, VC.
+
+0:26:25.560,0:26:26.900
+Nico: Okay.
+
+0:26:26.900,0:26:34.160
+Albert: And then we have the committed part.
+
+0:26:34.160,0:26:36.941
+We have a commitment.
+
+0:26:36.941,0:26:36.952
+Nico: Okay.
+
+0:26:36.952,0:26:42.760
+Albert: And the witness is a vector.
+
+0:26:46.240,0:26:46.800
+And that's it.
+
+0:26:46.800,0:26:48.160
+I think I'm not forgetting anything.
+
+0:26:48.160,0:26:50.640
+Maybe if I forget something, I will add it later.
+
+0:26:50.640,0:26:51.480
+Nico: Okay.
+
+0:26:51.480,0:26:55.800
+Albert: So r is in --
+
+0:26:55.800,0:27:08.800
+is a point with log(n) coordinates 
+where VA, VB, VC are field elements
+
+0:27:10.720,0:27:13.856
+x and this commitment is the same as in --
+
+0:27:13.856,0:27:13.872
+Nico: As before.
+
+0:27:13.872,0:27:18.760
+Albert: The original R1CS, 
+and w is the same as before.
+
+0:27:18.760,0:27:23.840
+All right. And then the key property 
+here is that -- is the following.
+
+0:27:23.840,0:27:31.440
+So the instance and the witness 
+are valid if the following holds.
+
+0:27:31.440,0:27:35.040
+So yeah, this will look a bit weird now,
+
+0:27:35.040,0:27:38.080
+but when I explain how a Hypernova works,  
+
+0:27:38.080,0:27:41.380
+it will become clear why we 
+have what I will write in here.
+
+0:27:41.380,0:27:42.200
+Nico: Sounds good.
+
+0:27:42.200,0:27:45.360
+Albert: So we have the multilinear extension of A.
+
+0:27:45.360,0:27:46.520
+Nico: Okay.
+
+0:27:46.520,0:27:48.280
+Albert: Let's discuss later what that means.
+
+0:27:48.280,0:27:49.420
+Nico: Sure.
+
+0:27:49.420,0:27:59.440
+Albert: Evaluated at r and summed 
+over all elements of this hypercube.
+
+0:27:59.440,0:28:01.668
+We will unpack this later.
+
+0:28:01.668,0:28:03.040
+Nico: Okay. I have many questions.
+
+0:28:03.040,0:28:03.880
+Albert: Yes.
+
+0:28:03.880,0:28:14.200
+And the multilinear extension 
+of z at y, this is equal to VA.
+
+0:28:14.200,0:28:15.440
+Nico: Okay.
+
+0:28:15.440,0:28:20.040
+Albert: And then we have 
+the same for B, equal to VB,
+
+0:28:20.040,0:28:23.320
+and the same for C equal to VC.
+
+0:28:23.320,0:28:26.160
+Nico: Okay.
+
+0:28:26.160,0:28:28.120
+Albert: Okay.
+
+0:28:47.520,0:28:54.400
+And of course we have that w is the commitment.
+
+0:28:54.400,0:28:56.857
+Nico: Oh. Same as before.
+
+0:28:56.857,0:28:56.874
+Albert: Yes. Yes.
+
+0:28:56.874,0:28:58.040
+Nico: Okay.
+
+0:29:01.160,0:29:02.580
+Albert: Okay.
+
+0:29:02.580,0:29:05.160
+Nico: So all will become clear in a bit.
+
+0:29:05.160,0:29:06.301
+Albert: Yeah. It will.
+
+0:29:06.301,0:29:06.312
+Nico: Okay.
+
+0:29:06.312,0:29:07.040
+Albert: It will.
+
+0:29:07.040,0:29:10.600
+I'll leave this definition here so we can come  
+
+0:29:10.600,0:29:18.680
+back to it when this makes sense 
+and see, okay, this makes sense.
+
+0:29:18.680,0:29:22.680
+So, yeah, let's unpack a bit what's going on here?
+
+0:29:22.680,0:29:25.360
+So for --
+
+0:29:25.360,0:29:30.680
+I will not define what a multilinear 
+extension is for that there's some module.
+
+0:29:30.680,0:29:31.640
+Nico: Yeah, absolutely.
+
+0:29:31.640,0:29:34.740
+There's the Sum-Check module, 
+where I think we cover this.
+
+0:29:34.740,0:29:46.360
+Albert: Okay. I just mentioned that if 
+you have a map from this set to a field,  
+
+0:29:46.360,0:29:58.040
+then f(X) will denote the 
+multilinear extension of f.
+
+0:29:59.600,0:30:00.200
+Okay?
+
+0:30:00.200,0:30:00.920
+Nico: Yeah.
+
+0:30:00.920,0:30:06.880
+Albert: And I'll be calling this 
+the hypercube of dimension m.
+
+0:30:06.880,0:30:10.060
+Nico: Okay. Fancy naming.
+
+0:30:10.060,0:30:13.140
+Albert: Yeah. Very fancy 
+name for a very simple thing.
+
+0:30:13.140,0:30:15.840
+Nico: It's just all the ones and zeros.
+
+0:30:15.840,0:30:17.912
+All the combinations of 
+zeros and ones. Is that it?
+
+0:30:17.912,0:30:18.840
+Albert: Yes, exactly!
+
+0:30:18.840,0:30:24.540
+Nico: Okay.
+
+0:30:24.540,0:30:30.040
+Albert: All vectors of size m with binary entries.
+
+0:30:30.040,0:30:33.070
+Nico: Okay.
+
+0:30:33.070,0:30:36.965
+Albert: But hypercube is shorter. Right? So --
+
+0:30:36.965,0:30:36.992
+Nico: Yeah. And so is cool.
+
+0:30:36.992,0:30:40.640
+Albert: Even though it's fancy, 
+it's convenient sometimes.
+
+0:30:40.640,0:30:41.720
+Okay.
+
+0:30:41.720,0:30:46.560
+So an important property that is 
+usually needed when dealing with  
+
+0:30:48.720,0:30:54.040
+multivariate or multilinear polynomials,
+or polynomials in general in ZK is  
+
+0:30:54.040,0:31:01.680
+this Schwartz–Zippel lemma, which in this case 
+we only needed four multilinear polynomials.
+
+0:31:01.680,0:31:06.120
+So if g(X) --
+
+0:31:06.120,0:31:11.460
+Oh, and this is a polynomial on n variables.
+
+0:31:11.460,0:31:12.920
+Nico: Okay.
+
+0:31:12.920,0:31:15.815
+So the X here is actually a bunch of small x's?
+
+0:31:15.815,0:31:15.834
+Albert: Yeah. Yeah.
+
+0:31:15.834,0:31:18.312
+Nico: Okay. I see.
+
+0:31:18.312,0:31:21.320
+Albert: I want to avoid writing 
+arrows everywhere all the time.
+
+0:31:21.320,0:31:22.600
+Nico: Sure.
+
+0:31:22.600,0:31:22.920
+Albert: Yeah.
+
+0:31:22.920,0:31:25.960
+And it is multilinear polynomial, 
+as the name indicates.
+
+0:31:25.960,0:31:27.920
+So if g(x) is multilinear  
+
+0:31:31.760,0:31:46.120
+and r is sampled randomly uniformly in Fᵐ,
+
+0:31:48.520,0:32:01.020
+then the probability that g(r) is 
+0 is at most 1 over f -- the size of f.
+
+0:32:01.020,0:32:02.720
+Nico: Okay.
+
+0:32:02.720,0:32:10.120
+So similar to what we had with our univariate 
+polynomials back in our zero testing, I think.
+
+0:32:10.720,0:32:14.100
+So the number of variables 
+doesn't affect this at all?
+
+0:32:14.100,0:32:15.440
+Albert: No, it does not.
+
+0:32:15.440,0:32:16.160
+Nico: Okay.
+
+0:32:16.160,0:32:19.600
+So how are we combining these things?
+
+0:32:19.600,0:32:21.432
+You said it would all make sense. I'm --
+
+0:32:21.432,0:32:21.600
+Albert: Yeah.
+
+0:32:21.600,0:32:22.960
+Nico: Looking forward to seeing it click.
+
+0:32:22.960,0:32:24.920
+Albert: Yeah. Let's do it.
+
+0:32:26.240,0:32:31.040
+So, as I mentioned before, Hypernova --
+
+0:32:31.040,0:32:37.200
+In Hypernova, you apply the first step of the 
+Spartan scheme, the Spartan SNARK from Setty.
+
+0:32:37.200,0:32:41.280
+So I think it would be nice to explain 
+this first step in the context of Spartan.
+
+0:32:41.280,0:32:42.680
+Nico: Sure.
+
+0:32:42.680,0:32:48.000
+Albert: So it's still going to take a while to 
+get to here, but we will get there eventually.
+
+0:32:48.000,0:32:49.040
+Nico: Okay.
+
+0:32:49.040,0:32:49.760
+Albert: Okay.
+
+0:32:49.760,0:32:57.200
+So the Spartan scheme.
+
+0:32:57.200,0:32:58.200
+So the Spartan --
+
+0:32:58.200,0:33:01.600
+Spartan is a SNARK for R1CS relations.
+
+0:33:10.120,0:33:11.120
+And how does it work?
+
+0:33:11.120,0:33:26.480
+Let's say that P has parameters, an instance, and 
+a witness in R R1CS as was described previously.
+
+0:33:26.480,0:33:33.480
+So parameters are a field, the 
+matrices, and some dimensions.
+
+0:33:33.480,0:33:36.160
+X is just x.
+
+0:33:36.160,0:33:41.600
+So a vector of public instances 
+and the W is a vector of witnesses.
+
+0:33:46.480,0:33:52.000
+Okay. I'll leave this here.
+
+0:33:52.000,0:34:03.920
+And now the prover claims that AZ, 
+Hadamard product, BZ equals CZ.
+
+0:34:03.920,0:34:04.560
+So yeah.
+
+0:34:04.560,0:34:07.560
+It claims that AZ, Hadamard product, BZ equals CZ.
+
+0:34:09.400,0:34:13.200
+Is the Hadamard product clear what it means?
+
+0:34:13.200,0:34:17.800
+Nico: You can define it if you think it's helpful?
+
+0:34:17.800,0:34:18.340
+Yeah, absolutely.
+
+0:34:18.340,0:34:23.360
+Albert: It's the component wise 
+multiplication of two vectors.
+
+0:34:23.360,0:34:32.000
+So u, the vector u, say u with t components.
+
+0:34:32.000,0:34:34.180
+And you have vector v with t components.
+
+0:34:34.180,0:34:37.240
+Nico: And we'll do v₁ times u₁.
+
+0:34:37.240,0:34:37.880
+Albert: Yeah.
+
+0:34:37.880,0:34:38.460
+Nico: Okay.
+
+0:34:38.460,0:34:44.640
+Albert: Then u Hadamard v 
+is u₁v₁, blah blah blah.
+
+0:34:44.640,0:34:46.300
+Nico: uₜvₜ.
+
+0:34:46.300,0:34:46.314
+Albert: uₜvₜ.
+
+0:34:46.314,0:34:46.900
+Nico: Okay.
+
+0:34:46.900,0:34:52.040
+Albert: And yeah, notice that because 
+this is matrix-vector multiplication.
+
+0:34:52.040,0:34:53.200
+This is a vector. Right?
+
+0:34:53.200,0:34:54.660
+Nico: Okay.
+
+0:34:54.660,0:34:56.000
+Albert: And this is a vector too.
+
+0:34:56.000,0:34:56.720
+Nico: Yeah.
+
+0:34:56.720,0:34:59.260
+Also reminiscent of I think Justin's episode.
+
+0:34:59.260,0:35:00.160
+Albert: Okay.
+
+0:35:00.160,0:35:03.600
+So this definition applies here 
+because we have two vectors.
+
+0:35:03.600,0:35:06.800
+Nico: Cool.
+
+0:35:06.800,0:35:09.760
+Albert: Okay. Let's switch.
+
+0:35:09.760,0:35:16.160
+Nico: Oh, sorry. Yes.
+
+0:35:16.160,0:35:27.920
+Albert: So now we will transform this 
+claim into a claim about polynomials.
+
+0:35:27.920,0:35:29.360
+Nico: Okay.
+
+0:35:29.360,0:35:49.880
+Albert: But first of all, let's analyze 
+matrix-vector multiplications in polynomial terms.
+
+0:35:49.880,0:35:50.400
+Okay.
+
+0:35:50.400,0:35:56.553
+So let's look at A times z set.
+
+0:35:56.553,0:36:00.620
+By the way, here, z is (x,1,w).
+
+0:36:00.620,0:36:01.800
+Nico: Like before.
+
+0:36:01.800,0:36:02.880
+Albert: Yeah.
+
+0:36:02.880,0:36:04.960
+So let's just look at A times z.
+
+0:36:04.960,0:36:07.080
+Let's also forget about the structure of z.
+
+0:36:07.080,0:36:13.000
+Let's just think of z as one vector 
+instead of a concatenation of three.
+
+0:36:13.000,0:36:17.640
+And yeah. So A --
+
+0:36:17.640,0:36:18.800
+A is a matrix. Right?
+
+0:36:18.800,0:36:26.760
+So A has entries, it's n times n entries matrix.
+
+0:36:26.760,0:36:30.720
+So we can picture the entries like this.
+
+0:36:31.840,0:36:47.640
+But we can also look at A 
+as a vector in F n².
+
+0:36:47.640,0:36:49.000
+Right?
+
+0:36:49.000,0:36:51.280
+Nico: How would you do that?
+
+0:36:51.280,0:36:53.701
+Albert: Because there's n-squared entries.
+
+0:36:53.701,0:36:53.712
+Nico: Okay.
+
+0:36:53.712,0:36:59.640
+Albert: So if we flatten it, we 
+get a vector with n-squared entries.
+
+0:36:59.640,0:37:09.920
+And if we look at A as such a vector, we 
+can consider the multilinear extension of A.
+
+0:37:09.920,0:37:11.480
+Nico: Right.
+
+0:37:11.480,0:37:17.080
+Albert: Which is A times -- not times.
+
+0:37:17.080,0:37:18.720
+A, and then there's variables.
+
+0:37:18.720,0:37:20.600
+I'll denote them.
+
+0:37:20.600,0:37:23.880
+Us Un² --
+
+0:37:23.880,0:37:25.480
+oh, sorry.
+
+0:37:25.480,0:37:30.240
+U log(n²).
+
+0:37:30.240,0:37:30.480
+Right?
+
+0:37:30.480,0:37:34.720
+Because when you take the 
+multilinear extension of a map,  
+
+0:37:34.720,0:37:42.120
+the number of variables you have is the 
+logarithm of the size of the hypercube.
+
+0:37:42.120,0:37:48.560
+So here maybe it's to make it --
+
+0:37:48.560,0:37:55.200
+Maybe this makes it more clear.
+
+0:37:55.200,0:37:59.940
+So this -- there are m elements here.
+
+0:37:59.940,0:38:01.200
+Nico: I see.
+
+0:38:01.200,0:38:03.820
+Because we're combining all the ones
+and zeros.
+
+0:38:03.820,0:38:05.000
+Albert: Yes.
+
+0:38:05.000,0:38:05.840
+Nico: Okay.
+
+0:38:05.840,0:38:10.160
+Albert: So yeah, A is a vector.
+
+0:38:10.160,0:38:22.360
+A is a multilinear polynomial 
+on log(n²) variables.
+
+0:38:22.360,0:38:26.120
+And this is 2 times log n.
+
+0:38:26.120,0:38:33.000
+Okay. So to build the multilinear 
+extension of A, we index --
+
+0:38:33.000,0:38:35.680
+So if we want to build a 
+multilinear extension of A,  
+
+0:38:35.680,0:38:40.600
+we have to index the entries of A with 
+elements from the hypercube, right?
+
+0:38:40.600,0:38:41.160
+Nico: Yes.
+
+0:38:41.160,0:38:42.409
+Albert: So --
+
+0:38:42.409,0:38:42.432
+Nico: That makes sense.
+
+0:38:42.432,0:38:46.000
+Albert: A, w -- u, sorry.
+
+0:38:46.000,0:38:48.160
+So this is u,
+
+0:38:49.400,0:38:55.300
+is the sum of the entries of the vector. Right?
+
+0:38:55.300,0:38:55.312
+Nico: Right.
+
+0:38:55.312,0:38:58.240
+Albert: So I'll put a cloud here for now.
+
+0:38:58.240,0:39:00.040
+Nico: Okay.
+
+0:39:00.040,0:39:10.080
+Albert: Times multilinear extension of the 
+equality function of this index times u.
+
+0:39:10.080,0:39:10.680
+Right?
+
+0:39:10.680,0:39:13.720
+And this is an index --
+
+0:39:13.720,0:39:27.360
+The index runs over the entries of this -- of 
+the hypercube of dimension log n-squared.
+
+0:39:27.360,0:39:29.720
+Nico: Right.
+
+0:39:29.720,0:39:33.980
+Because we said this. Okay.
+
+0:39:33.980,0:39:37.700
+Albert: Right?
+
+0:39:37.700,0:39:37.712
+Nico: Right.
+
+0:39:37.712,0:39:46.240
+Albert: But we can look at this hypercube 
+as hypercube of 2 log(n) dimension.
+
+0:39:46.240,0:39:48.640
+And we can look at this as the 
+direct product of two hypercubes.
+
+0:39:48.640,0:39:53.960
+Nico: Okay.
+
+0:39:53.960,0:40:02.760
+Albert: And then we can think of this part 
+in here as indexing the rows of the matrix
+
+0:40:02.760,0:40:05.700
+and this part as indexing 
+the columns of the matrix.
+
+0:40:05.700,0:40:07.360
+Nico: Okay.
+
+0:40:07.360,0:40:10.600
+So if I look at these as --
+
+0:40:10.600,0:40:11.940
+Sorry, these as bits.
+
+0:40:11.940,0:40:12.560
+Albert: Yes.
+
+0:40:12.560,0:40:15.320
+Nico: These would tell me 
+the bit number of the row?
+
+0:40:15.320,0:40:15.860
+Albert: Yes.
+
+0:40:15.860,0:40:18.240
+Nico: And then same for the column?
+
+0:40:18.240,0:40:27.320
+Okay. 
+
+0:40:33.280,0:40:36.120
+Albert: So we split this hypercube in two chunks.
+
+0:40:36.120,0:40:38.680
+This one and this one.
+
+0:40:38.680,0:40:42.120
+Nico: Okay.
+
+0:40:42.120,0:40:50.280
+Albert: And then this expression in 
+here becomes the following thing.
+
+0:40:50.280,0:41:06.080
+So it's the sum over x in the first hypercube 
+and y in the second hypercube of Axy.
+
+0:41:06.080,0:41:16.400
+So Axy means the entry indexed by the column 
+represented by this element of the hypercube 
+
+0:41:16.400,0:41:17.440
+and --
+
+0:41:17.440,0:41:18.320
+Sorry. Row.
+
+0:41:18.320,0:41:22.080
+And the column indexed by 
+this element of the hypercube.
+
+0:41:22.080,0:41:23.080
+Nico: Okay.
+
+0:41:23.080,0:41:31.040
+Albert: And then there's the equality polynomial 
+multilinear extension of x,y evaluated at --
+
+0:41:31.040,0:41:32.600
+And now we look at u as --
+
+0:41:32.600,0:41:35.800
+We also split u into two tuples.
+
+0:41:35.800,0:41:37.192
+Nico: Okay. So --
+
+0:41:37.192,0:41:38.800
+Albert: X, Y.
+
+0:41:38.800,0:41:50.020
+So here we are writing u as X, Y, 
+where X is a tuple of log(n) variables.
+
+0:41:50.020,0:41:52.352
+Nico: And Y is also --
+
+0:41:52.352,0:41:52.560
+Albert: Yeah.
+
+0:41:52.560,0:41:57.240
+Y is a tuple of log(n) variables.
+
+0:41:59.160,0:42:01.400
+Okay.
+
+0:42:01.400,0:42:05.680
+And this gives us A(X,Y).
+
+0:42:05.680,0:42:07.280
+Nico: Okay.
+
+0:42:07.280,0:42:13.960
+So to summarize this step, what we've done 
+here is the multilinear extension of a matrix.
+
+0:42:13.960,0:42:14.960
+Albert: Yes.
+
+0:42:14.960,0:42:19.800
+And we've written it in a nice way 
+where we know what happens when we --
+
+0:42:19.800,0:42:23.720
+when you replace one part of the variables of  
+
+0:42:23.720,0:42:28.740
+the multilinear extension with an 
+index for a row or for a column.
+
+0:42:28.740,0:42:30.780
+Nico: I see.
+
+0:42:30.780,0:42:33.120
+Albert: Yeah.
+
+0:42:33.120,0:42:46.640
+And notice that in particular, 
+if you take x, y here, of course,  
+
+0:42:46.640,0:42:51.434
+we get that the multilinear 
+extension evaluated at (x,y) is --
+
+0:42:51.434,0:42:52.945
+Nico: The matrix.
+
+0:42:52.945,0:42:53.140
+Albert: Is the entry.
+
+0:42:53.140,0:42:54.680
+Nico: The entry that we wanted.
+
+0:42:54.680,0:42:56.480
+That makes sense.
+
+0:42:56.480,0:42:57.640
+I guess that's the important part.
+
+0:42:57.640,0:42:59.800
+Albert: Yes.
+
+0:42:59.800,0:43:03.480
+Okay.
+
+0:43:03.480,0:43:08.180
+So now that we understand 
+multilinear extensions of matrices.
+
+0:43:08.180,0:43:11.520
+Nico: We're getting one step closer to this!
+
+0:43:11.520,0:43:12.240
+Albert: Yes!
+
+0:43:12.240,0:43:13.590
+Nico: Right.
+
+0:43:13.590,0:43:21.080
+Albert: Slowly but steadily.
+
+0:43:21.080,0:43:24.680
+Okay. So now let's look at Az.
+
+0:43:24.680,0:43:29.160
+So Az is -- what is -- is a vector. Okay?
+
+0:43:29.160,0:43:29.840
+Nico: Right.
+
+0:43:29.840,0:43:35.720
+Albert: And what's say, the 
+i-th entry of this vector?
+
+0:43:35.720,0:43:45.640
+It's the sum, and let's say x-th entry of 
+the vector where x is in the hypercube.
+
+0:43:45.640,0:43:50.440
+Nico: So it's a number, but 
+we write it and it's binary.
+
+0:43:50.440,0:43:50.960
+Albert: Yes.
+
+0:43:50.960,0:43:51.440
+Nico: Okay.
+
+0:43:51.440,0:43:54.940
+Albert: It's just one row. x-th row.
+
+0:43:54.940,0:43:55.760
+Nico: Right.
+
+0:43:55.760,0:44:00.017
+So if I wanted row two, I would 
+have -- You know one zero.
+
+0:44:00.017,0:44:01.890
+Albert: You would have 0, 0, 0, 0, 1. Right?
+
+0:44:01.890,0:44:05.200
+Nico: And then another zero.
+
+0:44:05.200,0:44:06.920
+Yeah. That would be number two.
+
+0:44:06.920,0:44:07.480
+Albert: Yeah.
+
+0:44:07.480,0:44:08.240
+Nico: Cool. Okay.
+
+0:44:08.240,0:44:24.000
+Albert: So the x entry of this vector is the 
+sum of the entries of the matrix A in the row x.
+
+0:44:24.000,0:44:24.660
+Nico: Yeah.
+
+0:44:24.660,0:44:31.472
+Albert: So sum over the column indices, times --
+
+0:44:31.472,0:44:35.300
+Nico: A little bit of linear 
+algebra in the head for our viewers.
+
+0:44:35.300,0:44:36.520
+Albert: Yeah.
+
+0:44:36.520,0:44:37.320
+Nico: Okay.
+
+0:44:37.320,0:44:41.240
+Albert: Times entries in z. Okay?
+
+0:44:41.240,0:44:41.960
+But this is --
+
+0:44:41.960,0:44:44.901
+And we have this at each x.
+
+0:44:44.901,0:44:44.912
+Nico: Yeah.
+
+0:44:44.912,0:44:45.760
+Albert: At each x entry.
+
+0:44:45.760,0:44:46.240
+Nico: Yeah.
+
+0:44:46.240,0:44:52.520
+Albert: But this is the sum 
+over y in this hypercube.
+
+0:44:52.520,0:44:56.060
+So let me write Bⁿ' here for brevity.
+
+0:44:56.060,0:44:57.040
+Nico: Okay.
+
+0:44:57.040,0:45:01.560
+Albert: And then we have the 
+multilinear extension of A(x,y)
+
+0:45:03.320,0:45:07.160
+and then multineal extension of Z(y).
+
+0:45:07.160,0:45:08.500
+Nico: Okay.
+
+0:45:08.500,0:45:09.440
+Albert: Right.
+
+0:45:09.440,0:45:22.640
+So let's write phi A of X to be the 
+math where you sum over this hypercube.
+
+0:45:22.640,0:45:24.660
+You keep this X as a variable.
+
+0:45:24.660,0:45:25.340
+Nico: Okay.
+
+0:45:25.340,0:45:31.554
+Albert: And replace the y's by the entries 
+in the hypercube and multiply by --
+
+0:45:31.554,0:45:31.840
+Nico: Okay.
+
+0:45:31.840,0:45:34.800
+So phi of A is what we just said here.
+
+0:45:34.800,0:45:38.462
+Like when we plug in some X, it gives us that row.
+
+0:45:38.462,0:45:38.474
+Albert: Yes.
+
+0:45:38.474,0:45:38.660
+Nico: Okay.
+
+0:45:38.660,0:45:39.120
+Albert: Yeah.
+
+0:45:39.120,0:45:45.400
+So phi A of a specific X in the 
+hypertube is one of these rows.
+
+0:45:45.400,0:45:46.240
+Nico: Okay.
+
+0:45:46.240,0:45:47.160
+Albert: Right.
+
+0:45:47.160,0:45:52.480
+So phi A of X, and it is a multilinear polynomial.
+
+0:45:52.480,0:45:54.960
+It's easy to see that it is multilinear.
+
+0:45:54.960,0:45:57.160
+Nico: Multilinear or multivariate?
+
+0:45:57.160,0:45:58.280
+Albert: Multilinear.
+
+0:45:58.280,0:46:00.000
+Nico: Oh, multilinear. Okay.
+
+0:46:00.000,0:46:01.440
+Albert: Yes.
+
+0:46:01.440,0:46:02.400
+Nico: Yes.
+
+0:46:02.400,0:46:05.560
+It's the multilinear extension, 
+and that's our only variable.
+
+0:46:05.560,0:46:07.400
+Albert: Yeah. There's only this variable.
+
+0:46:07.400,0:46:08.280
+You can --
+
+0:46:08.280,0:46:12.320
+If you want to do it as an exercise, you can 
+write the multilinear extension expression,  
+
+0:46:12.320,0:46:14.160
+the typical one for both of them,
+
+0:46:14.840,0:46:17.860
+multiply things together and you will see 
+that you get the multilinear polynomial.
+
+0:46:17.860,0:46:19.040
+Nico: I trust you.
+
+0:46:19.040,0:46:26.920
+Albert: So phi of A is the multilinear 
+extension actually of A times z.
+
+0:46:28.480,0:46:30.400
+Nico: Okay.
+
+0:46:30.400,0:46:34.800
+Albert: Because it is a multilinear 
+polynomial on log n variables,
+
+0:46:34.800,0:46:39.400
+and at each entry of the hypercube you 
+get one of these entries of this vector.
+
+0:46:39.400,0:46:43.360
+So by definition, it is the 
+multilinear extension of A times z.
+
+0:46:43.360,0:46:46.000
+Nico: I see.
+
+0:46:46.000,0:46:48.829
+Ah, I think I see where we are going now.
+
+0:46:48.829,0:46:50.600
+Albert: We we are slowly approaching. Yeah.
+
+0:46:50.600,0:46:51.590
+Nico: Yeah.
+
+0:46:51.590,0:46:53.800
+Albert: So recall --
+
+0:46:53.800,0:47:03.080
+So now recall that P claims that 
+Az, Hadamard, Bz is equal to cZ.
+
+0:47:03.080,0:47:04.040
+Okay?
+
+0:47:04.040,0:47:08.301
+So this is an equality between vectors, right?
+
+0:47:08.301,0:47:08.312
+Nico: Yeah.
+
+0:47:08.312,0:47:26.840
+Albert: So this is sum of Axy Zy
+times sum of Bxy Zy  
+
+0:47:29.960,0:47:41.560
+minus sum of Cxy Zy equals 
+the zero vector on all entries.
+
+0:47:41.560,0:47:42.440
+Nico: Okay.
+
+0:47:42.440,0:47:45.080
+So here what you've done is 
+you've moved this to this side
+
+0:47:45.080,0:47:46.660
+and you've put it equal zero.
+
+0:47:46.660,0:47:47.240
+Albert: Yes.
+
+0:47:47.240,0:47:47.940
+Nico: Okay. I see.
+
+0:47:47.940,0:47:50.160
+Albert: And this is an if and only if.
+
+0:47:50.160,0:47:51.150
+Nico: Okay.
+
+0:47:51.150,0:48:02.600
+Albert: But then remember that phi A(X) is 
+the multilinear extension of these vectors.
+
+0:48:02.600,0:48:03.720
+Nico: Right.
+
+0:48:03.720,0:48:05.640
+Albert: So if we consider --
+
+0:48:05.640,0:48:09.680
+So we can see that this holds if and only if the  
+
+0:48:09.680,0:48:15.000
+following expression holds 
+over the whole hypercube.
+
+0:48:15.000,0:48:16.480
+And the expression is the following,
+
+0:48:16.480,0:48:31.040
+is phi A(X) times phi B(X) minus
+phi C(X) equals 0 on all the hypercube.
+
+0:48:31.040,0:48:37.400
+Nico: So if instead of X we replace --
+
+0:48:37.400,0:48:40.420
+for if we test each values of X that is in this.
+
+0:48:40.420,0:48:40.860
+Albert: Yes.
+
+0:48:40.860,0:48:42.340
+Nico: We should get zero all the time.
+
+0:48:42.340,0:48:43.520
+Albert: Yes, exactly.
+
+0:48:43.520,0:48:44.440
+Nico: Okay.
+
+0:48:44.440,0:48:45.800
+Albert: Why is the equivalence true?
+
+0:48:45.800,0:48:49.000
+Because if you replace X, the variable X,  
+
+0:48:49.000,0:48:52.120
+by an element of the hypercube, you 
+precisely get one of these rows.
+
+0:48:52.120,0:48:52.792
+Nico: That makes sense.
+
+0:48:52.792,0:48:57.040
+Albert: So if it is zero, then 
+every, each one of these rows is zero  
+
+0:48:57.040,0:49:01.160
+and the columns is also quite easy to see.
+
+0:49:01.160,0:49:02.600
+Nico: Okay.
+
+0:49:02.600,0:49:07.400
+Albert: All right. So --
+
+0:49:07.400,0:49:08.040
+Maybe let's switch.
+
+0:49:08.040,0:49:09.120
+Nico: Oh, sure.
+
+0:49:09.120,0:49:11.360
+Albert: Thanks.
+
+0:49:11.360,0:49:11.880
+All right.
+
+0:49:11.880,0:49:17.220
+So now let's say that the prover is going to 
+prove this instead of proving this initial claim.
+
+0:49:17.220,0:49:18.280
+Nico: Sure.
+
+0:49:18.280,0:49:26.440
+Albert: So write g(X) to be this thing here.
+
+0:49:26.440,0:49:34.400
+So this is g(X).
+Which is a multivariate polynomial.
+
+0:49:35.520,0:49:37.200
+It's no longer multilinear.
+
+0:49:37.200,0:49:39.760
+Nico: Because we have this multiplication, right?
+
+0:49:39.760,0:49:40.320
+Albert: Yes.
+
+0:49:40.320,0:49:47.940
+Nico: Okay.
+
+0:49:47.940,0:49:51.600
+Albert: All right.
+
+0:49:51.600,0:49:58.760
+So now the prover claims that certain 
+polynomial g is 0 on the whole hypercube.
+
+0:49:58.760,0:50:00.360
+How can we check this?
+
+0:50:00.360,0:50:05.240
+Well, there is a technique called zerocheck
+that allows to check for that.
+
+0:50:05.240,0:50:06.960
+Nico: Okay.
+
+0:50:06.960,0:50:10.180
+I think Justin also covers 
+it in the Sum-Check episode.
+
+0:50:10.180,0:50:13.440
+Albert: Okay. So I will not --
+
+0:50:13.440,0:50:19.480
+I'll just give the overall scheme 
+and I will not explain why it works,
+
+0:50:19.480,0:50:21.700
+but we need -- we need the syntax at least.
+
+0:50:21.700,0:50:22.400
+Nico: Sounds good.
+
+0:50:22.400,0:50:35.520
+Albert: So P and V run the 
+zerocheck protocol for g(X).
+
+0:50:35.520,0:50:48.600
+And to do this, V sends a random 
+point r with log n coordinates.
+
+0:50:48.600,0:50:53.600
+And now P is going to prove that g at r is zero.
+
+0:50:53.600,0:50:54.840
+Nico: Okay.
+
+0:50:54.840,0:50:55.840
+Albert: Oops.
+
+0:50:55.840,0:50:58.640
+Not g at r but --
+
+0:50:58.640,0:51:11.800
+So now P and V run a Sum-Check for the 
+claim that the following expression holds,  
+
+0:51:11.800,0:51:19.160
+which is that g of little x
+and the sum runs over the hypercube.
+
+0:51:19.160,0:51:21.680
+Nico: Okay.
+
+0:51:21.680,0:51:26.960
+Albert: Times the equality polynomial -- 
+multilinear extension of the equality polynomial  
+
+0:51:26.960,0:51:34.440
+evaluated at r and x is zero.
+
+0:51:34.440,0:51:35.960
+This is how you do a zero check.
+
+0:51:35.960,0:51:36.600
+Nico: Okay.
+
+0:51:36.600,0:51:40.300
+Albert: The verifier sends a random point, 
+and then you run a Sum-Check for this claim.
+
+0:51:40.300,0:51:40.880
+Nico: Okay.
+
+0:51:40.880,0:51:44.560
+And this is the Schwartz-Zippel thing 
+you were saying about earlier, right?
+
+0:51:44.560,0:51:45.320
+Albert: Yes.
+
+0:51:45.320,0:51:50.960
+If this is zero, then, except with negligible 
+probability, g vanishes on the whole hypercube.
+
+0:51:50.960,0:51:52.940
+Nico: And this is what we wanted.
+
+0:51:52.940,0:51:55.600
+Albert: Yes, exactly. g is this.
+
+0:51:55.600,0:51:56.080
+Nico: Yeah.
+
+0:51:56.080,0:51:56.520
+Albert: Okay.
+
+0:51:56.520,0:51:56.844
+Nico: Cool.
+
+0:51:56.844,0:52:17.320
+Albert: And the Sum-Check reduces the 
+initial claim, this, to the claim g of r.
+
+0:52:17.320,0:52:30.920
+g of r' is equal to v for 
+certain r' point and v.
+
+0:52:30.920,0:52:35.440
+And this r' and v are determined during 
+the execution of this Sum-Check.
+
+0:52:35.440,0:52:36.700
+Nico: That makes sense.
+
+0:52:36.700,0:52:38.400
+Albert: Okay. So --
+
+0:52:38.400,0:52:40.640
+So far we have reduced the initial claim about the  
+
+0:52:40.640,0:52:45.920
+R1CS relation into a claim about 
+an evaluation of a polynomial.
+
+0:52:45.920,0:52:47.150
+Nico: Yeah.
+
+0:52:47.150,0:52:51.080
+Albert: Now the prover has to 
+prove that g of r' is v.
+
+0:52:52.080,0:53:09.160
+But g of r prime is phi A(r'),
+phi B(r') minus phi C(r').
+
+0:53:09.160,0:53:10.280
+Nico: Okay.
+
+0:53:10.280,0:53:10.920
+Albert: Okay.
+
+0:53:10.920,0:53:26.600
+So now P provides values 
+VA, VB, VC to the verifier,
+
+0:53:26.600,0:53:35.060
+and it claims that phi A(r') is VA,
+phi B(r') is VB, and phi C(r') is VC.
+
+0:53:35.060,0:53:37.480
+Nico: Are these the same that we have in here?
+
+0:53:37.480,0:53:38.280
+Albert: Yes.
+
+0:53:38.280,0:53:39.232
+Nico: Nice.
+
+0:53:39.232,0:53:48.320
+Albert: So V checks that 
+VA times VB minus VC is V.
+
+0:53:48.320,0:53:48.720
+Okay?
+
+0:53:49.480,0:54:02.600
+And now P is left to prove 
+that phi A(r') is VA,  
+
+0:54:02.600,0:54:09.800
+phi B(r') is VB, 
+and phi C(r') is VC.
+
+0:54:09.800,0:54:14.040
+Nico: This looks suspiciously 
+close to what we have in here.
+
+0:54:14.040,0:54:14.520
+Albert: Yeah.
+
+0:54:14.520,0:54:19.580
+If we unpack the definition of 
+phi A, we precisely get this.
+
+0:54:19.580,0:54:21.080
+Nico: Where do we have it?
+
+0:54:21.080,0:54:22.760
+Oh, phi A defined here.
+
+0:54:22.760,0:54:25.680
+If we replace X by r'.
+
+0:54:25.680,0:54:26.360
+Albert: Yeah.
+
+0:54:26.360,0:54:27.120
+Nico: Got you.
+
+0:54:27.120,0:54:31.000
+If you replace X by r'
+here, phi A, you precisely  
+
+0:54:31.000,0:54:34.160
+get this expression with r' instead of r.
+
+0:54:34.160,0:54:35.060
+Nico: Okay.
+
+0:54:35.060,0:54:35.640
+Albert: Okay.
+
+0:54:35.640,0:54:40.440
+Nico: So is it fair to say 
+that this Racc is actually --
+
+0:54:40.440,0:54:46.280
+We try to prove this, we do the zerocheck
+and we leave the rest unchecked.
+
+0:54:46.280,0:54:47.000
+Albert: Yes.
+
+0:54:47.000,0:54:47.600
+Nico: Okay.
+
+0:54:47.600,0:54:50.380
+Albert: So the prover wants to prove this.
+
+0:54:50.380,0:54:50.960
+Nico: Okay.
+
+0:54:50.960,0:54:52.720
+Albert: Prover and verifier exchange messages.
+
+0:54:52.720,0:54:56.320
+They do all this, and they 
+are left with this claim.
+
+0:54:56.320,0:54:57.500
+Nico: Yeah.
+
+0:54:57.500,0:54:58.040
+Albert: Okay.
+
+0:54:58.040,0:55:00.160
+But this claim is precisely this.
+
+0:55:00.160,0:55:05.120
+So they are left with an instance 
+witness pair for this relation.
+
+0:55:05.120,0:55:06.000
+Nico: Nice.
+
+0:55:06.000,0:55:06.267
+Okay.
+
+0:55:06.267,0:55:06.280
+Albert: Okay.
+
+0:55:06.280,0:55:09.500
+So this is the first step of the Spartan protocol.
+
+0:55:09.500,0:55:10.260
+Nico: Okay.
+
+0:55:10.260,0:55:13.760
+Albert: The first step of the Spartan 
+protocol takes the initial claim
+
+0:55:13.760,0:55:17.440
+and reduces it to a claim about 
+belonging to this relation.
+
+0:55:17.440,0:55:18.560
+Nico: Okay.
+
+0:55:18.560,0:55:20.480
+So how does this relate to folding?
+
+0:55:20.480,0:55:21.820
+Why did we do all this?
+
+0:55:21.820,0:55:26.520
+Albert: Well, it is actually very 
+nice because this relation is very  
+
+0:55:26.520,0:55:29.360
+easy to fold because it's 
+really a linear relation.
+
+0:55:29.360,0:55:29.760
+Right?
+
+0:55:29.760,0:55:31.700
+Nico: Why does that make it easy to fold?
+
+0:55:31.700,0:55:32.920
+Albert: Because when you fold,  
+
+0:55:33.760,0:55:39.080
+the way folding usually is done is you take 
+a random linear combination of the witness.
+
+0:55:39.080,0:55:43.960
+And then in Nova, for example, 
+the relation is quadratic.
+
+0:55:43.960,0:55:44.548
+Nico: Yes.
+
+0:55:44.548,0:55:48.680
+Albert: And this introduces -- this causes 
+a mess because the relation is not linear.
+
+0:55:48.680,0:55:54.440
+So taking linear combinations of witnesses is 
+not compatible with your original equation.
+
+0:55:54.440,0:55:57.382
+Nico: That's why we had all 
+this error term situation.
+
+0:55:57.382,0:55:57.394
+Albert: Yes.
+
+0:55:57.394,0:55:58.500
+Nico: And -- okay.
+
+0:55:58.500,0:56:00.960
+Albert: But if your original 
+constraints are linear,  
+
+0:56:00.960,0:56:05.940
+taking linear combinations of solutions gives 
+you solutions to the original constraint.
+
+0:56:05.940,0:56:06.880
+Nico: Right.
+
+0:56:06.880,0:56:08.960
+Albert: Without changing the constraint.
+
+0:56:08.960,0:56:11.000
+Nico: Right.
+
+0:56:11.000,0:56:12.080
+Could you maybe show us?
+
+0:56:12.080,0:56:15.720
+Albert: Yes.
+
+0:56:15.720,0:56:29.840
+Now, Hypernova, say we have an 
+instance from the committed R1CS.
+
+0:56:30.680,0:56:48.920
+So we have W and then we have pp, X',
+W' in R linearized R1CS.
+
+0:56:48.920,0:56:50.581
+And everything is committed.
+
+0:56:50.581,0:56:50.592
+Nico: Okay.
+
+0:56:50.592,0:56:53.360
+Albert: Let's forget about commitments.
+
+0:56:53.360,0:56:58.000
+And then what prover and 
+verifier do is the following.
+
+0:56:58.000,0:57:00.560
+P and V --
+
+0:57:00.560,0:57:02.440
+Okay. It's not exactly --
+
+0:57:02.440,0:57:06.840
+There's a small thing that has to 
+be done that I will explain later.
+
+0:57:06.840,0:57:08.360
+Nico: Okay.
+
+0:57:08.360,0:57:11.800
+Albert: But mostly Hypernova works as follows.
+
+0:57:11.800,0:57:17.280
+P and V run what? The protocol I just described.
+
+0:57:17.280,0:57:19.152
+Nico: So this whole zero check --
+
+0:57:19.152,0:57:19.480
+Albert: Yes.
+
+0:57:19.480,0:57:20.360
+Nico: Part.
+
+0:57:20.360,0:57:23.140
+Well, partial, I guess, zero check up to here.
+
+0:57:23.140,0:57:23.880
+Albert: Yeah.
+
+0:57:23.880,0:57:26.160
+Nico: I see.
+
+0:57:30.920,0:57:31.920
+Albert:  
+
+0:57:31.920,0:57:44.560
+To transform this instance into 
+a linearized R1CS instance.
+
+0:57:44.560,0:57:58.480
+Into, let's call it X₀, W₀ in R linearized R1CS.
+
+0:57:58.480,0:58:02.560
+And now Prover and Verifier 
+are left with folding two  
+
+0:58:02.560,0:58:05.320
+instance readiness pairs from the linearized R1CS.
+
+0:58:05.320,0:58:06.880
+Nico: Which is this thing?
+
+0:58:06.880,0:58:07.420
+Albert: Yes.
+
+0:58:07.420,0:58:11.200
+Albert: So let's write what they are.
+
+0:58:11.200,0:58:25.000
+There's X₀ -- X₀, r₀, VA₀, VB₀, VC₀
+
+0:58:25.000,0:58:35.040
+and x¹ or x' -- x', r',
+VA', VB', VC'.
+
+0:58:35.040,0:58:39.200
+Nico: So here you're ignoring the commitments 
+just because we don't really need them or?
+
+0:58:39.200,0:58:40.960
+Albert: No. We should add the commitments here.
+
+0:58:40.960,0:58:43.440
+But I'm ignoring them for simplicity.
+
+0:58:43.440,0:58:44.520
+Nico: Okay.
+
+0:58:44.520,0:58:46.280
+Albert: Or maybe I should add them.
+
+0:58:46.280,0:58:47.240
+Let's add them.
+
+0:58:47.240,0:58:49.120
+All right.
+
+0:58:49.120,0:58:56.280
+So commitment to witness w₀, 
+commitment to witness w'.
+
+0:58:56.280,0:59:02.040
+Okay. So there are two cases here.
+
+0:59:02.040,0:59:05.160
+Whether the evaluation point is the 
+same or whether it is different.
+
+0:59:05.160,0:59:05.740
+Nico: Okay.
+
+0:59:05.740,0:59:08.360
+Albert: I'm going to assume 
+that it is the same for now.
+
+0:59:08.360,0:59:13.190
+Nico: Sure.
+
+0:59:13.190,0:59:21.640
+Albert: And we will discuss 
+what happens if it is not.
+
+0:59:21.640,0:59:23.160
+Nico: Maybe we should keep this.
+
+0:59:23.160,0:59:23.640
+Albert: Yes.
+
+0:59:23.640,0:59:26.040
+Nico: It's been useful for 
+me at least for reference.
+
+0:59:26.040,0:59:31.280
+Albert: Yes, I delete this. Delete this.
+
+0:59:31.280,0:59:35.960
+Okay. So we know that these and these are true.
+
+0:59:35.960,0:59:37.960
+If and only if.
+
+0:59:37.960,0:59:45.280
+I'm gonna focus on the A part, but everything 
+applies to the other equation. Yes.
+
+0:59:45.280,1:00:06.840
+So we know that sum of A(r,y) Z₀(y) is equal to VA₀
+and sum of A(r,y) Z'(y) is equal to VA'.
+
+1:00:06.840,1:00:12.840
+And here Z₀ is X₀, 1, witness 0.
+
+1:00:12.840,1:00:16.440
+Z' is x', 1, witness prime.
+
+1:00:16.440,1:00:17.000
+Nico: Right.
+
+1:00:17.000,1:00:19.960
+And here the sum is over what?
+
+1:00:19.960,1:00:21.520
+Albert: Over the hypercube.
+
+1:00:21.520,1:00:22.680
+Nico: Okay.
+
+1:00:22.680,1:00:24.760
+So as in our statement here. Absolutely.
+
+1:00:24.760,1:00:25.960
+Albert: Yes.
+
+1:00:31.120,1:00:35.920
+So folding now proceeds similarly as in Nova.
+
+1:00:35.920,1:00:43.240
+Verifier sends a random challenge, 
+random element, alpha in the field.
+
+1:00:43.240,1:00:44.300
+Nico: Okay.
+
+1:00:44.300,1:00:55.200
+Albert: And now notice that if you take a 
+random linear combination of Z₀ and Z',
+
+1:00:56.320,1:01:02.440
+then you keep the same identity with 
+the random linear combination if you  
+
+1:01:02.440,1:01:05.880
+add a corresponding random 
+linear combination in here.
+
+1:01:05.880,1:01:06.960
+Nico: Right.
+
+1:01:06.960,1:01:09.379
+Because we can factor things. Right?
+
+1:01:09.379,1:01:09.391
+Albert: Yes.
+
+1:01:09.391,1:01:10.360
+Nico: Is that correct?
+
+1:01:10.360,1:01:12.474
+Albert: So we have that --
+
+1:01:12.474,1:01:13.720
+Nico: Actually, I'll move to the other side.
+
+1:01:13.720,1:01:16.680
+Albert: Yeah.
+
+1:01:16.680,1:01:19.880
+So it is very easy to see 
+that if these two things hold,  
+
+1:01:19.880,1:01:35.460
+then the sum of A(r,y) times Z₀(y) plus alpha 
+Z'(y) is equal to VA plus alpha VA'.
+
+1:01:35.460,1:01:41.120
+Nico: So just to visualize, if we 
+distribute this, we have this sum up here.
+
+1:01:41.120,1:01:41.640
+Albert: Yes.
+
+1:01:41.640,1:01:44.060
+Nico: Plus alpha times that sum.
+
+1:01:44.060,1:01:44.560
+Albert: Yes.
+
+1:01:44.560,1:01:46.560
+Nico: And it's actually these results.
+
+1:01:46.560,1:01:47.360
+Okay, cool.
+
+1:01:47.360,1:01:48.360
+Albert: Yes.
+
+1:01:48.360,1:01:56.200
+So the accumulated witness 
+will come from the accumulated  
+
+1:01:56.200,1:02:04.780
+Z₃, which will be Z₀ plus alpha Z'.
+
+1:02:04.780,1:02:05.960
+Nico: Right.
+
+1:02:05.960,1:02:08.480
+Albert: Which is X₀, 1 --
+
+1:02:08.480,1:02:12.280
+Nico: w₀.
+
+1:02:12.280,1:02:18.280
+Albert: w₀ plus alpha(X', 1, w').
+
+1:02:18.280,1:02:19.280
+Nico: Okay.
+
+1:02:19.280,1:02:20.240
+Albert: Okay.
+
+1:02:20.240,1:02:21.960
+So, yeah --
+
+1:02:21.960,1:02:23.560
+Nico: So we had --
+
+1:02:23.560,1:02:24.580
+These two are the same.
+
+1:02:24.580,1:02:25.080
+Albert: Yes.
+
+1:02:25.080,1:02:27.520
+Nico: These two we update like this.
+
+1:02:27.520,1:02:28.360
+Albert: Yes.
+
+1:02:28.360,1:02:30.260
+Nico: These we've updated there.
+
+1:02:30.260,1:02:31.794
+Albert: Yeah. And --
+
+1:02:31.794,1:02:32.640
+Nico: What about the commitments?
+
+1:02:32.640,1:02:34.360
+Albert: The new value for --
+
+1:02:34.360,1:02:42.640
+The accumulated value for A is 
+going to be VA₀ plus alpha VA'.
+
+1:02:42.640,1:02:44.040
+Nico: Okay. Yeah.
+
+1:02:44.040,1:02:50.160
+Albert: And for the commitments, 
+commitment to the w₃ is just the  
+
+1:02:50.160,1:02:56.040
+commitment to the linear combination 
+of the two witnesses we started with,
+
+1:02:56.040,1:02:59.360
+which can be computed using 
+the homomorphic property.
+
+1:02:59.360,1:03:01.520
+Nico: Okay.
+
+1:03:01.520,1:03:06.752
+So if I add two commitments together, 
+I get the commitment of the sum.
+
+1:03:06.752,1:03:08.440
+Albert: Yeah.
+
+1:03:08.440,1:03:11.080
+Nico: Cool.
+
+1:03:11.080,1:03:16.480
+So we did this protocol to go 
+from R1CS to linearized R1CS,
+
+1:03:16.480,1:03:17.110
+Albert: Yes.
+
+1:03:17.110,1:03:19.220
+Nico: Because it's very easy to do this.
+
+1:03:19.220,1:03:20.600
+Albert: Yeah.
+
+1:03:20.600,1:03:22.752
+Nico: Okay. And that's our folding scheme.
+
+1:03:22.752,1:03:26.080
+Albert: And the step that goes from R1CS into here  
+
+1:03:26.080,1:03:30.120
+can be generalized to high degree 
+without paying too much of an overhead.
+
+1:03:30.120,1:03:33.840
+You just do a Sum-Check. 
+You do a similar reduction.
+
+1:03:34.400,1:03:37.640
+There's also the nice thing that 
+you don't commit to any error terms.
+
+1:03:37.640,1:03:39.960
+There's no error terms 
+appearing anywhere, actually.
+
+1:03:39.960,1:03:40.460
+Nico: Right.
+
+1:03:40.460,1:03:44.200
+Albert: Because when you actually do the 
+folding, you are folding a linear relation,
+
+1:03:44.200,1:03:46.640
+which is super simple to do.
+
+1:03:46.640,1:03:48.640
+Nico: Okay. Well, simple.
+
+1:03:48.640,1:03:50.234
+Albert: Yeah, well.
+
+1:03:50.234,1:03:51.680
+Nico: This part is simple,
+
+1:03:51.680,1:03:54.520
+but I think going down to 
+here was a bit, you know.
+
+1:03:54.520,1:03:57.400
+Albert: Yeah. But going down to here was the --
+
+1:03:57.400,1:03:59.200
+It was not folding the linear part. Right?
+
+1:03:59.200,1:04:00.680
+Nico: True, true, true, true.
+
+1:04:00.680,1:04:01.240
+Albert: Yeah.
+
+1:04:02.120,1:04:06.040
+There's one thing left, which 
+is when r₀ is not r'.
+
+1:04:06.040,1:04:11.200
+And Hypernova uses a really nice 
+trick to deal with this issue.
+
+1:04:11.200,1:04:12.000
+Nico: Cool.
+
+1:04:12.000,1:04:16.200
+So let's maybe wrap up how the 
+Hypernova folding scheme works
+
+1:04:16.200,1:04:18.320
+and then wrap up the whole module, maybe.
+
+1:04:18.320,1:04:18.960
+Albert: Okay.
+
+1:04:18.960,1:04:26.480
+So the Hypernova scheme folds CCS 
+instances into linearized CCS instances.
+
+1:04:27.160,1:04:33.760
+We wrote the scheme for instead of CCSs for R1CSs.
+
+1:04:33.760,1:04:36.920
+The way it works is first it uses a Sum-Check
+
+1:04:36.920,1:04:42.040
+and a smart way of expressing 
+the initial R1CS constraint in  
+
+1:04:42.040,1:04:45.560
+terms of polynomials and in terms of a zerocheck.
+
+1:04:45.560,1:04:48.680
+So in terms of a claim about a polynomial,  
+
+1:04:48.680,1:04:51.080
+multivariate polynomial 
+being zero on the hypercube,
+
+1:04:51.080,1:04:55.000
+and then use a zerocheck which uses 
+the Sum-Check to prove this claim.
+
+1:04:55.000,1:04:58.320
+And we saw that when you use 
+the zerocheck for this claim,
+
+1:04:58.320,1:05:03.160
+you end up with a so-called linearized 
+R1CS relation which looks like this.
+
+1:05:03.840,1:05:08.480
+And then we saw that if you have 
+two linearized R1CS relations,  
+
+1:05:08.480,1:05:10.280
+it's very easy to fold them together.
+
+1:05:10.280,1:05:16.800
+You just send a random challenge and take random 
+-- take the linear combination of everything.
+
+1:05:16.800,1:05:18.320
+Nico: Okay.
+
+1:05:18.320,1:05:20.920
+Albert: Yeah, we left --
+
+1:05:20.920,1:05:24.280
+We make an assumption while describing 
+the scheme, which is a strong assumption,
+
+1:05:24.280,1:05:28.760
+you have to deal with the general case where 
+the two evaluation points are not the same.
+
+1:05:28.760,1:05:33.560
+The trick in Hypernova where this 
+is dealt with, it's really nice.
+
+1:05:33.560,1:05:36.260
+I recommend everybody to check it out.
+
+1:05:36.260,1:05:37.080
+Nico: Sounds good.
+
+1:05:37.080,1:05:38.860
+Albert: And yeah, that's 
+the overview of Hypernova.
+
+1:05:38.860,1:05:39.840
+Nico: Amazing!
+
+1:05:39.840,1:05:52.640
+Thank you very much!

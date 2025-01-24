@@ -1,0 +1,3555 @@
+0:00:08.000,0:00:10.000
+S2 Module 4: RISC-V ZKVMs with Uma Roy
+
+0:00:10.742,0:00:13.840
+Tracy: Hello, welcome to ZK Whiteboard Sessions.
+
+0:00:13.840,0:00:17.520
+We're doing a module today on RISC-V zkVMs.
+
+0:00:17.520,0:00:20.360
+I'm Tracy, I'm here today with Uma.
+
+0:00:20.360,0:00:24.520
+I'm the co-founder of a company called Pluto 
+and we're building cryptography tools for devs.
+
+0:00:24.520,0:00:28.080
+And Uma is the co-founder of 
+Succinct, which is building a zkVM.
+
+0:00:28.080,0:00:33.000
+So we're going to dive into some of the details 
+of how zkVMs work and hopefully explain them.
+
+0:00:33.000,0:00:38.460
+Uma, you want to start us out maybe with an 
+introduction to zkVMs and what they're good for?
+
+0:00:38.460,0:00:39.800
+Uma: Yeah, for sure.
+
+0:00:39.800,0:00:44.840
+So maybe we can start off by talking 
+about what does "zkVM" stand for?
+
+0:00:44.840,0:00:47.400
+It stands for Zero-Knowledge Virtual Machine.
+
+0:00:47.400,0:00:52.920
+And what that means is that if you 
+are used to a previous area of ZK,  
+
+0:00:52.920,0:00:57.320
+typically you would write a circuit 
+for your computation where basically  
+
+0:00:57.320,0:01:01.880
+you take your computation or function that 
+you want to generate a ZK proof of and you  
+
+0:01:01.880,0:01:06.200
+write a fixed computational graph for 
+it that a lot of people call circuits.
+
+0:01:06.200,0:01:13.280
+In a zkVM, you have a program, you compile 
+it to some ISA instruction set and then  
+
+0:01:13.280,0:01:16.400
+you prove the execution of that instruction set.
+
+0:01:16.400,0:01:21.800
+So you have a circuit that proves the 
+execution, in our case of a RISC-V ISA
+
+0:01:21.800,0:01:30.120
+and then you prove programs that are 
+compiled to that ISA instead of circuits. 
+
+0:01:30.120,0:01:31.240
+Tracy: Got it.
+
+0:01:31.240,0:01:35.100
+And so that's easier than writing a circuit?
+
+0:01:35.100,0:01:36.080
+Uma: Yeah.
+
+0:01:36.080,0:01:41.360
+So the main point of zkVMs is that 
+writing a circuit is very difficult,
+
+0:01:41.360,0:01:43.360
+it's very annoying.
+
+0:01:43.360,0:01:48.320
+With zkVM, you can just write a program 
+in a normal programming language  
+
+0:01:48.320,0:01:52.840
+or a ZK-specific programming language and 
+then you don't have to write a circuit.
+
+0:01:52.840,0:01:56.880
+The zkVM just takes care of 
+all the ZK stuff for you.
+
+0:01:56.880,0:01:58.120
+Tracy: Got it.
+
+0:01:58.120,0:01:58.760
+Cool.
+
+0:01:58.760,0:01:59.840
+Maybe we could get into,  
+
+0:02:00.680,0:02:06.080
+I guess, like a high level overview of the 
+core pieces of it and how they work together.
+
+0:02:06.080,0:02:07.280
+Uma: Yeah.
+
+0:02:07.280,0:02:13.880
+So the general pipeline of a RISC-V zkVM, 
+in our case, is we take normal Rust code.
+
+0:02:13.880,0:02:18.760
+So you have Rust here, and you just 
+have totally normal Rust codes.
+
+0:02:18.760,0:02:27.920
+So for example, you can have like for -- 
+and this is going to be some pseudocode.
+
+0:02:27.920,0:02:30.031
+Maybe I just compute like --
+
+0:02:30.031,0:02:31.860
+Tracy: The sum or something.
+
+0:02:31.860,0:02:34.240
+Uma: Yeah. The sum.
+
+0:02:37.880,0:02:39.920
+And then basically --
+
+0:02:39.920,0:02:46.120
+Yeah. So we have some normal code 
+and then it gets compiled to RISC-V.
+
+0:02:46.120,0:02:51.920
+So RISC-V stands for Reduced Instruction Set.
+
+0:02:51.920,0:02:57.320
+It's a small open source instruction set 
+with a very small number of instructions.
+
+0:02:57.320,0:02:58.520
+That's why it's called reduced.
+
+0:02:58.520,0:03:05.840
+I believe it's like maybe in the around 30 
+or 40 instructions, something like that.
+
+0:03:05.840,0:03:08.760
+And it's a standard target of the Rust compiler.
+
+0:03:08.760,0:03:13.560
+So you don't need to do anything to the 
+compiler. It's a standard supported target.
+
+0:03:13.560,0:03:16.960
+A lot of people use it for like other applications other than zkVM.
+
+0:03:16.960,0:03:20.680
+So like embedded 
+devices and things like that.
+
+0:03:20.680,0:03:22.240
+So we just have normal code,  
+
+0:03:22.240,0:03:27.320
+we use the regular Rust compiler and 
+then we get a bunch of RISC-V byte code.
+
+0:03:27.320,0:03:35.840
+So your program over here turns
+into something called an ELF.
+
+0:03:35.840,0:03:38.920
+And the ELF is basically like these series of
+RISC-V instructions that your program gets compiled into.
+
+0:03:43.400,0:03:47.680
+And so for example, you could
+have a really simple program,
+
+0:03:48.240,0:03:51.840
+and I'm just gonna have like 
+a few instructions here.
+
+0:03:51.840,0:03:55.840
+So, for example, one of the 
+standard instructions is like ADD,
+
+0:03:55.840,0:03:58.840
+and in this case ADDI stands for ADD Immediate.
+
+0:03:58.840,0:04:04.520
+RISC-V has this notion of registers 
+where you have, I believe,
+
+0:04:04.520,0:04:09.240
+30 something registers, and each register --
+
+0:04:09.240,0:04:11.240
+generally instructions operate over registers.
+
+0:04:11.240,0:04:13.920
+So you might have something like this,
+
+0:04:15.360,0:04:23.640
+where I'm going to add -- or let's 
+do actually something like this.
+
+0:04:25.160,0:04:28.440
+I'm going to add the value in the 0th register,
+x0,
+
+0:04:28.440,0:04:34.120
+I'm going to ADD the constant 5, and then 
+I'm going to store it in the 29th register.
+
+0:04:34.120,0:04:36.680
+So that's kind of what this 
+instruction represents.
+
+0:04:36.680,0:04:40.440
+So I might do that again.
+
+0:04:40.440,0:04:44.749
+Tracy: And all of these concepts, these are 
+all traditional computer science concepts.
+
+0:04:44.749,0:04:47.640
+Uma: Yeah. There's nothing 
+ZK specific going on here.
+
+0:04:48.160,0:04:54.120
+And then maybe I'll AND the values 
+and the 29th and 30th register,  
+
+0:04:54.120,0:04:56.160
+and then put it in like the 27th register.
+
+0:04:56.160,0:05:00.080
+So for example, you might have 
+instructions that look like this.
+
+0:05:00.080,0:05:03.600
+And this is all contained in your ELF file.
+
+0:05:03.600,0:05:05.280
+So that's like the, you know,
+
+0:05:05.280,0:05:10.320
+kind of a representation of your program
+in terms of these RISC-V instructions.
+
+0:05:10.320,0:05:11.993
+And then once you have your program --
+
+0:05:11.993,0:05:15.463
+Tracy: And normally, I guess
+this is meant to be run on a CPU.
+
+0:05:15.463,0:05:15.473
+Uma: Yeah.
+
+0:05:15.473,0:05:18.880
+Tracy: So like, this is a file
+for a CPU
+
+0:05:18.880,0:05:20.580
+and then you're going to do something special with this file.
+
+0:05:20.580,0:05:22.360
+Uma: Yeah, exactly.
+
+0:05:22.360,0:05:30.360
+Then we have our zkVM, which basically
+is going to prove that when you run this program
+
+0:05:30.360,0:05:36.520
+with a specific set of inputs,
+that it results in a particular output.
+
+0:05:36.520,0:05:42.180
+And so in then our case, we take the ELF, we
+run it through a zkVM, and out we get a proof.
+
+0:05:42.180,0:05:43.840
+Tracy: Awesome.
+
+0:05:43.840,0:05:44.960
+Okay. This looks good.
+
+0:05:44.960,0:05:50.680
+So this is maybe like not the 
+classic CPU instruction set, right?
+
+0:05:50.680,0:05:52.560
+Normally, when you make a Rust 
+program, you don't get this.
+
+0:05:52.560,0:05:56.800
+You get like x86 or something, and here 
+you're using this special instruction set
+
+0:05:56.800,0:05:59.640
+which is maybe a little easier 
+to use when generating the proof.
+
+0:06:00.880,0:06:01.380
+Cool.
+
+0:06:01.380,0:06:02.672
+I think this makes sense to me
+
+0:06:02.672,0:06:03.172
+And so maybe we should dive into, like, what does 
+it take to make a proof and an example of a proof?
+
+0:06:03.172,0:06:11.591
+Uma: Yeah. Sounds good.
+
+0:06:11.591,0:06:13.444
+So we --
+
+0:06:14.116,0:06:17.126
+Yeah. The compilation part is actually very easy,
+
+0:06:17.126,0:06:19.652
+because we're using the is like standard compilation target.
+
+0:06:19.652,0:06:21.920
+Tracy: Do you have to make any modifications to it?
+
+0:06:21.920,0:06:25.760
+It's really just run Rust with a target's flag.
+
+0:06:25.760,0:06:28.557
+Uma: You basically just run 
+Rust with the target flag.
+
+0:06:28.557,0:06:30.320
+Tracy: That's cool.
+
+0:06:30.320,0:06:39.200
+So, yeah, once we have our ELF, then we 
+actually have to do all the ZK stuff.
+
+0:06:39.200,0:06:41.560
+Okay. So maybe we can dive into how that works.
+
+0:06:41.560,0:06:47.400
+So we have an ELF that has like the instructions.
+
+0:06:47.400,0:06:52.080
+So let's go back to that world.
+
+0:06:56.600,0:07:07.000
+So the first thing we do when we have this 
+ELF, and this program, is we execute it.
+
+0:07:07.000,0:07:11.640
+So we have some sort of runtime, like an --
+
+0:07:11.640,0:07:14.720
+We have a RISC-V emulator.
+
+0:07:14.720,0:07:23.800
+So we have a runtime/emulator, and 
+we actually just execute the ELF,
+
+0:07:23.800,0:07:26.160
+and we execute each of the instructions.
+
+0:07:26.160,0:07:29.160
+One important thing to 
+understand here is like, you --
+
+0:07:29.160,0:07:32.920
+Or one question you might ask is, well, how 
+do we know which instruction to execute?
+
+0:07:32.920,0:07:35.880
+So you have a start program counter --
+
+0:07:35.880,0:07:38.640
+So you have this notion of a program counter
+
+0:07:38.640,0:07:43.440
+which tells you which instruction in the
+ELF you should actually execute.
+
+0:07:43.440,0:07:45.280
+And the program counter is
+literally just a number,
+
+0:07:45.280,0:07:49.280
+and then you use that number to index into 
+your ELF, which is just a list of instructions.
+
+0:07:49.280,0:07:50.360
+So it's really simple.
+
+0:07:50.360,0:07:55.480
+You index into this list, you grab an 
+instruction, and then you execute the instruction.
+
+0:07:55.480,0:08:00.840
+And so, first, you do execution
+with this like emulator.
+
+0:08:00.840,0:08:10.080
+So there's the execution phase, and that's
+dictated by the start program counter.
+
+0:08:10.080,0:08:18.200
+Then you basically have a while loop, that 
+will get the latest instruction.
+
+0:08:18.200,0:08:25.760
+So it'll fetch the instruction and then it'll execute
+the instruction, depending on what it is.
+
+0:08:25.760,0:08:30.520
+And then at the end, there's a
+halt instruction, or there's --
+
+0:08:30.520,0:08:32.680
+There's a way to signal that
+the program is terminated.
+
+0:08:32.680,0:08:33.360
+So with --
+
+0:08:33.360,0:08:39.440
+So you generally call like halt with some exit
+code, and then that's when the program stops.
+
+0:08:39.440,0:08:45.000
+So you might ask, okay, given a particular
+opcode that -- or instruction that I'm executing,
+
+0:08:45.000,0:08:47.680
+how do I figure out what's the
+next instruction to execute?
+
+0:08:47.680,0:08:50.560
+Typically, for example, for ADD instructions,
+
+0:08:50.560,0:08:54.800
+you just increment the program counter
+and execute the next instruction.
+
+0:08:54.800,0:08:58.200
+But sometimes there's things like "JUMP".
+
+0:08:58.200,0:08:58.840
+So there --
+
+0:08:58.840,0:09:02.360
+For example, the JAL opcode 
+stands for "JUMP and LINK".
+
+0:09:02.360,0:09:04.960
+So this happens in like, FOR
+loops and function calls,
+
+0:09:04.960,0:09:10.520
+and in general, any logic that is branching and 
+that will actually increment the program counter  
+
+0:09:10.520,0:09:15.040
+to not go to the next instruction,
+but go to another place in the code.
+
+0:09:15.040,0:09:20.880
+And so you have JUMP instructions, branching 
+instructions that explicitly modify the program  
+
+0:09:20.880,0:09:25.840
+counter to go to a specific place in the code 
+and not just execute the next instruction.
+
+0:09:25.840,0:09:29.940
+And that's how we get function calls and IF 
+statements and FOR loops and things like that.
+
+0:09:29.940,0:09:30.560
+Tracy: Got it.
+
+0:09:30.560,0:09:34.800
+So the goal of this emulator is to kind
+of do what a normal CPU would be doing
+
+0:09:34.800,0:09:40.920
+if it was executing this ELF file, but mix
+the ELF file with maybe a specific input,
+
+0:09:40.920,0:09:44.400
+and then based on that, give
+you like an execution trace.
+
+0:09:44.400,0:09:45.240
+Something like this.
+
+0:09:45.240,0:09:45.880
+Uma: Yeah.
+
+0:09:45.880,0:09:54.880
+So actually, the way inputs work in our program
+is that we have this concept of syscalls.
+
+0:09:54.880,0:10:01.840
+So typically, even in, like normal programs,
+often it's -- a question you might ask is,
+
+0:10:01.840,0:10:03.560
+"Okay, how do we get the arguments to the program?"
+
+0:10:03.560,0:10:05.240
+"How do we get the input to the program?"
+
+0:10:05.240,0:10:11.200
+So, for example, if I'm trying to prove the
+nth Fibonacci number, how do I know what n is?
+
+0:10:11.200,0:10:17.240
+For us, and also in RISC-V, the opcode,
+
+0:10:17.240,0:10:21.920
+which is like, what operation is this 
+instruction running, is called ECALL.
+
+0:10:21.920,0:10:26.040
+And this is a syscall.
+
+0:10:26.040,0:10:30.440
+And generally these ECALLs are used 
+to talk to your host environment.
+
+0:10:30.440,0:10:35.640
+So your ECALL, in typical
+programs, it's used to like,
+
+0:10:35.640,0:10:38.720
+you know, talk to the kernel or do other things.
+
+0:10:38.720,0:10:42.400
+Here we use it to get inputs
+and also write outputs.
+
+0:10:42.400,0:10:48.120
+So this is used to get inputs and 
+outputs and do a bunch of other stuff.
+
+0:10:48.120,0:10:52.120
+It's basically like, you can think 
+of it as like special instruction.
+
+0:10:52.120,0:10:57.680
+So to get inputs into a program, we just 
+call ECALL with a particular syscall code.
+
+0:10:57.680,0:11:01.280
+So there's just like some constant that 
+says, "hey, at this point we're reading input".
+
+0:11:01.280,0:11:07.480
+And then what that will do in our -- in our
+particular zkVM, is it'll just read input that
+
+0:11:07.480,0:11:13.480
+the runtime is instantiated with, and it'll load
+it -- start loading it into registers and memory.
+
+0:11:14.120,0:11:17.820
+So that's how input and output
+kind of work in our zkVM.
+
+0:11:17.820,0:11:19.480
+Tracy: And maybe -- yeah.
+
+0:11:19.480,0:11:20.880
+So, okay, this makes sense to me.
+
+0:11:20.880,0:11:24.720
+You're kind of like working through 
+this program one instruction at a time,  
+
+0:11:24.720,0:11:27.520
+and you're probably logging 
+something along the way,  
+
+0:11:27.520,0:11:31.080
+that's like building up what should be 
+a witness for your proof, I'm guessing.
+
+0:11:31.720,0:11:35.720
+So like what is maybe an example of a 
+witness look like or some execution trace,  
+
+0:11:35.720,0:11:37.900
+and then maybe we can start 
+diving into the actual proof.
+
+0:11:37.900,0:11:39.000
+Uma: Yeah. Totally.
+
+0:11:39.000,0:11:41.840
+So, yeah, maybe this is a good 
+time to start talking about like  
+
+0:11:41.840,0:11:48.160
+how a zkVM generally works, at
+least in the current paradigm.
+
+0:11:48.800,0:11:57.600
+So, in general, I think most zkVMs today are
+using STARKs, FRI and AIR arithmetization.
+
+0:11:58.960,0:12:07.520
+And so, in that world, basically what you have is 
+you have this -- you have like some sort of table.
+
+0:12:07.520,0:12:10.760
+So maybe you have like the CPU table.
+
+0:12:10.760,0:12:15.920
+And the goal of this STARK is to constrain
+that your program is executed correctly.
+
+0:12:15.920,0:12:20.160
+So each row corresponds to an instruction.
+
+0:12:20.160,0:12:25.320
+And so here, for example
+let's do the ADD instruction.
+
+0:12:25.320,0:12:31.480
+You'd have the op code, you'd have the operands.
+
+0:12:31.480,0:12:34.720
+So in this case it would be ADD --
+
+0:12:34.720,0:12:40.120
+Now, obviously, this is replaced with like a number, 
+a constant that corresponds to ADD.
+
+0:12:40.120,0:12:41.120
+You'd have the operands.
+
+0:12:41.120,0:12:45.360
+So in this case it'd be 29, 0 and 5.
+
+0:12:45.360,0:12:47.360
+So in this case the 29 is a register.
+
+0:12:47.360,0:12:50.560
+This is a register, this is a constant.
+
+0:12:51.440,0:12:57.120
+And then you would also have the program counter.
+
+0:12:57.120,0:13:01.720
+And then there's a bunch of
+other columns for other stuff.
+
+0:13:01.720,0:13:03.680
+And really what's happening underneath the hood is that
+
+0:13:03.680,0:13:09.080
+each instruction gets
+turned into one row in our STARK.
+
+0:13:09.080,0:13:14.960
+And then we want to prove that the
+instruction was executed properly.
+
+0:13:14.960,0:13:16.760
+So what does that involve?
+
+0:13:16.760,0:13:27.720
+First, you have to check that the
+program counter was updated properly.
+
+0:13:27.720,0:13:32.360
+And so for example, in the case of
+an ADD opcode, it's very simple.
+
+0:13:32.360,0:13:34.880
+You just increment the program counter by one.
+
+0:13:34.880,0:13:40.360
+But in the case of, for example, a JUMP and LINK
+instruction or you know, a branch instruction,  
+
+0:13:40.360,0:13:45.000
+you have to have more intricate logic for checking
+that the program counter was incremented properly.
+
+0:13:45.000,0:13:47.640
+Or set properly to the next program counter.
+
+0:13:47.640,0:13:48.480
+Tracy: Got it.
+
+0:13:48.480,0:13:49.480
+And so these --
+
+0:13:49.480,0:13:52.960
+Some of these checks probably
+have to look at what happened to the registries?
+
+0:13:52.960,0:13:54.160
+What happened to the memory?
+
+0:13:54.160,0:13:56.860
+Like maybe, is there a 
+memory piece to this as well?
+
+0:13:56.860,0:13:59.560
+Uma: Yeah. That's a bit more
+complicated and maybe we can dive into that --
+
+0:13:59.560,0:14:02.200
+dive into that in a little bit.
+
+0:14:02.200,0:14:02.880
+Tracy: Okay.
+
+0:14:02.880,0:14:03.840
+Umma: So yeah.
+
+0:14:03.840,0:14:07.920
+Basically the program -- you check that
+the program counter was updated properly.
+
+0:14:07.920,0:14:15.800
+You also have to check that the memory
+and registers are like set correctly.
+
+0:14:17.680,0:14:20.840
+And then you also have to
+constrain the actual operation.
+
+0:14:20.840,0:14:27.480
+So you have to constrain the
+actual particular opcode.
+
+0:14:27.480,0:14:34.960
+So for example, in our case, and maybe
+I'll go into a little more detail here.
+
+0:14:36.360,0:14:42.720
+For example, for an ADD instruction, you have the 
+operands and then you kind of have the "value".
+
+0:14:42.720,0:14:45.000
+So for example, this is a register.
+
+0:14:45.000,0:14:47.400
+So these are both registers.
+
+0:14:48.160,0:14:55.520
+Register, register, constant. 
+It's probably a bit hard to read.
+
+0:14:55.520,0:14:58.880
+I'm just gonna --
+
+0:15:01.080,0:15:05.200
+And then, so if you -- when you have a 
+register, you also have to like -- you know,
+
+0:15:05.200,0:15:09.880
+take that register and look up what 
+is actually the value at that register.
+
+0:15:09.880,0:15:15.720
+So in our case, maybe imagine all our 
+registers are set to 0 at that point in time.
+
+0:15:15.720,0:15:20.600
+So X0 is 0, 5 is just a constant. It's 5.
+
+0:15:20.600,0:15:28.960
+And then after you ADD the value in X0 and the 
+constant 5, X29, register 29 should be set to 5.
+
+0:15:29.800,0:15:37.640
+And so if you look at these values, we do a 
+memory argument basically to show that,
+
+0:15:37.640,0:15:45.760
+okay -- we have to constrain that after you run this 
+instruction, the 29th register has a value of 5.
+
+0:15:45.760,0:15:48.040
+Tracy: And so the goal of 
+this procedure is to sort of
+
+0:15:48.040,0:15:54.000
+show that the machine is transitioning 
+correctly through each of these states,  
+
+0:15:54.000,0:15:57.574
+and not violating any sort of rules 
+about how memory can be updated --
+
+0:15:57.574,0:15:57.593
+Uma: Yeah. Exactly.
+
+0:15:57.593,0:16:00.915
+Tracy: Or the order that memory 
+is touched and updated, et cetera.
+
+0:16:00.915,0:16:01.822
+Uma: Yeah.
+
+0:16:01.822,0:16:01.835
+Tracy: I see.
+
+0:16:01.835,0:16:06.880
+Uma: And -- yeah, one interesting
+detail is that in our proof system,
+
+0:16:06.880,0:16:12.240
+and in general, I think most VMs 
+operate over small fields these days.
+
+0:16:12.240,0:16:17.920
+So, yeah, maybe we can talk a little bit 
+about the proof stack that people use.
+
+0:16:17.920,0:16:19.960
+Tracy: Yeah. So in this CPU table,  
+
+0:16:19.960,0:16:24.480
+like these aren't necessarily integers. 
+They're like all field elements, right?
+
+0:16:24.480,0:16:24.840
+Uma: Yeah.
+
+0:16:24.840,0:16:33.160
+So the proof stack most 
+zkVMs use is STARKs and FRI.
+
+0:16:33.160,0:16:39.920
+And then they usually use a small field.
+
+0:16:39.920,0:16:49.160
+So for example, Mersenne31 or 
+Baby Bear, these are both 30 --
+
+0:16:49.160,0:16:52.600
+They're 32-bit primes, or I guess 31-bit primes.
+
+0:16:52.600,0:16:55.000
+Tracy: What does that mean, "small field"?
+
+0:16:55.000,0:16:55.840
+Uma: Small field.
+
+0:16:55.840,0:16:58.920
+So in general, when you do STARKs and FRI,
+
+0:16:58.920,0:17:04.840
+you can have a choice of like what prime 
+field you're using in these proof systems.
+
+0:17:04.840,0:17:07.600
+Historically, people have used like bigger fields.
+
+0:17:07.600,0:17:13.040
+So like 250 -- fields that are 251-bits, 252-bits.
+
+0:17:13.720,0:17:18.840
+And like in the old world of SNARKs, you 
+have to use those big fields.
+
+0:17:19.960,0:17:24.480
+However, I guess maybe not recently, 
+but in the past few years, it's become
+
+0:17:24.480,0:17:30.400
+very popular to use much smaller 
+fields in proof systems in general.
+
+0:17:30.400,0:17:33.720
+And the reason for that is small 
+fields are really hardware-friendly.
+
+0:17:33.720,0:17:41.360
+So because this field is less than 
+32 bits, it can fit into one word,
+
+0:17:41.360,0:17:44.080
+and therefore your arithmetic gets a lot faster.
+
+0:17:44.080,0:17:46.380
+And so your proof times get a lot faster.
+
+0:17:46.380,0:17:47.320
+Tracy: Got it.
+
+0:17:47.320,0:17:50.280
+So like, this table, instead of 
+being filled with really big numbers,
+
+0:17:50.280,0:17:53.400
+is filled with 2 to the 32 or smaller numbers.
+
+0:17:53.400,0:17:54.120
+Uma: Yeah, Exactly.
+
+0:17:54.120,0:17:54.275
+Tracy: I see.
+
+0:17:54.275,0:17:58.480
+Uma: So, in our particular 
+case, we use Baby Bear.
+
+0:17:58.480,0:18:03.880
+I believe there's -- StarkWare, 
+for example, is using M31.
+
+0:18:03.880,0:18:07.520
+And yeah, other teams also use Baby Bear.
+
+0:18:07.520,0:18:10.280
+So, yeah, we use small fields.
+
+0:18:11.400,0:18:13.360
+And then, yeah, we can like 
+go into the other things like
+
+0:18:13.360,0:18:15.240
+what our lookup argument is and things like that.
+
+0:18:15.240,0:18:17.440
+But before we do that, one thing to note,
+
+0:18:17.440,0:18:24.560
+for example here is that in RISC-V, 
+we use RISC-V 32-bit variant.
+
+0:18:24.560,0:18:28.840
+So in RISC-V, the word size is 32 bits.
+
+0:18:28.840,0:18:33.080
+Now our field is actually 
+smaller than 2 to the 32.
+
+0:18:33.080,0:18:40.520
+And so we can't keep all RISC-V values just as one 
+field element, because it'll overflow our field.
+
+0:18:40.520,0:18:50.880
+So what we end up doing actually is these values, 
+I kind of lied before or simplified before,
+
+0:18:51.960,0:18:57.320
+these values actually are all represented 
+underneath the hood as 4 field elements.
+
+0:18:57.320,0:19:04.800
+So you'll have values here, and there will be 
+4 field elements that represent each value.
+
+0:19:04.800,0:19:12.673
+So for example, 5 would be 5,0,0,0. Here 
+it'd be 0,0,0,0 to represent 0, et cetera.
+
+0:19:12.673,0:19:14.880
+Tracy: And this is just because you can't pack the  
+
+0:19:14.880,0:19:20.600
+32-bit size from RISC 32 into the 
+field element of Baby Bear or M31.
+
+0:19:20.600,0:19:21.360
+Uma: Yeah. Exactly.
+
+0:19:21.360,0:19:22.400
+Tracy: Got it.
+
+0:19:22.400,0:19:24.400
+Uma: And yeah --
+
+0:19:24.400,0:19:29.000
+So then for example, now it becomes a 
+bit more difficult because to constrain an addition,
+
+0:19:29.000,0:19:33.600
+you have to basically do grade school arithmetic.
+
+0:19:33.600,0:19:35.560
+You have to write an AIR to constrain addition.
+
+0:19:35.560,0:19:40.000
+So you have to prove that when you 
+add these 2 32-bit things together,
+
+0:19:40.000,0:19:42.560
+it results in this 32-bit thing.
+
+0:19:42.560,0:19:44.160
+And there's a lot of --
+
+0:19:44.160,0:19:46.520
+That's like a very standard thing to do.
+
+0:19:47.520,0:19:50.280
+And so yeah, you often have to have extra witness columns
+
+0:19:50.280,0:19:52.540
+to constrain that appropriately and stuff like that.
+
+0:19:52.540,0:19:53.000
+Tracy: Right.
+
+0:19:53.000,0:19:55.600
+So instead of having just like 
+one constraint, you have several
+
+0:19:55.600,0:19:59.040
+constraints you have to check a few more 
+conditions, but I think that makes sense.
+
+0:19:59.040,0:20:01.000
+And then you have to do that 
+for every single instruction.
+
+0:20:01.000,0:20:03.200
+Uma: Yeah.
+Tracy: So it does increase the cost, 
+
+0:20:03.200,0:20:06.260
+I guess, of doing this a little bit, but 
+it's sort of what you have to do.
+
+0:20:06.260,0:20:10.280
+Uma: Yeah. So for every single opcode, 
+you have to basically figure out 
+
+0:20:10.280,0:20:13.360
+What are the constraints, like what's 
+the AIR arithmetization  
+
+0:20:13.360,0:20:18.080
+and what are the constraints I need to constrain 
+appropriately the logic of the opcode.
+
+0:20:18.080,0:20:23.000
+Most opcodes have like fundamentally 
+very similar high-level flavor.
+
+0:20:23.000,0:20:24.920
+You have 3 operands.
+
+0:20:24.920,0:20:29.120
+Some of them can be "immediates", which 
+means it's a constant, not a register.
+
+0:20:29.120,0:20:34.680
+But if it's not a constant, it usually 
+involves reading a value from a register.
+
+0:20:34.680,0:20:40.640
+So yeah, most operands, you load registers 
+If appropriate, you -- or immediates,
+
+0:20:40.640,0:20:42.800
+then you do some like arithmetic with them.
+
+0:20:42.800,0:20:46.880
+So for example ADD is adding the 
+2 operands and then storing it
+
+0:20:46.880,0:20:51.920
+in the destination operand AND 
+would do the same thing, OR, XOR.
+
+0:20:51.920,0:20:58.840
+So there's a bunch of like ALU, we call them 
+operations that are just doing like arithmetic.
+
+0:20:58.840,0:21:03.080
+Then there's a class of operands 
+that involve dealing with memory.
+
+0:21:03.080,0:21:05.960
+So like loading and storing to memory.
+
+0:21:05.960,0:21:08.320
+So that will read from memory 
+and put it in a register,  
+
+0:21:08.320,0:21:11.120
+or take a register and write it to memory.
+
+0:21:11.120,0:21:13.640
+Then there's branching operands that basically,  
+
+0:21:13.640,0:21:19.280
+you know, check if a particular value 
+in a register is equal to something,  
+
+0:21:19.280,0:21:23.920
+greater than something, less than something, and 
+then increment the program counter appropriately.
+
+0:21:23.920,0:21:27.280
+And then the JUMP instructions 
+also do something kind of similar,  
+
+0:21:27.280,0:21:29.600
+but most of the time they're just 
+touching the program counter.
+
+0:21:29.600,0:21:33.200
+So I think those are like most 
+of flavors of the instructions.
+
+0:21:33.200,0:21:36.200
+But yeah, most instructions involve registers,  
+
+0:21:36.200,0:21:39.440
+and like constraining values from registers 
+and then doing some logic on top of that.
+
+0:21:39.440,0:21:43.340
+Tracy: Are there specific instructions 
+that are, like, really hard?
+
+0:21:43.340,0:21:44.640
+Uma: Yeah.
+
+0:21:44.640,0:21:51.040
+So RISC-V was obviously not 
+designed for being proven in a zkVM.
+
+0:21:51.040,0:21:57.000
+And so they often have pretty annoying 
+instructions, like, I think the multiplication --
+
+0:21:57.000,0:21:59.720
+So we actually prove a extension of RISC-V.
+
+0:21:59.720,0:22:06.080
+There's a base RISC-V 32 variant that 
+doesn't have multiplication instructions.
+
+0:22:06.080,0:22:10.840
+We prove RISC-V 32IM that has 
+multiplication instructions.
+
+0:22:10.840,0:22:13.840
+Some of those can be really 
+annoying, because you have
+
+0:22:13.840,0:22:19.400
+to multiply a word by a half word or you 
+have to multiply unsigned by signed or --
+
+0:22:19.400,0:22:21.280
+And then you have to do a lot of annoying logic  
+
+0:22:21.280,0:22:27.440
+with detecting what is the top bit of a 
+particular result and things like that.
+
+0:22:27.440,0:22:28.520
+Yeah. So those can be pretty annoying.
+
+0:22:28.520,0:22:29.560
+Tracy: Cool.
+
+0:22:29.560,0:22:30.520
+All right. Yeah.
+
+0:22:30.520,0:22:33.280
+Maybe we'll dive into the internals of this now,
+
+0:22:33.280,0:22:36.480
+and how sort of memory attaches 
+to the CPU and some of that.
+
+0:22:36.480,0:22:38.520
+All right, so --
+
+0:22:38.520,0:22:41.600
+Cool. This is -- This explains the CPU super well.
+
+0:22:41.600,0:22:45.320
+I guess, there's also like, 
+memory and some other pieces.
+
+0:22:45.320,0:22:48.780
+Are those all represented in this one big 
+thing or how do those kind of fit together?
+
+0:22:48.780,0:22:50.080
+Uma: Yeah. For sure.
+
+0:22:50.080,0:22:57.280
+So let's maybe first introduce or talk a 
+little bit about the concept of lookups.
+
+0:22:58.040,0:22:59.240
+So I'll put it here.
+
+0:22:59.240,0:23:00.880
+Tracy: Oh, sure.
+
+0:23:00.880,0:23:04.680
+Uma: So in general, STARKs are really good.
+
+0:23:04.680,0:23:08.000
+You have this one table and 
+it has a bunch of constraints,
+
+0:23:08.000,0:23:11.280
+and it's proving the program 
+counter was updated correctly.
+
+0:23:11.280,0:23:13.920
+The opcodes are actually being constrained.
+
+0:23:13.920,0:23:15.960
+Like the values have the correct properties.
+
+0:23:15.960,0:23:20.680
+They're being ADDed together or ANDed 
+together, XOR'ed together, whatever.
+
+0:23:20.680,0:23:23.640
+But actually that's like kind of a 
+simplification of what's going on.
+
+0:23:23.640,0:23:27.000
+In practice, we don't just 
+have one STARK for a CPU.
+
+0:23:27.000,0:23:30.880
+We actually have many, many STARKs 
+that talk to each other via lookups.
+
+0:23:30.880,0:23:37.760
+In particular, we use the log 
+derivative lookup argument to do that.
+
+0:23:37.760,0:23:41.080
+And yeah, at a high level, what 
+a lookup allows you to do is it
+
+0:23:41.080,0:23:46.680
+allows you to have certain columns in one 
+table, basically talk to certain other
+
+0:23:46.680,0:23:52.200
+columns in another table and say these 
+columns here appear in another table.
+
+0:23:52.200,0:23:54.520
+So why is that useful?
+
+0:23:54.520,0:23:58.440
+I can draw it out.
+
+0:23:58.440,0:24:05.400
+So in practice we don't just have a CPU 
+table. We actually have many tables.
+
+0:24:05.400,0:24:15.360
+So for example, we have an ADD 
+table, we have a like AND table,  
+
+0:24:15.360,0:24:20.740
+we have a MUL table, we have a SHIFT table.
+
+0:24:20.740,0:24:23.760
+Tracy: So you have one for 
+every instruction pretty much?
+
+0:24:23.760,0:24:24.720
+Uma: We have -- yeah.
+
+0:24:24.720,0:24:28.260
+We have tables for most 
+instructions. And what's --
+
+0:24:28.260,0:24:31.640
+Or at least for the arithmetic instructions.
+
+0:24:31.640,0:24:32.480
+Tracy: Oh, I see.
+
+0:24:32.480,0:24:39.080
+Uma: And what happens is -- and this is 
+pretty specific to SP1 Succinct zkVMs,  
+
+0:24:39.080,0:24:41.000
+the Succinct zkVM's architecture.
+
+0:24:41.000,0:24:46.120
+So you know, other zkVMs take -- 
+make different design decisions.
+
+0:24:47.040,0:24:48.560
+Yeah. We have this multi-table architecture.
+
+0:24:48.560,0:24:53.480
+And what happens is the CPU is actually 
+really lazy and it doesn't do that much.
+
+0:24:53.480,0:24:59.080
+It just takes, it takes an 
+instruction, it makes sure --
+
+0:24:59.080,0:25:05.120
+It loads the values, so it makes sure that like 
+all the registers are loaded appropriately.
+
+0:25:05.120,0:25:12.840
+And then what happens, for example for an ADD 
+instruction is it just looks up that a, b and c,  
+
+0:25:12.840,0:25:17.320
+which are the 3 operands, appear in the ADD table.
+
+0:25:17.320,0:25:23.420
+And then the ADD table is responsible for 
+constraining that b plus c is equal to a.
+
+0:25:23.420,0:25:28.560
+Tracy: So you can put kind of constraint -- 
+or like instruction specific constraints here,  
+
+0:25:28.560,0:25:30.120
+and then this thing can kind of be naive.
+
+0:25:30.120,0:25:32.400
+It just has to think about what a CPU needs to do.
+
+0:25:32.400,0:25:34.680
+It doesn't really care what the 
+instruction specifically does.
+
+0:25:34.680,0:25:35.840
+Uma: Yeah. Exactly.
+
+0:25:35.840,0:25:39.160
+And so, this is kind of like a 
+very lookup-centric architecture  
+
+0:25:39.160,0:25:44.680
+where the CPU is just looking 
+up the result of the operation.
+
+0:25:44.680,0:25:47.120
+And why is that really nice?
+
+0:25:47.120,0:25:52.160
+It's nice because in practice, to 
+constrain that a equals b plus c,
+
+0:25:52.160,0:25:55.160
+you actually need some extra columns over here.
+
+0:25:55.160,0:25:58.000
+So you need extra witness columns.
+
+0:25:58.000,0:26:03.820
+And you know, these witness columns are usually 
+for things like carries or stuff like that.
+
+0:26:03.820,0:26:05.560
+Tracy: And this is probably variable,  
+
+0:26:05.560,0:26:09.270
+like different instructions need more 
+witness, some need just a little bit.
+
+0:26:09.270,0:26:09.840
+Uma: Yes. Exactly.
+
+0:26:09.840,0:26:12.000
+So the ADD table, for example, is pretty simple.
+
+0:26:12.000,0:26:14.640
+Like adding stuff is pretty simple.
+
+0:26:14.640,0:26:17.800
+Earlier, we had talked about the 
+MUL table being really annoying,  
+
+0:26:17.800,0:26:19.320
+and the MUL constrains being annoying.
+
+0:26:19.320,0:26:24.760
+So the MUL table has a lot of witnesses and a 
+lot of edge cases and it's very complicated.
+
+0:26:24.760,0:26:28.640
+Now if we were to try to do this all in the CPU,  
+
+0:26:28.640,0:26:34.080
+what we would have to do is we'd have to have 
+all the witness data in the CPU all the time.
+
+0:26:34.080,0:26:40.160
+And that's kind of bad because we'd have to 
+have all this extra area in the CPU which --
+
+0:26:40.160,0:26:42.360
+For example, when we're doing an ADD instruction,  
+
+0:26:42.360,0:26:47.320
+we don't need all that extra witness data that 
+we might need for a multiplication instruction.
+
+0:26:47.320,0:26:50.800
+So we're kind of paying for all those 
+columns and all that trace area,  
+
+0:26:50.800,0:26:52.920
+even though it's not being used.
+
+0:26:52.920,0:26:54.680
+With this lookup-centric architecture,  
+
+0:26:54.680,0:26:58.480
+we don't pay for any witness data 
+or trace area that we're not using.
+
+0:26:58.480,0:27:02.560
+So it's much, much more efficient than 
+trying to stuff everything in one table.
+
+0:27:02.560,0:27:03.520
+Tracy: Cool.
+
+0:27:03.520,0:27:06.360
+This is actually like a pretty subtle 
+innovation, if I remember correctly,
+
+0:27:06.360,0:27:10.440
+because, like, these end up becoming 
+different proofs; isn't that right?
+
+0:27:10.440,0:27:13.680
+Like, this is one STARK, this is 
+another STARK, this is another STARK.
+
+0:27:13.680,0:27:14.520
+Is that how this works?
+
+0:27:14.520,0:27:15.040
+Uma: Yeah.
+
+0:27:15.040,0:27:19.309
+So this ends up being one STARK, this 
+is one STARK, and then another STARK.
+
+0:27:19.309,0:27:19.315
+Tracy: I see.
+
+0:27:19.315,0:27:22.040
+Uma: And then the lookup 
+argument just makes sure all  
+
+0:27:22.040,0:27:24.020
+the STARKs are connected together appropriately.
+
+0:27:24.020,0:27:25.000
+Tracy: Got it.
+
+0:27:25.000,0:27:25.320
+Okay.
+
+0:27:25.320,0:27:28.440
+Do you have to then, like, recurse -- 
+like somehow aggregate these STARKs  
+
+0:27:28.440,0:27:30.460
+together or recursively verify them or something?
+
+0:27:30.460,0:27:31.320
+Uma: Yeah.
+
+0:27:31.320,0:27:35.880
+So if you have a bunch of 
+these STARKs, in practice,  
+
+0:27:35.880,0:27:40.680
+what you have to do to get like one 
+final STARK is you recursively --
+
+0:27:40.680,0:27:42.200
+Well, you have a few options.
+
+0:27:42.200,0:27:47.880
+One is you could just have a bunch of these 
+STARKs, and it's still a constant size proof.
+
+0:27:48.640,0:27:52.880
+So you could just have a bunch of STARKs 
+and your proof is just a little bigger.
+
+0:27:52.880,0:27:57.640
+You could also recursively aggregate them 
+using STARK recursion, where you verify  
+
+0:27:57.640,0:28:02.440
+a bunch of proofs in another proof 
+to get like one final small STARK.
+
+0:28:02.440,0:28:06.320
+And in practice, we do do that also 
+for proving larger programs,  
+
+0:28:06.320,0:28:09.160
+which I think we'll talk about in a little bit.
+
+0:28:09.160,0:28:12.360
+Tracy: Yeah. Maybe this is 
+interesting to talk about too,  
+
+0:28:12.360,0:28:17.520
+but I think, when I learned about lookups, I 
+was thinking about them as like a single proof.
+
+0:28:17.520,0:28:20.320
+But here you're actually 
+doing a lookup across proofs.
+
+0:28:20.320,0:28:23.480
+Does that introduce complexity?
+
+0:28:23.480,0:28:25.520
+Uma: Not for our lookup --
+
+0:28:25.520,0:28:28.120
+Using the log derivative 
+lookup argument, not really.
+
+0:28:28.120,0:28:29.080
+Tracy: Okay.
+
+0:28:29.080,0:28:33.800
+Uma: Yeah. You can also do lookups 
+within a single proof as well.
+
+0:28:33.800,0:28:36.020
+Yeah. For us, it's not that much extra complexity.
+
+0:28:36.020,0:28:36.920
+Tracy: Got it.
+
+0:28:36.920,0:28:37.760
+Okay. Cool.
+
+0:28:37.760,0:28:40.400
+So you have these instructions, you have a CPU.
+
+0:28:40.400,0:28:42.000
+Is there anything else here?
+
+0:28:42.000,0:28:48.760
+Uma: Yeah. So maybe another interesting 
+thing to dive into is our memory argument.
+
+0:28:48.760,0:28:52.468
+So actually, how does loading 
+all these values actually work?
+
+0:28:52.468,0:28:57.760
+Tracy: Cool.
+Uma: So, yeah, maybe we can talk about that.
+
+0:28:57.760,0:29:03.600
+So, memory, obviously, is a big part of a VM.
+
+0:29:04.600,0:29:11.320
+And there's been several different 
+techniques for doing memory within zkVMs.
+
+0:29:11.320,0:29:19.120
+So the older technique is 
+known as Merkelized memory.
+
+0:29:19.120,0:29:22.360
+Basically how that works, is you have some --
+
+0:29:22.360,0:29:28.360
+You have memory. So you just have like 
+a bunch of addresses in address space.
+
+0:29:28.360,0:29:30.360
+So you'll have like, for example, you know,  
+
+0:29:30.360,0:29:34.120
+Address 0 has this value, 
+Address 1 has this value.
+
+0:29:34.120,0:29:36.800
+And then, you know, you'll 
+have some big address space.
+
+0:29:36.800,0:29:41.000
+So maybe it's like 2 to the 32 has this value.
+
+0:29:41.000,0:29:44.200
+And then what you do is you commit to the memory.
+
+0:29:44.200,0:29:49.240
+So you basically construct a Merkle 
+tree of all these address value pairs,  
+
+0:29:49.240,0:29:51.840
+and then you get a Merkle root.
+
+0:29:51.840,0:29:54.120
+And that is a commitment to your memory.
+
+0:29:54.120,0:30:01.360
+Now, every time you access a memory address 
+in your zkVM, with Merkleized memory,  
+
+0:30:01.360,0:30:08.200
+you first prove that you're accessing the 
+particular value against the Merkle root.
+
+0:30:08.200,0:30:12.640
+So you have some current Merkle root that says 
+this is the memory. You proof -- You open.
+
+0:30:12.640,0:30:18.800
+So when you do a memory access, you 
+first open with the Merkle proof.
+
+0:30:18.800,0:30:25.560
+Tracy: So I guess, maybe briefly, just to 
+add context. Like the goal here is to kind  
+
+0:30:25.560,0:30:32.120
+of put some structure to the memory, and 
+share it with the CPU or the other STARKs
+
+0:30:32.120,0:30:35.800
+that are a part of this, so that they can -- 
+similar to what you do with the instructions,
+
+0:30:35.800,0:30:38.360
+like look into this thing and make 
+sure it's in the correct state?
+
+0:30:38.360,0:30:39.240
+Uma: Yeah. Exactly.
+
+0:30:39.240,0:30:44.400
+Because like, for example, each instruction 
+is generally modifying memory or registers.
+
+0:30:44.400,0:30:47.960
+In our case, there's no real distinction 
+between memory and registers.
+
+0:30:47.960,0:30:49.600
+Like, registers are just --
+
+0:30:49.600,0:30:53.200
+We just think of it as like 
+other addresses in memory.
+
+0:30:53.200,0:30:53.680
+Tracy: Got it.
+
+0:30:53.680,0:30:55.400
+And this varies over time too, right?
+
+0:30:55.400,0:30:58.000
+So like, you might have this entire snapshot
+
+0:30:58.000,0:31:01.700
+at time 0 and then time 1 or 
+instruction 0, instruction 1.
+
+0:31:01.700,0:31:02.821
+Uma: Yeah. Exactly.
+
+0:31:02.821,0:31:02.835
+Tracy: Got it.
+
+0:31:02.835,0:31:08.440
+Uma: And in the zkVM, it's really important that 
+you prove, "hey, when I tell you, oh, register, value",
+
+0:31:08.440,0:31:13.680
+you know, 29 has this particular 
+that, that is actually true.
+
+0:31:13.680,0:31:17.760
+Because obviously if you could claim 
+that a register has a particular value,  
+
+0:31:17.760,0:31:22.120
+and that's not like a provable fact, then your 
+entire program execution is totally meaningless.
+
+0:31:22.120,0:31:23.040
+Tracy: Got it.
+
+0:31:23.040,0:31:24.960
+And then there's a lot of different 
+ways you can represent this.
+
+0:31:24.960,0:31:26.823
+And one is this Merkle thing.
+
+0:31:26.823,0:31:26.833
+Uma: Yeah.
+
+0:31:26.833,0:31:30.560
+Tracy: And I guess you're about to 
+share how to pull data out of it now.
+
+0:31:30.560,0:31:31.480
+Uma: Yeah. Exactly.
+
+0:31:31.480,0:31:35.040
+So you basically commit to your memory, 
+you say, "hey, here's a Merkle root.
+
+0:31:35.040,0:31:37.880
+That's like a succinct 
+commitment to all my memory".
+
+0:31:37.880,0:31:41.920
+And then when I want to access 
+a particular value of memory  
+
+0:31:41.920,0:31:44.840
+or a particular address, I open the Merkle proof.
+
+0:31:44.840,0:31:47.600
+So I verify a Merkle proof 
+against this Merkle root.
+
+0:31:47.600,0:31:52.880
+Then I do whatever logic, and 
+then I'll update the Merkle root.
+
+0:31:52.880,0:31:57.480
+So if it's a read, I don't have to do 
+the second step, but if it's a write,  
+
+0:31:57.480,0:32:02.760
+then I have to obviously update 
+the Merkle root with the new value.
+
+0:32:02.760,0:32:08.840
+Obviously this is, you know, kind of 
+undesirable, because it introduces this log n,  
+
+0:32:08.840,0:32:14.960
+where n is like the size of your address 
+space overhead to every access to memory.
+
+0:32:14.960,0:32:23.920
+And so this is kind of a older technique. But --
+
+0:32:23.920,0:32:28.240
+The technique that we use is a newer technique.
+
+0:32:28.240,0:32:38.280
+It's known as "offline memory checking". 
+And it makes use of our lookup argument.
+
+0:32:38.280,0:32:47.840
+So what we do in our memory technique in our zkVM 
+SP1, is when we access memory at a particular  
+
+0:32:47.840,0:32:56.760
+address and it has a particular value, we keep 
+-- we have this notion of a timestamp which is  
+
+0:32:56.760,0:33:05.560
+basically kind of like the clock cycle of, you 
+know, when the instruction is getting executed.
+
+0:33:05.560,0:33:09.720
+And the clock cycle is just strictly incrementing 
+throughout the course of our program.
+
+0:33:09.720,0:33:12.160
+So, for example, the program 
+counter does not have this property,  
+
+0:33:12.160,0:33:14.600
+because it can like jump around your ELF.
+
+0:33:14.600,0:33:18.120
+But the clock cycle, no matter 
+what, each instruction always  
+
+0:33:18.120,0:33:20.840
+increments by one or roughly that.
+
+0:33:20.840,0:33:25.080
+So for us, this clock cycle, 
+or what we call timestamp,  
+
+0:33:25.080,0:33:27.760
+is a strictly incrementing thing 
+throughout the course of our program.
+
+0:33:28.360,0:33:33.200
+And whenever we access a particular memory 
+address, and want to claim that it has some  
+
+0:33:33.200,0:33:42.080
+value, what we do is we add to our log 
+derivative lookup argument the tuple.
+
+0:33:43.000,0:33:48.000
+And this is kind of like assuming that you 
+know about the log derivative lookup argument.
+
+0:33:48.000,0:33:53.520
+You add this tuple of address, the current 
+value, and the timestamp to the lookup  
+
+0:33:53.520,0:34:03.880
+arguments accumulator with multiplicity plus 
+1 and you add the address, the previous value,  
+
+0:34:03.880,0:34:13.960
+and the previous timestamp that you last 
+accessed that memory with multiplicity minus 1.
+
+0:34:13.960,0:34:20.680
+And then at the end, if you do this for every 
+single access, you will -- each of these will  
+
+0:34:20.680,0:34:30.120
+cancel out and then you will have to check that 
+your accumulator for your memory is equal to 0.
+
+0:34:30.120,0:34:34.600
+And that's how we check our 
+memory access was all consistent.
+
+0:34:34.600,0:34:37.160
+I mean -- I think it's a bit 
+hard to see maybe from this.
+
+0:34:37.160,0:34:40.040
+We can go into a little example.
+
+0:34:40.040,0:34:43.320
+But maybe before I do that, one question people  
+
+0:34:43.320,0:34:47.400
+might ask is how do you constrain that 
+an access was a read versus a write?
+
+0:34:47.400,0:34:48.640
+It's actually very simple.
+
+0:34:48.640,0:34:51.960
+If you want to say, hey, I accessed 
+this memory and all I did was read it,  
+
+0:34:51.960,0:34:55.680
+you just say "value is equal 
+to previous value" for reads.
+
+0:34:55.680,0:34:59.880
+And then for writes, that's obviously 
+just not the case because you're writing.
+
+0:34:59.880,0:35:03.880
+So for example, in our CPU, for most instructions,  
+
+0:35:03.880,0:35:09.360
+you're generally reading from 2 operands and 
+you're writing to the third destination operand.
+
+0:35:09.360,0:35:14.440
+So in that case we access the 
+memory at those 2 operands,  
+
+0:35:14.440,0:35:17.400
+and we make sure that we're 
+reading and not writing.
+
+0:35:17.400,0:35:19.320
+And then we write to the third operand.
+
+0:35:19.320,0:35:20.400
+Tracy: I see.
+
+0:35:20.400,0:35:24.280
+So this kind of lets you efficiently 
+check the state of the VM as you're
+
+0:35:24.280,0:35:29.080
+going through it without -- and just 
+almost summing them into an accumulator.
+
+0:35:29.080,0:35:34.400
+And then you don't have to do Merkle paths, 
+which are maybe a little less efficient.
+
+0:35:35.080,0:35:37.240
+Okay.
+And then at the end, you know
+
+0:35:37.240,0:35:43.040
+the CPU touched all of the memory registries 
+in the correct order and at the correct time.
+
+0:35:43.040,0:35:44.120
+Uma: Yeah. Exactly.
+
+0:35:44.120,0:35:44.742
+So --
+
+0:35:44.742,0:35:44.755
+Tracy: I see.
+
+0:35:44.755,0:35:49.960
+Uma: Maybe to go through a small little example 
+of this, to develop some better intuition for,  
+
+0:35:49.960,0:35:56.960
+like, why, you know, you can't cheat 
+-- you can't make like a false proof.
+
+0:35:56.960,0:36:02.880
+Let's imagine you're trying to access 
+memory at some address 500. And at times --
+
+0:36:02.880,0:36:08.920
+So this is the address, this is the 
+value, and this is the timestamp.
+
+0:36:08.920,0:36:13.240
+So say we're time 10 and the value is 7.
+
+0:36:14.520,0:36:19.280
+And then we're at time 11. And 
+we're also accessing it again,  
+
+0:36:19.280,0:36:23.600
+and now we want to do a read, 
+so the value is still 7.
+
+0:36:23.600,0:36:28.000
+And then say at timestamp 20, the 
+value -- we want to do a write.
+
+0:36:28.000,0:36:35.320
+So this is a read, this is a write. 
+And the value becomes like 15.
+
+0:36:35.320,0:36:39.200
+I also forgot to mention that another really 
+important thing here, is you always have to  
+
+0:36:39.200,0:36:46.160
+check that the timestamp here is greater 
+than the previous timestamp you accessed.
+
+0:36:46.160,0:36:48.480
+So that's why the timestamp 
+is important. You have to --
+
+0:36:48.480,0:36:51.560
+This is a very important check.
+
+0:36:51.560,0:36:52.713
+And I'll go over why that is --
+
+0:36:52.713,0:36:54.040
+Tracy: It just means it's ordered right.
+
+0:36:54.040,0:36:58.760
+Uma: Yeah. It means that your 
+kind of log is ordered properly.
+
+0:36:58.760,0:37:02.400
+So, for example, here, at this point in time --
+
+0:37:02.400,0:37:06.320
+And imagine that the memory address 
+was initialized at timestamp 0.
+
+0:37:06.320,0:37:10.000
+And with this argument, you have 
+to do like a initialization phase,  
+
+0:37:10.000,0:37:12.360
+where you basically just for all 
+the memory you're going to touch,  
+
+0:37:12.360,0:37:17.000
+you just have to add it to the accumulator 
+at the beginning to initialize it.
+
+0:37:17.000,0:37:20.440
+So it cancels out like the first 
+read or last write or whatever.
+
+0:37:20.440,0:37:22.840
+So there's some subtlety there, but --
+
+0:37:22.840,0:37:32.520
+Yeah. So here we've basically added 
+the tuple 500, 7, 10 with plus 1.
+
+0:37:32.520,0:37:38.800
+And the previous value maybe 
+let's say was 0 at timestamp 0.
+
+0:37:38.800,0:37:40.000
+So we've added minus 1.
+
+0:37:40.000,0:37:45.520
+So this is like the initialization, and 
+that's like kind of taken care of separately.
+
+0:37:45.520,0:37:57.440
+Here, you can see that we've added 500, 7, 11 
+with plus 1, and we've added 500 -- the previous  
+
+0:37:57.960,0:38:02.280
+value was 7, and then the previous 
+timestamp was 10 with minus 1.
+
+0:38:02.280,0:38:08.600
+So you can see this guy here 
+cancels this guy here, right?
+
+0:38:08.600,0:38:10.600
+So those two cancel out.
+
+0:38:10.600,0:38:20.720
+And then here we add 500, 15, 
+20 with plus 1, and we subtract  
+
+0:38:20.720,0:38:27.000
+500 -- the previous value was 7 and 
+the timestamp was 11 with minus 1.
+
+0:38:27.000,0:38:32.040
+And you can see that this guy 
+here cancels out this plus 1 here.
+
+0:38:32.040,0:38:32.680
+Right?
+
+0:38:32.680,0:38:39.280
+And so at any point in time, for example, if 
+I tried at this point to claim that, oh --
+
+0:38:39.280,0:38:42.440
+or say at this point I was trying 
+to claim -- I was doing a read,  
+
+0:38:42.440,0:38:45.000
+and I was trying to claim that the 
+value -- and I was malicious -- and  
+
+0:38:45.000,0:38:49.080
+I was trying to pretend that the value 
+was actually 8 or something like that.
+
+0:38:49.080,0:38:54.560
+Well, I would run into trouble 
+because here I would have to have 8,  
+
+0:38:54.560,0:38:58.800
+8, and then suddenly this guy 
+does not cancel out this guy.
+
+0:38:58.800,0:39:00.840
+Right?
+So you --
+
+0:39:00.840,0:39:05.280
+You basically run into trouble where now these 
+-- this thing and this thing don't cancel out,  
+
+0:39:05.280,0:39:07.640
+and then your accumulator is not zero.
+
+0:39:07.640,0:39:08.313
+Does that kind of make sense?
+
+0:39:08.313,0:39:08.640
+Tracy: I see.
+
+0:39:08.640,0:39:09.040
+Yeah, it does.
+
+0:39:09.040,0:39:13.600
+So you add this sort of fixed 
+functionality into your STARK,  
+
+0:39:13.600,0:39:19.520
+which does this behavior on the memory accumulator 
+every single time an instruction is processed.
+
+0:39:19.520,0:39:25.120
+And then if anything about the memory is out 
+of sequence or doesn't have the correct value,  
+
+0:39:25.120,0:39:30.060
+you get to the end of this, and then it's obvious 
+that it's incorrect because you don't have the 0.
+
+0:39:30.060,0:39:31.040
+Uma: Yeah. Exactly.
+
+0:39:31.040,0:39:32.600
+Tracy: Okay. That's really cool.
+
+0:39:32.600,0:39:33.320
+Awesome.
+
+0:39:33.320,0:39:35.640
+All right. Should we talk about --
+
+0:39:35.640,0:39:36.400
+Let's see.
+
+0:39:36.400,0:39:37.160
+So we did memory.
+
+0:39:37.160,0:39:38.700
+Should we talk about precompiles, maybe?
+
+0:39:38.700,0:39:39.860
+Uma: Yeah. Let's do it.
+
+0:39:39.860,0:39:41.360
+Tracy: All right.
+
+0:39:41.360,0:39:51.040
+Uma: So this is kind of one reason 
+that SP1, our zkVM is very efficient.
+
+0:39:51.040,0:39:55.000
+And in general -- you know, 
+zkVMs are awesome, right?
+
+0:39:55.000,0:39:59.360
+You write normal code, it gets compiled to this 
+normal target RISC-V, and then you prove it.
+
+0:39:59.360,0:40:02.080
+So it's kind of like, that's super awesome.
+
+0:40:02.080,0:40:06.200
+Now the downside is, you 
+know, it can be much more --
+
+0:40:06.200,0:40:12.040
+It can be much less efficient than handwriting 
+a circuit or like a specialized circuit  
+
+0:40:12.040,0:40:15.640
+for your particular computation, because 
+there's a lot of overhead in a VM, right?
+
+0:40:15.640,0:40:17.640
+You're like reading and writing to memory.
+
+0:40:17.640,0:40:19.240
+You're reading and writing to registers.
+
+0:40:19.240,0:40:21.360
+You're doing a bunch of random operations.
+
+0:40:22.240,0:40:24.800
+And so there's a lot of overhead.
+
+0:40:24.800,0:40:31.480
+And so one way that you can address this 
+overhead is through this notion of precompiles.
+
+0:40:31.480,0:40:37.840
+So maybe I can kind of describe at a high 
+level how you can think of it conceptually,  
+
+0:40:37.840,0:40:39.340
+and then we can dive into how it actually works.
+
+0:40:39.340,0:40:40.880
+Tracy: And people call these 
+different things, right?
+
+0:40:40.880,0:40:41.580
+There's like --
+
+0:40:41.580,0:40:42.520
+Uma: Accelerators --
+
+0:40:42.520,0:40:45.560
+Tracy: Coprocessors, accelerators, precompile. 
+They're all kind of the same thing,  
+
+0:40:45.560,0:40:51.640
+but it's like a special circuit that is more 
+efficient than your standard CPU circuit.
+
+0:40:51.640,0:40:52.400
+Uma: Yeah, exactly.
+
+0:40:52.400,0:40:54.320
+Yeah. It has a bunch of different names.
+
+0:40:54.320,0:40:57.240
+So for example, for a Keccak hash function,  
+
+0:40:59.120,0:41:06.040
+normally in my VM, if I just compile Keccak 
+to RISC-V, maybe it has 10,000 cycles.
+
+0:41:06.040,0:41:09.320
+And this is a hypothetical number. 
+I think it's something around that.
+
+0:41:09.320,0:41:12.880
+And so, it looks like I'm 
+XORing a bunch of things,  
+
+0:41:12.880,0:41:16.560
+I'm loading a bunch of things, I'm 
+storing a bunch of things, et cetera.
+
+0:41:16.560,0:41:18.560
+So naively, it's just 10k cycles.
+
+0:41:18.560,0:41:22.720
+So that means it's like 10k rows in my CPU table.
+
+0:41:23.440,0:41:27.240
+But one interesting thing is, is if you 
+have a specialized circuit for Keccak,  
+
+0:41:28.320,0:41:30.160
+then you can actually --
+
+0:41:30.160,0:41:36.600
+So with a precompile or a specialized circuit, 
+you can actually have much, much less cycles.
+
+0:41:36.600,0:41:40.880
+So you Basically replace this 10k 
+cycles with a specialized circuit,  
+
+0:41:40.880,0:41:45.160
+and it goes down to like hundreds of cycles.
+
+0:41:45.160,0:41:51.960
+And so, concretely what that kind of 
+looks like is we take -- we have our
+
+0:41:51.960,0:41:56.840
+CPU here. And remember before even 
+I'd explain to you guys that we
+
+0:41:56.840,0:42:01.000
+have this multi-table architecture 
+where like the CPU is really lazy,
+
+0:42:01.000,0:42:03.680
+you know, for an ADD, it 
+actually just looks up the ADD.
+
+0:42:03.680,0:42:05.680
+For Keccak, we actually do something similar.
+
+0:42:05.680,0:42:11.840
+So we have a -- we signal to the 
+CPU, we want to do a Keccak.
+
+0:42:11.840,0:42:19.560
+So in practice, how that actually works, we use 
+this like ECALL which I talked about previously,  
+
+0:42:19.560,0:42:25.720
+ECALL or syscall instruction, and we say, 
+we're going to do a syscall with Keccak.
+
+0:42:25.720,0:42:32.520
+So we're going to do a Keccak syscall, and 
+we're going to pass in like to a pointer.
+
+0:42:32.520,0:42:38.040
+So we pass in a pointer to the array 
+region that we want to do Keccak on.
+
+0:42:38.040,0:42:43.440
+So we pass in a pointer, we signal we want to 
+do a Keccak. And then in the CPU, we load the  
+
+0:42:43.440,0:42:54.360
+pointer and then what we do is we have this Keccak 
+table where it's responsible for doing the Keccak.
+
+0:42:54.360,0:42:58.080
+So in our case, our precompiled 
+tables directly talk to memory.
+
+0:42:58.080,0:43:05.920
+So for example, here we have the 
+pointer, we have a timestamp,
+
+0:43:05.920,0:43:08.720
+which is like the cycle that the 
+CPU is going to look this up.
+
+0:43:08.720,0:43:14.920
+And then we have a ton of columns here that are 
+doing like XORs, that are talking to memory,  
+
+0:43:14.920,0:43:19.640
+that are doing ANDs that are doing 
+ADDs, like whatever you need for Keccak.
+
+0:43:19.640,0:43:22.920
+And it's kind of doing it all in one row.
+
+0:43:22.920,0:43:27.120
+So, basically, instead of paying 
+like 10k cycles in the CPU  
+
+0:43:27.680,0:43:31.993
+and paying 10k rows over here, which is a lot --
+
+0:43:31.993,0:43:35.680
+Tracy: And the CPU rows, these are really 
+narrow, I guess. And then these are really wide.
+
+0:43:35.680,0:43:37.254
+So you can lay out a lot more memory --
+
+0:43:37.254,0:43:39.040
+Uma: Yeah, exactly.
+Tracy: And a lot more data and operations.
+
+0:43:39.040,0:43:46.200
+Uma: So normally in the CPU, our CPU I think 
+is like 100, 200 columns, something like that.
+
+0:43:46.200,0:43:48.600
+We hope to make it skinnier in the future.
+
+0:43:48.600,0:43:50.040
+But yeah, the CPU --
+
+0:43:50.040,0:43:53.920
+So -- you know, you have 10K rows 
+here and it's like 100, 200 columns.
+
+0:43:54.560,0:43:57.160
+You replace that instead 
+with -- it's not actually one  
+
+0:43:57.160,0:44:02.160
+row. I think it ends up being like 32 rows 
+or something like this, with 32 rows here.
+
+0:44:02.160,0:44:05.840
+Now the Keccak table is a lot 
+wider. It's like 3,000 columns.
+
+0:44:05.840,0:44:09.240
+But in the end, we've saved a lot of trace area,  
+
+0:44:09.240,0:44:13.640
+because we've replaced 10k times 
+like 200 with like 32 times 3000.
+
+0:44:13.640,0:44:16.720
+And that math ends up being 
+like much, much better.
+
+0:44:16.720,0:44:20.360
+It ends up being like an 
+order of magnitude basically.
+
+0:44:20.360,0:44:23.000
+And so yeah, the reason we can have these savings  
+
+0:44:23.000,0:44:26.680
+is that Keccak table is really 
+wide and it's really specialized.
+
+0:44:26.680,0:44:33.040
+So it just does like XORs and ANDs and ADDs. 
+And then we also basically lay out the memory.
+
+0:44:33.040,0:44:36.920
+Like normally it's kind of inefficient, 
+because if you just naively compile to  
+
+0:44:36.920,0:44:39.880
+RISC-V, you're like loading and 
+storing to memory all the time.
+
+0:44:39.880,0:44:41.240
+You're doing a bunch of stuff.
+
+0:44:41.240,0:44:43.080
+Here, we don't have any of that overhead.
+
+0:44:43.080,0:44:46.480
+We can just directly take the results 
+from the previous operation, and put  
+
+0:44:46.480,0:44:50.113
+it into the next operation without having 
+to talk to memory. And so this is a lot --
+
+0:44:50.113,0:44:53.134
+Tracy: You don't need to like 
+emulate what the CPU does --
+
+0:44:53.134,0:44:54.720
+Uma: Yeah, exactly.
+Tracy: To actually do this computation.
+
+0:44:54.720,0:44:56.280
+You can just like show --
+
+0:44:56.280,0:44:59.080
+You can just witness the computation 
+and show that it is correct.
+
+0:44:59.080,0:45:00.000
+Uma: Yeah, exactly.
+
+0:45:00.000,0:45:00.640
+Tracy: Okay.
+
+0:45:00.640,0:45:05.520
+Uma: And so this ends up being 
+like really, really significant.
+
+0:45:05.520,0:45:07.680
+Like it's kind of like an order of magnitude,  
+
+0:45:07.680,0:45:12.300
+sometimes more gains because 
+you're just proving a lot less --
+
+0:45:12.300,0:45:14.240
+Significantly, significantly less trace area.
+
+0:45:14.240,0:45:18.080
+Like you've replaced 10,000 cycles 
+with like hundreds of cycles.
+
+0:45:18.080,0:45:20.120
+And you've replaced a lot of trace area.
+
+0:45:20.120,0:45:24.120
+So maybe like hundreds of thousands of cells with 
+just like a thousand cells or something like that.
+
+0:45:24.120,0:45:26.960
+Tracy: Does this impact the Rust programmer?
+
+0:45:26.960,0:45:30.080
+Uma: No. This doesn't really 
+impact the Rust programmer,
+
+0:45:30.080,0:45:33.920
+because in practice what we do 
+is you have an existing crate.
+
+0:45:33.920,0:45:38.360
+So for example, there's like a tiny Keccak crate 
+that's a pure Rust implementation of Keccak.
+
+0:45:38.360,0:45:42.520
+Or you have a Rust crypto crate, 
+that's an implementation of Keccak.
+
+0:45:42.520,0:45:49.200
+And then what happens is, we fork that 
+crate and we maintain a fork of it that  
+
+0:45:49.200,0:45:54.640
+replaces the logic where normally you would 
+be just calling -- doing normal Keccak stuff,  
+
+0:45:54.640,0:45:56.920
+we just replace it with this ECALL instruction.
+
+0:45:56.920,0:45:57.520
+Tracy: I see.
+
+0:45:57.520,0:46:00.680
+Uma: So we just inline the 
+assembly, we replace it.
+
+0:46:00.680,0:46:03.280
+And then from the programmer's 
+perspective, all they have to  
+
+0:46:03.280,0:46:07.221
+do is they have to use our crate as a 
+dependency instead of the normal crate.
+
+0:46:07.221,0:46:07.235
+Tracy: Got it.
+
+0:46:07.235,0:46:10.880
+Uma: Or they can use cargo-patching to 
+just replace it underneath the hood.
+
+0:46:10.880,0:46:12.000
+Tracy: That's cool.
+
+0:46:12.000,0:46:13.460
+Awesome.
+Uma: So it's really nice.
+
+0:46:13.460,0:46:14.880
+Tracy: Okay. Cool.
+
+0:46:14.880,0:46:16.680
+Precompiles are covered.
+
+0:46:16.680,0:46:19.640
+I think there's one other thing 
+that we could cover, which is,  
+
+0:46:19.640,0:46:22.000
+there's this idea of long running programs.
+
+0:46:22.000,0:46:23.640
+And I've heard it called a 
+bunch of different things,
+
+0:46:23.640,0:46:26.440
+but I think the issue is, as you --
+
+0:46:26.440,0:46:30.040
+if you run a short Fibonacci that works just fine,  
+
+0:46:30.040,0:46:34.320
+but when you start running millions and millions 
+of instructions, you start running into issues.
+
+0:46:34.320,0:46:36.380
+Maybe we could talk about 
+how you address that problem.
+
+0:46:36.380,0:46:37.560
+Uma: Yeah, totally.
+
+0:46:37.560,0:46:44.960
+So you're totally right that if you run a 
+short program that's maybe a few 100K cycles,
+
+0:46:44.960,0:46:48.920
+or even a million cycles, we can 
+just have one STARK proof for it.
+
+0:46:48.920,0:46:54.160
+We have, like, our CPU, we might have our ALU 
+tables like ADD and MUL and stuff like that,  
+
+0:46:54.160,0:46:58.640
+maybe a few precompiles and 
+then you just get your proof.
+
+0:46:58.640,0:47:01.360
+But often, the programs we 
+want to prove end up being
+
+0:47:01.360,0:47:04.600
+hundreds of millions, if not billions of cycles.
+
+0:47:04.600,0:47:07.600
+And you can't generate a STARK 
+proof with a billion rows.
+
+0:47:07.600,0:47:11.640
+You're just going to run out of memory, 
+like it's not actually going to work.
+
+0:47:11.640,0:47:14.080
+And so for that, we have to do --
+
+0:47:14.080,0:47:20.320
+You generally have to break up your 
+program into segments or chunks.
+
+0:47:20.320,0:47:22.800
+We call them "shards" in SP1.
+
+0:47:22.800,0:47:26.920
+So you take your really long program 
+that has a ton of instructions,  
+
+0:47:26.920,0:47:32.200
+you break it up into fixed size chunks 
+of like a million instructions at a time.
+
+0:47:32.200,0:47:36.760
+And then you generate STARK proofs of each chunk.
+
+0:47:36.760,0:47:39.360
+And then you combine each of these STARK proofs  
+
+0:47:39.360,0:47:42.880
+together using STARK recursion 
+to get one final STARK proof.
+
+0:47:42.880,0:47:47.400
+So maybe I can draw out a little diagram of that.
+
+0:47:47.400,0:47:49.680
+Tracy: Are we done with this too?
+
+0:47:49.680,0:47:52.000
+Uma: Yeah, I think so.
+
+0:47:52.000,0:47:53.360
+So yeah.
+
+0:47:53.360,0:47:55.560
+Basically, you have --
+
+0:47:55.560,0:47:58.060
+I have a really long program, let's say.
+
+0:47:58.060,0:48:02.240
+Tracy: Does this also -- I mean, this 
+helps with like tons of instructions.
+
+0:48:02.240,0:48:03.940
+Does this also help with parallelization?
+
+0:48:03.940,0:48:04.960
+Uma: Yes.
+
+0:48:04.960,0:48:05.600
+Tracy: Okay.
+
+0:48:05.600,0:48:10.120
+Uma: So first I break it up into chunks or shards.
+
+0:48:10.120,0:48:16.360
+So this is Shard 1, Shard 2, etc.
+
+0:48:16.360,0:48:19.080
+Maybe each of these have 
+like a million instructions.
+
+0:48:19.080,0:48:24.680
+And then what I do, as you said, it's also 
+really good for parallelizing the proof.
+
+0:48:26.560,0:48:29.960
+I have each of my shards being proven.
+
+0:48:29.960,0:48:32.280
+And one really cool thing is, 
+I can prove them in parallel.
+
+0:48:32.280,0:48:39.120
+So if I have a bunch of computers on AWS or I have 
+some cluster, I can prove each shard in parallel.
+
+0:48:39.120,0:48:42.960
+And so the end-to-end latency 
+of the proof is not like:
+
+0:48:42.960,0:48:45.800
+first I have to prove this shard, 
+then this shard, et cetera.
+
+0:48:45.800,0:48:53.400
+The latency of the proof is actually logarithmic 
+in the number of cycles, which is really awesome.
+
+0:48:53.400,0:49:01.360
+So, okay, I'm proving Shard 
+1, I have Shard 2, Shard 3.
+
+0:49:01.360,0:49:03.160
+And then each of these has a proof.
+
+0:49:03.160,0:49:04.880
+So this is a proof.
+
+0:49:04.880,0:49:06.760
+This is a proof.
+
+0:49:06.760,0:49:09.120
+This is a proof.
+
+0:49:09.120,0:49:13.280
+And then, the bad part about this 
+is now I have a bunch of proofs.
+
+0:49:13.280,0:49:14.920
+So it's not that succinct. Right?
+
+0:49:14.920,0:49:17.360
+The whole point of a zero-knowledge 
+proof -- well, there's two points.
+
+0:49:17.360,0:49:18.640
+One is it's zero knowledge.
+
+0:49:18.640,0:49:20.440
+So it's like privacy preserving.
+
+0:49:20.440,0:49:21.960
+Another is that it's succinct.
+
+0:49:21.960,0:49:24.200
+If I have a bunch of shards, obviously,  
+
+0:49:24.200,0:49:30.120
+this isn't a fixed size proof with the length of 
+my computation, and we want a fixed size proof.
+
+0:49:30.120,0:49:32.240
+So what do I do?
+
+0:49:32.240,0:49:38.800
+I basically can recursively 
+combine two of these shard  
+
+0:49:38.800,0:49:44.960
+proofs into one proof by using "STARK Recursion".
+
+0:49:44.960,0:49:51.920
+So this is a concept, and it's 
+pretty commonly used where you  
+
+0:49:51.920,0:49:56.360
+take -- you make a proof that 
+two other proofs are valid.
+
+0:49:56.360,0:49:59.400
+Or in practice, you can also have n other proofs.
+
+0:49:59.400,0:50:03.840
+So you can take a bunch of proofs, we 
+call them child proofs or leaf proofs,
+
+0:50:03.840,0:50:06.560
+and you can combine them into one proof.
+
+0:50:06.560,0:50:11.560
+You do this a few times, you 
+basically have a tree of proofs.
+
+0:50:11.560,0:50:21.520
+And then at the end you get one final proof at the 
+end that's just -- you end up with one STARK proof.
+
+0:50:21.520,0:50:25.235
+Tracy: How big are these proofs? Are these like --
+
+0:50:25.235,0:50:26.640
+Uma: They're may be like hundreds of kilobytes.
+
+0:50:26.640,0:50:30.435
+Tracy: Okay. So you have like maybe 
+dozens or hundreds of these --
+
+0:50:30.435,0:50:34.000
+Uma: Oh hundreds or thousands sometimes 
+of these hundred kilobyte proofs,  
+
+0:50:34.000,0:50:38.920
+can end up being fairly big if you're 
+dealing with a really long computation.
+
+0:50:38.920,0:50:42.360
+And at the end you just get this -- you 
+know, several hundred kilobyte proof.
+
+0:50:42.360,0:50:43.000
+Tracy: Got it.
+
+0:50:43.000,0:50:45.960
+So you could send all of these 
+hundreds of hundred kilobyte  
+
+0:50:45.960,0:50:49.720
+proofs to somebody and they could use 
+that to verify that this is correct.
+
+0:50:49.720,0:50:52.120
+But instead you do these 
+sort of like layered thing  
+
+0:50:52.120,0:50:54.720
+that gets them into one even more succinct proof.
+
+0:50:54.720,0:50:55.360
+Uma: Yes.
+
+0:50:55.360,0:51:00.920
+And one interesting thing to talk about 
+is recursion is very, very difficult.
+
+0:51:01.520,0:51:05.640
+So you might ask, okay, how do we 
+actually do this recursive part?
+
+0:51:05.640,0:51:11.640
+Naively, one thing you could do is you could 
+write a STARK verifier in normal Rust code,  
+
+0:51:11.640,0:51:17.440
+you could basically compile it to RISC-V, 
+and we could use our original RISC-V VM
+
+0:51:17.440,0:51:21.440
+to basically verify a bunch of child 
+proofs and then generate one proof.
+
+0:51:21.440,0:51:23.720
+That's like the naive approach.
+
+0:51:23.720,0:51:24.960
+Unfortunately, that doesn't work.
+
+0:51:24.960,0:51:26.080
+We tried it.
+
+0:51:26.080,0:51:26.800
+It doesn't work.
+
+0:51:26.800,0:51:29.520
+RISC-V is way too much overhead.
+
+0:51:29.520,0:51:33.480
+It basically is computationally 
+infeasible to do that.
+
+0:51:33.480,0:51:39.320
+So we actually, and I think in practice, 
+many teams have a recursion VM.
+
+0:51:39.320,0:51:45.800
+So we built another VM that has its own 
+ISA, specialized for STARK recursion.
+
+0:51:45.800,0:51:48.680
+So it only has, like, instructions 
+that deal with recursion,  
+
+0:51:48.680,0:51:53.000
+like Poseidon hashing or like, 
+FRI fold or things like this.
+
+0:51:53.560,0:52:01.320
+And then, we wrote a program in that specialized 
+instruction set to do this operation.
+
+0:52:01.320,0:52:04.120
+And so, we actually have a 
+specialized recursion VM over  
+
+0:52:04.120,0:52:09.120
+here that is responsible for doing this recursion.
+
+0:52:09.120,0:52:10.240
+Tracy: Interesting.
+
+0:52:10.240,0:52:13.720
+Why does it need to be a VM versus a circuit?
+
+0:52:13.720,0:52:15.160
+Uma: Yeah. It can be a VM.
+
+0:52:15.160,0:52:17.880
+It could be a circuit or a VM.
+
+0:52:17.880,0:52:21.400
+Sometimes having a VM is nice 
+because you have extra flexibility.
+
+0:52:21.400,0:52:23.840
+You can have branching logic and stuff like that.
+
+0:52:23.840,0:52:26.520
+If you do a circuit, you 
+don't have those affordances.
+
+0:52:27.360,0:52:31.000
+And so, I think some teams do a recursion circuit.
+
+0:52:31.000,0:52:32.480
+We do a recursion VM.
+
+0:52:32.480,0:52:35.840
+I think in the future, we might also 
+do a combination of circuit and VM,  
+
+0:52:35.840,0:52:39.680
+like circuit's more efficient when 
+you don't need the flexibility.
+
+0:52:39.680,0:52:40.200
+Yeah.
+Tracy: Cool.
+
+0:52:40.200,0:52:40.880
+That makes sense.
+
+0:52:40.880,0:52:44.880
+So this is just a more efficient 
+circuit that lets you take what  
+
+0:52:44.880,0:52:49.309
+are chunks of the RISC-V and combine 
+them together into a SNARK -- a STARK.
+
+0:52:49.309,0:52:53.200
+Uma: Yeah. And you also have to verify 
+things like, okay, the program counter.
+
+0:52:53.200,0:52:59.560
+The last program counter from here is equal 
+to the STARK program counter from here.
+
+0:52:59.560,0:53:00.940
+And you have to do checks like that.
+
+0:53:00.940,0:53:04.320
+Tracy: You have to link these together to 
+make sure that they actually follow the full..
+
+0:53:04.320,0:53:06.320
+Uma: Exactly, in sequence.
+
+0:53:06.320,0:53:10.440
+And so, you also have to do a few 
+checks in this recursion program that,  
+
+0:53:10.440,0:53:14.240
+you know, these things are all 
+appropriately linked together.
+
+0:53:14.240,0:53:17.680
+Also, for us, we kind of make 
+use of this unique thing,  
+
+0:53:17.680,0:53:24.520
+where globally -- our memory argument is 
+global across the entire computational trace.
+
+0:53:24.520,0:53:26.520
+And so, yeah, we kind of --
+
+0:53:26.520,0:53:30.920
+We have to do some extra things for that, 
+but we also have to sum the accumulator  
+
+0:53:30.920,0:53:34.720
+from here and here to get a summed 
+accumulator across all these shards.
+
+0:53:34.720,0:53:36.140
+And at the end, we check at zero.
+
+0:53:36.140,0:53:37.480
+Tracy: Got it.
+
+0:53:37.480,0:53:38.160
+Cool.
+
+0:53:38.160,0:53:39.360
+That's really unique.
+
+0:53:39.360,0:53:41.320
+Yeah. I guess maybe from here we can talk about --
+
+0:53:41.320,0:53:43.200
+So at the top of this tree, you have,  
+
+0:53:43.200,0:53:48.560
+like, 100 kilobyte proof and then typically 
+these are being verified on-chain, I guess.
+
+0:53:48.560,0:53:52.280
+And so you want to somehow get 
+that to an even more compressed  
+
+0:53:52.280,0:53:54.200
+proof that you could put on-chain; is that right?
+
+0:53:54.200,0:53:54.960
+Uma: Yeah.
+
+0:53:54.960,0:54:02.360
+So typically what we want to do with this 
+n-proof is we want to verify it on Ethereum.
+
+0:54:03.040,0:54:07.920
+So, I mean, obviously ZK is 
+useful even outside of blockchain.
+
+0:54:07.920,0:54:12.680
+But a really big use case for ZK 
+is zk-Rollups where yo have --
+
+0:54:12.680,0:54:16.640
+you have a bunch of transactions, you 
+have a Layer 2, you batch them together,  
+
+0:54:16.640,0:54:19.360
+and then you want to prove that the 
+transactions were executed correctly.
+
+0:54:19.360,0:54:21.160
+And then there is a new state route
+
+0:54:21.160,0:54:24.320
+And then what you do is you 
+verify those proofs on Ethereum.
+
+0:54:24.320,0:54:28.520
+And then that's kind of like how we're 
+scaling Ethereum, is with these zk-Rollups.
+
+0:54:28.520,0:54:32.920
+So a main target for us is 
+verifying these proofs on Ethereum.
+
+0:54:32.920,0:54:37.440
+Now Ethereum is, you know, very, 
+very slow and very expensive.
+
+0:54:37.440,0:54:39.120
+So it doesn't even like these --
+
+0:54:39.120,0:54:41.040
+These proofs are pretty small things considered.
+
+0:54:41.040,0:54:43.840
+You know, a couple hundred 
+kilobytes is not that much.
+
+0:54:43.840,0:54:45.040
+But Ethereum doesn't like that.
+
+0:54:45.040,0:54:48.920
+It would cost like millions of gas 
+to verify these proofs on Ethereum.
+
+0:54:48.920,0:54:51.080
+So what do we do?
+
+0:54:51.080,0:54:55.400
+We take these STARK proofs 
+and we wrap them in a SNARK.
+
+0:54:55.400,0:54:57.520
+So that's known as like "STARK to SNARK".
+
+0:54:57.520,0:55:00.400
+It's kind of like the last stage of our pipeline.
+
+0:55:00.400,0:55:09.160
+We have like our core RISC-V proving, then we 
+have recursion with the recursion VM/circuit,  
+
+0:55:09.160,0:55:11.240
+and then finally we have STARK to SNARK.
+
+0:55:11.240,0:55:16.480
+So it's -- yeah, building a zkVM is -- 
+you know there's a lot of moving pieces.
+
+0:55:17.600,0:55:23.560
+Yeah. So we have STARK and 
+then we take it into a SNARK.
+
+0:55:23.560,0:55:30.400
+And the reason for that is Ethereum has a 
+bunch of precompiles for the BN254 curve.
+
+0:55:31.040,0:55:35.720
+So like in particular, we use 
+these pairing-based SNARKs.
+
+0:55:39.480,0:55:45.680
+And we use them with the BN254 field, because the 
+EVM and Ethereum have precompiles for it.
+
+0:55:45.680,0:55:49.320
+So it's pretty cheap to verify 
+pairing-based SNARKs on Ethereum.
+
+0:55:49.320,0:55:52.040
+There's a few flavors of pairing-based SNARKs.
+
+0:55:52.040,0:55:55.720
+There's Groth16, which I think 
+probably a lot of people have heard of.
+
+0:55:56.800,0:55:59.360
+It's very cheap, it's very 
+small, it's very efficient.
+
+0:55:59.360,0:56:05.400
+And then there's Plonkish KZG,  
+
+0:56:05.400,0:56:09.200
+which is basically like a -- I would 
+say more modern version of Groth16.
+
+0:56:10.360,0:56:13.040
+This has a circuit specific trusted setup.
+
+0:56:13.040,0:56:17.280
+So if you want to do a particular 
+computation or particular circuit,  
+
+0:56:17.280,0:56:20.280
+you have to do a circuit 
+specific trusted setup for it.
+
+0:56:20.840,0:56:24.120
+For Plonkish KZG, there's 
+a universal trusted setup.
+
+0:56:24.120,0:56:29.720
+So you do it once, and then you can just use it 
+over and over again, no matter the computation.
+
+0:56:29.720,0:56:35.000
+So for us, we use Plonkish KZG.
+
+0:56:35.000,0:56:39.920
+But we can also -- we use a proof 
+system called Gnark for this part,  
+
+0:56:39.920,0:56:43.440
+and they have both Plonkish 
+KZG and Groth16 as options.
+
+0:56:43.440,0:56:46.680
+But we use Plonkish KZG just because 
+it doesn't have the trusted setup,  
+
+0:56:46.680,0:56:49.680
+which I think is kind of bad for security reasons.
+
+0:56:49.680,0:56:51.440
+And also it's just annoying to do.
+
+0:56:51.440,0:56:52.360
+Tracy: Got it.
+
+0:56:52.360,0:56:56.360
+So back here, we were talking about, 
+it's like FRI and it uses logUp,  
+
+0:56:56.360,0:56:58.000
+and it's a STARK and AIR constraints.
+
+0:56:58.000,0:57:02.480
+And this is like a whole different 
+kind of set of cryptography tools.
+
+0:57:02.480,0:57:04.760
+And then when you get over here, 
+you need a different set of tools.
+
+0:57:04.760,0:57:07.000
+Instead of small fields, you have large fields.
+
+0:57:07.000,0:57:10.920
+And instead of maybe hash-based commitments, 
+you have pairing-based commitments.
+
+0:57:10.920,0:57:12.440
+Uma: Yeah, exactly.
+
+0:57:12.440,0:57:16.880
+And we -- so basically to 
+recurse the STARK into a SNARK,  
+
+0:57:16.880,0:57:21.720
+we wrote a circuit in a SNARK 
+world that verifies this STARK.
+
+0:57:21.720,0:57:29.240
+So we wrote a FRI verification circuit and then 
+we get a Plonkish KZG proof out at the end.
+
+0:57:29.240,0:57:30.900
+And then we verify that on Ethereum.
+
+0:57:30.900,0:57:31.480
+Tracy: Right.
+
+0:57:31.480,0:57:33.040
+So you have yet another circuit.
+
+0:57:33.040,0:57:35.800
+You had like at the bottom you had your 
+CPU circuit, and then you had one that  
+
+0:57:35.800,0:57:40.520
+combines STARKs, and now you have one that takes 
+a STARK in a SNARK, so you can verify it on EVM.
+
+0:57:40.520,0:57:41.440
+Uma: Yes.
+
+0:57:41.440,0:57:42.720
+So yeah, that's the whole pipeline.
+
+0:57:42.720,0:57:47.960
+Tracy: And this is hundreds of 
+kilobytes. And this is what?
+
+0:57:47.960,0:57:51.120
+Uma: In practice, this ends up 
+being like very, very small.
+
+0:57:51.120,0:57:53.600
+Like it ends up being, you know, 
+three elliptic curve points.
+
+0:57:53.600,0:57:56.120
+So it's like hundreds of bytes, maybe.
+
+0:57:56.120,0:57:56.840
+Tracy: Okay, cool.
+
+0:57:56.840,0:58:01.180
+And then this is millions of gas and this 
+is maybe like a few hundred thousand.
+
+0:58:01.180,0:58:03.560
+Uma: Yeah. It's like 200k, 300k gas.
+
+0:58:03.560,0:58:03.960
+Tracy: Yeah.
+
+0:58:03.960,0:58:04.400
+That's awesome.
+
+0:58:04.400,0:58:05.320
+Thanks for showing me this.
+
+0:58:05.320,0:58:09.440
+I think, I get it how whole 
+zkVM works at this point.
+
+0:58:09.440,0:58:12.680
+Maybe one more thing we could cover 
+is like, what are these good for?
+
+0:58:12.680,0:58:14.140
+Like what's the point of this whole thing?
+
+0:58:14.140,0:58:15.200
+Uma: Yeah, totally.
+
+0:58:15.200,0:58:18.480
+So I think ZK has a lot of use cases,  
+
+0:58:18.480,0:58:23.840
+but a big use case of ZK is privacy in 
+blockchains and also scaling blockchains.
+
+0:58:23.840,0:58:29.320
+So things like zk-Rollups, for example, 
+are kind of the future of Ethereum scaling.
+
+0:58:29.320,0:58:33.120
+And I kind of described this earlier. You have 
+a bunch of transactions, you generate a ZK proof  
+
+0:58:33.120,0:58:38.600
+that the transactions were properly applied 
+to some state, and then you get a state root.
+
+0:58:38.600,0:58:44.400
+You post that on Ethereum, and then you can 
+basically lock ETH in a bridge contract and  
+
+0:58:44.400,0:58:50.280
+then do a bunch of transactions off-chain 
+and generate a ZK proof of what everyone's  
+
+0:58:50.280,0:58:54.040
+updated balances are, and then later, 
+you can use that to unlock the ETH.
+
+0:58:54.720,0:58:57.920
+And so, that's kind of how a 
+zk-Rollup works very quickly.
+
+0:58:57.920,0:59:01.720
+And I think, Vitalik has said many 
+times that he thinks the end game of  
+
+0:59:01.720,0:59:05.040
+Ethereum is like everyone's going 
+to be transacting on a zk-Rollup.
+
+0:59:05.040,0:59:09.480
+Now historically, to make a zk-Rollup, 
+you needed a team of like 30 people,  
+
+0:59:09.480,0:59:15.960
+30 very smart cryptography PhDs who 
+handwrote a circuit for the zkEVM.
+
+0:59:15.960,0:59:19.920
+So Ethereum has the EVM, Ethereum Virtual Machine.
+
+0:59:19.920,0:59:22.840
+And you know, people write Solidity 
+and they write smart contracts that  
+
+0:59:22.840,0:59:26.360
+compile to EVM and then you 
+needed to write the circuit  
+
+0:59:26.360,0:59:31.440
+that has all the logic for transaction processing 
+and running the EVM and stuff like that.
+
+0:59:31.440,0:59:36.720
+And it was very complicated, it took many, 
+many years and it was very difficult.
+
+0:59:36.720,0:59:39.640
+And there's a lot of other downsides, like 
+it's hard to audit and understand what's  
+
+0:59:39.640,0:59:44.240
+going on, and it's hard to like, 
+customize and upgrade and modify.
+
+0:59:44.240,0:59:50.800
+With a zkVM, what you can do, is you can 
+take an existing Rust node of Ethereum,  
+
+0:59:50.800,0:59:56.240
+so for example, something like Reth. It is 
+a Rust implementation of an Ethereum client.
+
+0:59:56.240,1:00:01.440
+So you can just take Reth's transaction 
+processing logic, Reth's EVM, things like that,  
+
+1:00:01.440,1:00:08.400
+and you can just import it into a zkVM 
+and you can run Rust code in your zkVM.
+
+1:00:08.400,1:00:13.000
+And now it becomes like kind of a 
+weekend project to make a zk-Rollup.
+
+1:00:13.000,1:00:18.280
+So now making a zk-Rollup is really easily 
+accessible to many, many more teams.
+
+1:00:18.280,1:00:21.080
+It's much more maintainable. 
+It's much more upgradable.
+
+1:00:21.080,1:00:24.640
+Remember like Ethereum hard forks 
+every six months to one year.
+
+1:00:24.640,1:00:28.400
+So every time there's an upgrade you're 
+just -- you know, let's cargo update my  
+
+1:00:28.400,1:00:33.840
+version of Reth and then you know, oh, 
+I'm now still compatible with Ethereum.
+
+1:00:33.840,1:00:35.600
+And so, it becomes like much more maintainable,  
+
+1:00:35.600,1:00:40.720
+much easier, etcetera with 
+our zkVM to have zk-Rollups.
+
+1:00:40.720,1:00:43.000
+And in general, there's like a 
+lot of use cases in crypto for  
+
+1:00:43.000,1:00:51.080
+ZK including ZK bridges, categories like 
+ZK coprocessors, things like ZK oracles.
+
+1:00:51.080,1:00:54.000
+And historically all of that's been 
+very, very difficult to do because you  
+
+1:00:54.000,1:00:58.240
+need very specialized expertise to write ZK 
+circuits and do all this complicated stuff.
+
+1:00:58.240,1:01:04.400
+In the zkVM paradigm, now any developer 
+can just use ZK by writing normal Rust.
+
+1:01:04.400,1:01:08.920
+And then underneath the hood, a zkVM team 
+will take care of all the hard stuff for you.
+
+1:01:08.920,1:01:11.280
+They'll worry about recursion, 
+they'll worry about STARK to SNARK,  
+
+1:01:11.280,1:01:12.920
+they'll worry about all these constraints.
+
+1:01:12.920,1:01:16.160
+But you as a developer, you can 
+use ZK by just writing normal code.
+
+1:01:16.160,1:01:18.240
+And that's why zkVMs are awesome.
+
+1:01:18.240,1:01:19.640
+It just makes ZK really easy.
+
+1:01:19.640,1:01:20.760
+Tracy: I see.
+
+1:01:20.760,1:01:24.720
+I guess, it comes with some trade-offs 
+because like the zkEVM is this custom  
+
+1:01:24.720,1:01:28.200
+built thing and the zkVM can 
+do kind of any Rust program.
+
+1:01:28.200,1:01:30.880
+So I guess it takes longer to compute maybe.
+
+1:01:30.880,1:01:32.160
+Or what are the trade-offs there?
+
+1:01:32.160,1:01:39.800
+Uma: Yeah. The trade-offs are that there is more 
+overhead. So the proof time can be a bit slower.
+
+1:01:39.800,1:01:46.080
+But in practice, actually we've found 
+that because the zkVM is really general,  
+
+1:01:46.080,1:01:49.920
+so like it's really general, you can 
+support a wide variety of use cases,  
+
+1:01:49.920,1:01:56.160
+it can support a wide variety of teams, you can 
+really put in the work to optimize it in a way  
+
+1:01:56.160,1:02:00.320
+that a one specific team, who's 
+only doing a specialized circuit,  
+
+1:02:00.320,1:02:04.080
+there's no engineering -- there's not as 
+much engineering ROI to really optimize it.
+
+1:02:04.080,1:02:09.280
+So basically with the zkVM, we've 
+actually found for a lot of use cases  
+
+1:02:09.280,1:02:13.960
+that it can be more efficient than 
+an unoptimized circuit-based system.
+
+1:02:13.960,1:02:18.320
+Because we -- like, we have like a team of 
+very competent people working on optimizing it.
+
+1:02:18.320,1:02:21.200
+There's a lot of other teams 
+also working on this problem.
+
+1:02:21.200,1:02:25.840
+And because it's so broad, there's a lot 
+of ROI to making our VM more efficient.
+
+1:02:26.400,1:02:27.320
+So there are trade-offs.
+
+1:02:27.320,1:02:30.520
+It is like a little less efficient in practice.
+
+1:02:30.520,1:02:33.680
+Or sorry. In theory it's a lot less efficient,  
+
+1:02:33.680,1:02:38.080
+but then in practice you're kind of able to close 
+that gap just because engineering is difficult,  
+
+1:02:38.080,1:02:43.580
+and if you're working on improving one system that 
+many people use, it's kind of easier to improve.
+
+1:02:43.580,1:02:44.880
+Tracy: Got it.
+
+1:02:44.880,1:02:45.560
+Okay, cool.
+
+1:02:45.560,1:02:47.040
+Well, thanks for joining us.
+
+1:02:47.040,1:02:49.640
+Thanks Uma for sharing how zkVMs work.
+
+1:02:49.640,1:02:51.120
+It's complicated, but cool.
+
+1:02:51.720,1:02:53.080
+I think it's been a great overview!
+
+1:02:53.080,1:02:55.000
+So thanks for spending the time with us.
+
+1:02:55.000,1:03:07.800
+Uma: Yeah. Thanks for having me!
